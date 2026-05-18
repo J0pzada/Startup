@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply text-slate-800;
+}
+
+.input {
+  @apply border border-slate-300 rounded-md px-3 py-2 text-sm w-full;
+}
+
+.th {
+  @apply text-left px-3 py-2 font-medium;
+}
+
+.td {
+  @apply px-3 py-2;
+}
