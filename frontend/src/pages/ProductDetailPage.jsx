@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { ActionButton } from "../components/ActionButton";
 import { ChartCard, Sparkline } from "../components/AnalyticsCharts";
 import { Badge } from "../components/Badge";
 import { EmptyState } from "../components/EmptyState";
@@ -29,21 +30,35 @@ function ScoreRing({ value = 0 }) {
   );
 }
 
+function MarketplaceMetric({ label, value }) {
+  return (
+    <div>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
 export function ProductDetailPage() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [marketplaces, setMarketplaces] = useState([]);
+  const [mercadoLivre, setMercadoLivre] = useState(null);
+  const [mlStatus, setMlStatus] = useState(null);
+  const [mlLoading, setMlLoading] = useState(false);
+  const [mlError, setMlError] = useState("");
 
   useEffect(() => {
     let mounted = true;
     async function load() {
-      const [productRes, marketRes] = await Promise.all([
+      const [productRes, marketRes, statusRes] = await Promise.all([
         api.get(`/products/${id}`),
         api.get(`/products/${id}/marketplaces`),
+        api.get("/marketplaces/mercadolivre/status"),
       ]);
       if (!mounted) return;
       setProduct(productRes.data);
-      setMarketplaces(marketRes.data.items || []);
+      setMercadoLivre(marketRes.data.mercadolivre || null);
+      setMlStatus(statusRes.data);
     }
     load();
     return () => {
@@ -72,6 +87,43 @@ export function ProductDetailPage() {
       { name: "Margem", value: Number(product.margin_pct || 0) },
     ];
   }, [product]);
+
+  const mlAnalysis = mercadoLivre?.latest_snapshot?.summary || null;
+  const mlMode = mlAnalysis?.source || mlStatus?.mode || mercadoLivre?.status || "mock";
+  const mlMarket = mlAnalysis?.market_summary || mlAnalysis || {};
+  const mlPrice = mlAnalysis?.price_intelligence || {};
+  const mlRecommendation = mlAnalysis?.recommendation?.action || mlAnalysis?.recommendation || mlAnalysis?.recommendation_label;
+  const mlContext = mlAnalysis?.analysis_context || {};
+
+  async function analyzeMercadoLivre() {
+    setMlLoading(true);
+    setMlError("");
+    try {
+      const res = await api.post(`/products/${id}/marketplaces/mercadolivre/analyze`, { limit: 50, force_refresh: true });
+      setMercadoLivre((prev) => ({
+        ...(prev || {}),
+        status: res.data.source || prev?.status || "mock",
+        latest_snapshot: {
+          id: res.data.snapshot_id,
+          product_id: Number(id),
+          marketplace: "mercadolivre",
+          query: res.data.query_used,
+          total_results: res.data.total_results,
+          min_price: res.data.min_price,
+          avg_price: res.data.avg_price,
+          max_price: res.data.max_price,
+          sellers_count: res.data.sellers_count,
+          created_at: res.data.snapshot_created_at,
+          summary: res.data,
+        },
+      }));
+      if (res.data.error) setMlError(res.data.error);
+    } catch (error) {
+      setMlError(error?.response?.data?.detail || "Não foi possível analisar o Mercado Livre agora.");
+    } finally {
+      setMlLoading(false);
+    }
+  }
 
   if (!product) return <EmptyState title="Carregando produto" description="Buscando dados detalhados para decisão comercial." />;
 
@@ -149,18 +201,90 @@ export function ProductDetailPage() {
         </PremiumCard>
 
         <PremiumCard>
-          <SectionHeader title="Marketplaces simulados" description="Snapshot mockado para apoio tático de posicionamento." />
-          <div className="market-grid">
-            {marketplaces.map((market) => (
-              <div key={market.marketplace} className="market-card">
-                <h4>{market.marketplace}</h4>
-                <p>Preço sugerido: {formatMoneyBRL(market.suggested_price)}</p>
-                <p>Taxa estimada: {market.estimated_fee_pct}%</p>
-                <p>Concorrência: {market.competition_level}</p>
-                <span>{market.notes}</span>
+          <SectionHeader
+            title="Inteligência Mercado Livre"
+            description="Análise manual de concorrência, faixa de preço e recomendação comercial."
+            actions={
+              <div className="section-actions">
+                <Badge tone={mlMode === "live" ? "success" : "muted"}>{mlMode === "live" ? "live" : "mock"}</Badge>
+                <ActionButton variant="primary" size="sm" onClick={analyzeMercadoLivre} disabled={mlLoading} icon="ML">
+                  {mlLoading ? "Analisando..." : "Analisar Mercado Livre"}
+                </ActionButton>
+                <ActionButton as={Link} to={`/marketplaces/mercadolivre?product_id=${id}`} variant="outline" size="sm" icon=">">
+                  Ver análise completa
+                </ActionButton>
               </div>
-            ))}
+            }
+          />
+
+          <div className="ml-status-row">
+            <Badge tone={mlStatus?.enabled ? "success" : "muted"}>
+              {mlStatus?.enabled ? "Dados reais Mercado Livre" : "Análise simulada"}
+            </Badge>
+            <span>Query prevista: {mercadoLivre?.query_preview || "-"}</span>
           </div>
+
+          {mlError ? <div className="inline-alert strong">{mlError}</div> : null}
+
+          {mlAnalysis ? (
+            <div className="stack-vertical">
+              <div className="kpi-grid marketplace-kpis">
+                <MarketplaceMetric label="Anúncios" value={mlMarket.total_results ?? 0} />
+                <MarketplaceMetric label="Menor preço" value={formatMoneyBRL(mlMarket.min_price)} />
+                <MarketplaceMetric label="Preço médio" value={formatMoneyBRL(mlMarket.avg_price)} />
+                <MarketplaceMetric label="Maior preço" value={formatMoneyBRL(mlMarket.max_price)} />
+                <MarketplaceMetric label="Diferença vs média" value={formatMoneyBRL(mlPrice.difference_value ?? mlAnalysis.difference_vs_avg)} />
+              </div>
+
+              <div className="marketplace-recommendation">
+                <div>
+                  <span className="eyebrow">Recomendação automática</span>
+                  <h4>{mlRecommendation || "revisar cadastro"}</h4>
+                  <p>
+                    Origem: {mlContext.origin_label || "Produto interno"} • Query usada: {mlAnalysis.query_used || "-"} • vendedores: {mlMarket.sellers_count ?? 0}
+                  </p>
+                </div>
+                <Badge tone={mlAnalysis.source === "live" ? "success" : "muted"}>
+                  {mlAnalysis.source === "live" ? "Dados reais Mercado Livre" : "Dados mock Mercado Livre"}
+                </Badge>
+              </div>
+
+              <div className="table-wrap marketplace-table-wrap">
+                <table className="premium-table marketplace-table">
+                  <thead>
+                    <tr>
+                      <th>Anúncio</th>
+                      <th>Preço</th>
+                      <th>Vendedor</th>
+                      <th>Condição</th>
+                      <th>Frete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(mlAnalysis.top_ads || []).map((ad, index) => (
+                      <tr key={`${ad.title}-${index}`}>
+                        <td>
+                          {ad.link ? (
+                            <a href={ad.link} target="_blank" rel="noreferrer" className="table-link">
+                              {ad.title || "Anúncio sem título"}
+                            </a>
+                          ) : (
+                            <span className="table-link">{ad.title || "Anúncio sem título"}</span>
+                          )}
+                        </td>
+                        <td>{formatMoneyBRL(ad.price)}</td>
+                        <td>{ad.seller_name || ad.seller || "-"}</td>
+                        <td>{ad.condition === "new" ? "Novo" : ad.condition === "used" ? "Usado" : "-"}</td>
+                        <td>{ad.free_shipping === true ? "Grátis" : ad.free_shipping === false ? "Pago" : "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <EmptyState title="Mercado Livre ainda não analisado" description="Clique para gerar o primeiro snapshot deste produto." />
+          )}
         </PremiumCard>
       </div>
     </div>

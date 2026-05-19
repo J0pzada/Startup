@@ -8,6 +8,7 @@ import { PageShell } from "./components/PageShell";
 import { AdCreatorPage } from "./pages/AdCreatorPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ImportPage } from "./pages/ImportPage";
+import { MercadoLivreIntelligencePage } from "./pages/MercadoLivreIntelligencePage";
 import { OpportunitiesPage } from "./pages/OpportunitiesPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { ProductDetailPage } from "./pages/ProductDetailPage";
@@ -67,6 +68,7 @@ export default function App() {
             <Route path="/produtos/:id" element={<ProductDetailPage />} />
             <Route path="/oportunidades" element={<OpportunitiesPage />} />
             <Route path="/marketplaces" element={<PlaceholderPage title="Marketplaces" description="Integrações mockadas prontas para evolução nas próximas etapas." />} />
+            <Route path="/marketplaces/mercadolivre" element={<MercadoLivreIntelligencePage />} />
             <Route path="/anuncios" element={<AdCreatorPage />} />
             <Route path="/configuracoes" element={<PlaceholderPage title="Configurações" description="Gerencie preferências do workspace e parâmetros operacionais do MapaSeller." />} />
             <Route path="*" element={<Navigate to="/" />} />

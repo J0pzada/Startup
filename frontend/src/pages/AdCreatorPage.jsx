@@ -48,6 +48,21 @@ export function AdCreatorPage() {
     return `${detail.ad_creator?.base_description || ""}\n\nAplicação: consulte compatibilidade por código da peça, modelo e motorização antes da instalação.`;
   }, [detail]);
 
+  const mlInsights = detail?.ad_creator?.ml_insights;
+  const mlTitle = useMemo(() => {
+    if (!detail) return "";
+    const terms = mlInsights?.suggested_title_terms || [];
+    if (!terms.length) return detail.ad_creator?.suggested_title || "";
+    return `${detail.name || "Produto"} ${terms.slice(0, 4).join(" ")}`;
+  }, [detail, mlInsights]);
+
+  const mlStrategy = useMemo(() => {
+    if (!mlInsights?.has_analysis) return "Sem análise ML recente. Rode a Inteligência ML para enriquecer título, preço e estratégia.";
+    const price = mlInsights.suggested_price ? `Preço inicial competitivo: R$ ${Number(mlInsights.suggested_price).toFixed(2)}.` : "";
+    const strategy = mlInsights.strategy || "validar margem antes";
+    return `Estratégia: ${strategy}. ${price} Evite guerra de preço se a margem líquida ficar apertada.`;
+  }, [mlInsights]);
+
   const qaText =
     "Pergunta: É compatível com meu veículo?\nResposta: Confirme o código da peça e aplicação específica antes da compra.\n\nPergunta: Produto é novo?\nResposta: Sim, produto novo conforme descrição do anúncio.";
 
@@ -79,9 +94,11 @@ export function AdCreatorPage() {
           <SectionHeader title={detail.name || "Produto"} description="Material editorial pronto para adaptar ao canal de venda." />
           <div className="stack-vertical">
             <CopyBlock title="Título sugerido" text={detail.ad_creator?.suggested_title} />
+            <CopyBlock title="Título com inteligência ML" text={mlTitle} />
             <CopyBlock title="Descrição curta" text={detail.ad_creator?.base_description} />
             <CopyBlock title="Descrição completa" text={longDescription} />
-            <CopyBlock title="Palavras-chave" text={(detail.ad_creator?.keywords || []).join(", ")} />
+            <CopyBlock title="Palavras-chave" text={((mlInsights?.suggested_keywords?.length ? mlInsights.suggested_keywords : detail.ad_creator?.keywords) || []).join(", ")} />
+            <CopyBlock title="Estratégia ML" text={mlStrategy} />
             <CopyBlock title="Perguntas e respostas" text={qaText} />
           </div>
           <div className="inline-alert strong">

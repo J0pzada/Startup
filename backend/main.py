@@ -1,7 +1,10 @@
+import json
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -9,9 +12,10 @@ from database import Base, engine, ensure_columns, get_db
 from importer import preview_xlsx, read_xlsx
 from marketplace.amazon import AmazonAdapter
 from marketplace.magalu import MagaluAdapter
-from marketplace.mercadolivre import MercadoLivreAdapter
+from marketplace.mercadolivre import MercadoLivreAdapter, build_mercadolivre_query
 from marketplace.shopee import ShopeeAdapter
-from models import PRODUCT_EXTRA_COLUMNS, Product
+from models import MARKETPLACE_SNAPSHOT_EXTRA_COLUMNS, PRODUCT_EXTRA_COLUMNS, MarketplaceSnapshot, MarketplaceSnapshotItem, Product
+from profit_calculator import calculate_profit
 from scoring import (
     calculate_score,
     classify_alerta,
@@ -32,8 +36,49 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 ensure_columns("products", PRODUCT_EXTRA_COLUMNS)
+ensure_columns("marketplace_snapshots", MARKETPLACE_SNAPSHOT_EXTRA_COLUMNS)
 
-adapters = [MercadoLivreAdapter(), ShopeeAdapter(), AmazonAdapter(), MagaluAdapter()]
+mercadolivre_adapter = MercadoLivreAdapter()
+adapters = [mercadolivre_adapter, ShopeeAdapter(), AmazonAdapter(), MagaluAdapter()]
+
+
+class MercadoLivreAnalyzeRequest(BaseModel):
+    limit: Optional[int] = 50
+    force_refresh: bool = False
+
+
+class MercadoLivreUrlAnalyzeRequest(BaseModel):
+    url: str
+    purchase_price: Optional[float] = None
+    sale_price: Optional[float] = None
+    monthly_sales: Optional[float] = None
+    tax_percent: float = 4
+    commission_percent: float = 12
+    fixed_fee: float = 0
+    shipping_cost: float = 0
+    additional_cost: float = 0
+    additional_cost_type: str = "value"
+    free_shipping: bool = False
+    listing_type: str = "classico"
+    fiscal_regime: str = "simples"
+    annual_revenue_bracket: str = "simples_ate_180k"
+    limit: Optional[int] = 50
+
+
+class ProfitCalculatorRequest(BaseModel):
+    sale_price: float
+    purchase_price: float
+    monthly_sales: float = 1
+    commission_percent: float = 12
+    fixed_fee: float = 0
+    shipping_cost: float = 0
+    tax_percent: float = 4
+    additional_cost: float = 0
+    additional_cost_type: str = "value"
+    free_shipping: bool = False
+    listing_type: str = "classico"
+    fiscal_regime: str = "simples"
+    annual_revenue_bracket: str = "simples_ate_180k"
 
 
 def serialize_product(product: Product):
@@ -60,6 +105,148 @@ def serialize_product(product: Product):
         "valor_total_estoque": product.valor_total_estoque,
         "margem_pct": product.margem_pct,
     }
+
+
+def serialize_marketplace_snapshot(snapshot: MarketplaceSnapshot):
+    if not snapshot:
+        return None
+    raw_summary = {}
+    if snapshot.raw_summary_json:
+        try:
+            raw_summary = json.loads(snapshot.raw_summary_json)
+        except json.JSONDecodeError:
+            raw_summary = {}
+
+    return {
+        "id": snapshot.id,
+        "product_id": snapshot.product_id,
+        "marketplace": snapshot.marketplace,
+        "mode": snapshot.mode,
+        "query": snapshot.query,
+        "source_url": snapshot.source_url,
+        "total_results": snapshot.total_results,
+        "min_price": snapshot.min_price,
+        "avg_price": snapshot.avg_price,
+        "max_price": snapshot.max_price,
+        "median_price": snapshot.median_price,
+        "sellers_count": snapshot.sellers_count,
+        "catalog_count": snapshot.catalog_count,
+        "free_shipping_count": snapshot.free_shipping_count,
+        "full_shipping_count": snapshot.full_shipping_count,
+        "classic_count": snapshot.classic_count,
+        "premium_count": snapshot.premium_count,
+        "used_count": snapshot.used_count,
+        "new_count": snapshot.new_count,
+        "estimated_monthly_sales": snapshot.estimated_monthly_sales,
+        "estimated_monthly_revenue": snapshot.estimated_monthly_revenue,
+        "recommendation": snapshot.recommendation,
+        "created_at": snapshot.created_at.isoformat() if snapshot.created_at else None,
+        "summary": raw_summary,
+    }
+
+
+def serialize_marketplace_item(item: MarketplaceSnapshotItem):
+    return {
+        "id": item.id,
+        "snapshot_id": item.snapshot_id,
+        "external_id": item.external_id,
+        "title": item.title,
+        "price": item.price,
+        "permalink": item.permalink,
+        "seller_name": item.seller_name,
+        "seller_id": item.seller_id,
+        "seller_reputation": item.seller_reputation,
+        "condition": item.condition,
+        "listing_type": item.listing_type,
+        "free_shipping": bool(item.free_shipping),
+        "full_shipping": bool(item.full_shipping),
+        "thumbnail": item.thumbnail,
+        "sold_quantity": item.sold_quantity,
+        "available_quantity": item.available_quantity,
+        "category_id": item.category_id,
+        "position": item.position,
+    }
+
+
+def _latest_ml_snapshot(db: Session, product_id: Optional[int] = None, source_url: Optional[str] = None):
+    query = db.query(MarketplaceSnapshot).filter(MarketplaceSnapshot.marketplace == mercadolivre_adapter.marketplace_key)
+    if product_id is not None:
+        query = query.filter(MarketplaceSnapshot.product_id == product_id)
+    if source_url:
+        query = query.filter(MarketplaceSnapshot.source_url == source_url)
+    return query.order_by(MarketplaceSnapshot.created_at.desc(), MarketplaceSnapshot.id.desc()).first()
+
+
+def _snapshot_is_fresh(snapshot: MarketplaceSnapshot):
+    if not snapshot or not snapshot.created_at:
+        return False
+    created_at = snapshot.created_at
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    return datetime.now(timezone.utc) - created_at <= timedelta(hours=mercadolivre_adapter.cache_ttl_hours)
+
+
+def _save_ml_snapshot(db: Session, analysis: dict, product_id: Optional[int] = None, source_url: Optional[str] = None):
+    market = analysis.get("market_summary") or {}
+    sales = analysis.get("sales_intelligence") or {}
+    recommendation = analysis.get("recommendation") or {}
+    db_product_id = product_id if product_id is not None else 0
+    snapshot = MarketplaceSnapshot(
+        product_id=db_product_id,
+        marketplace=mercadolivre_adapter.marketplace_key,
+        mode=analysis.get("mode") or analysis.get("source"),
+        query=analysis.get("query_used"),
+        source_url=source_url or analysis.get("source_url"),
+        total_results=market.get("total_results") or analysis.get("total_results") or 0,
+        min_price=market.get("min_price") or analysis.get("min_price"),
+        avg_price=market.get("avg_price") or analysis.get("avg_price"),
+        max_price=market.get("max_price") or analysis.get("max_price"),
+        median_price=market.get("median_price") or analysis.get("median_price"),
+        sellers_count=market.get("sellers_count") or analysis.get("sellers_count") or 0,
+        catalog_count=market.get("catalog_count") or 0,
+        free_shipping_count=market.get("free_shipping_count") or 0,
+        full_shipping_count=market.get("full_shipping_count") or 0,
+        classic_count=market.get("classic_count") or 0,
+        premium_count=market.get("premium_count") or 0,
+        used_count=market.get("used_count") or 0,
+        new_count=market.get("new_count") or 0,
+        estimated_monthly_sales=sales.get("estimated_total_sales") or analysis.get("estimated_monthly_sales"),
+        estimated_monthly_revenue=sales.get("estimated_monthly_revenue") or analysis.get("estimated_monthly_revenue"),
+        recommendation=recommendation.get("action") or analysis.get("recommendation_label"),
+        raw_summary_json=json.dumps(analysis, ensure_ascii=False),
+    )
+    db.add(snapshot)
+    db.flush()
+
+    for item in (analysis.get("top_ads") or [])[:50]:
+        db.add(
+            MarketplaceSnapshotItem(
+                snapshot_id=snapshot.id,
+                external_id=item.get("external_id"),
+                title=item.get("title"),
+                price=item.get("price"),
+                permalink=item.get("permalink"),
+                seller_name=item.get("seller_name") or item.get("seller"),
+                seller_id=item.get("seller_id"),
+                seller_reputation=item.get("seller_reputation"),
+                condition=item.get("condition"),
+                listing_type=item.get("listing_type"),
+                free_shipping=1 if item.get("free_shipping") else 0,
+                full_shipping=1 if item.get("full_shipping") else 0,
+                thumbnail=item.get("thumbnail"),
+                sold_quantity=item.get("sold_quantity"),
+                available_quantity=item.get("available_quantity"),
+                category_id=item.get("category_id"),
+                position=item.get("position"),
+                raw_json=json.dumps(item.get("raw") or item, ensure_ascii=False),
+            )
+        )
+
+    db.commit()
+    db.refresh(snapshot)
+    analysis["snapshot_id"] = snapshot.id
+    analysis["snapshot_created_at"] = snapshot.created_at.isoformat() if snapshot.created_at else None
+    return snapshot, analysis
 
 
 @app.get("/health")
@@ -438,6 +625,12 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     margin = margin_pct(product.cost, product.price)
     recommendation = product.priority
     keywords = ad_keywords(product)
+    latest_ml = _latest_ml_snapshot(db, product_id=product.id)
+    ml_summary = serialize_marketplace_snapshot(latest_ml)["summary"] if latest_ml else {}
+    listing_quality = ml_summary.get("listing_quality") or {}
+    price_intelligence = ml_summary.get("price_intelligence") or {}
+    ml_keywords = listing_quality.get("suggested_search_terms") or []
+    ml_terms = listing_quality.get("suggested_title_terms") or []
 
     return {
         **serialize_product(product),
@@ -452,6 +645,13 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
                 )
             ),
             "keywords": keywords,
+            "ml_insights": {
+                "has_analysis": bool(latest_ml),
+                "suggested_title_terms": ml_terms,
+                "suggested_keywords": ml_keywords,
+                "suggested_price": price_intelligence.get("suggested_competitive_price"),
+                "strategy": (ml_summary.get("recommendation") or {}).get("action"),
+            },
         },
     }
 
@@ -462,4 +662,98 @@ def product_marketplaces(product_id: int, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
 
-    return {"items": [adapter.get_product_snapshot(product) for adapter in adapters]}
+    latest_ml = _latest_ml_snapshot(db, product_id=product.id)
+
+    return {
+        "items": [adapter.get_product_snapshot(product) for adapter in adapters],
+        "mercadolivre": {
+            "status": mercadolivre_adapter.mode,
+            "configured": mercadolivre_adapter.configured,
+            "enabled": mercadolivre_adapter.enabled,
+            "query_preview": build_mercadolivre_query(product),
+            "available_analyses": ["market_summary", "price_intelligence", "sales_intelligence", "competitors", "profit_calculator"],
+            "latest_snapshot": serialize_marketplace_snapshot(latest_ml) if latest_ml else None,
+        },
+    }
+
+
+@app.post("/products/{product_id}/marketplaces/mercadolivre/analyze")
+def analyze_product_mercadolivre(
+    product_id: int,
+    payload: Optional[MercadoLivreAnalyzeRequest] = None,
+    db: Session = Depends(get_db),
+):
+    payload = payload or MercadoLivreAnalyzeRequest()
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+
+    latest = _latest_ml_snapshot(db, product_id=product.id)
+    if latest and not payload.force_refresh and _snapshot_is_fresh(latest):
+        cached = serialize_marketplace_snapshot(latest)["summary"]
+        cached["cache_hit"] = True
+        cached["snapshot_id"] = latest.id
+        cached["snapshot_created_at"] = latest.created_at.isoformat() if latest.created_at else None
+        return cached
+
+    analysis = mercadolivre_adapter.analyze_product(product, limit=payload.limit)
+    if analysis.get("valid"):
+        _, analysis = _save_ml_snapshot(db, analysis, product_id=product.id)
+
+    return analysis
+
+
+@app.post("/marketplaces/mercadolivre/analyze-url")
+def analyze_mercadolivre_url(payload: MercadoLivreUrlAnalyzeRequest, db: Session = Depends(get_db)):
+    profit_result = None
+    if payload.purchase_price is not None and payload.sale_price is not None:
+        profit_result = calculate_profit(
+            sale_price=payload.sale_price,
+            purchase_price=payload.purchase_price,
+            monthly_sales=payload.monthly_sales or 1,
+            commission_percent=payload.commission_percent,
+            fixed_fee=payload.fixed_fee,
+            shipping_cost=payload.shipping_cost,
+            tax_percent=payload.tax_percent,
+            additional_cost=payload.additional_cost,
+            additional_cost_type=payload.additional_cost_type,
+            free_shipping=payload.free_shipping,
+            listing_type=payload.listing_type,
+            fiscal_regime=payload.fiscal_regime,
+            annual_revenue_bracket=payload.annual_revenue_bracket,
+        )
+
+    analysis = mercadolivre_adapter.analyze_product_url(
+        payload.url,
+        limit=payload.limit,
+        profit_inputs={**payload.model_dump(), "result": profit_result},
+    )
+    if analysis.get("valid"):
+        _, analysis = _save_ml_snapshot(db, analysis, product_id=None, source_url=payload.url)
+    return analysis
+
+
+@app.get("/marketplaces/mercadolivre/snapshots/{snapshot_id}")
+def get_mercadolivre_snapshot(snapshot_id: int, db: Session = Depends(get_db)):
+    snapshot = db.query(MarketplaceSnapshot).filter(MarketplaceSnapshot.id == snapshot_id).first()
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Snapshot não encontrado")
+    items = (
+        db.query(MarketplaceSnapshotItem)
+        .filter(MarketplaceSnapshotItem.snapshot_id == snapshot.id)
+        .order_by(MarketplaceSnapshotItem.position.asc(), MarketplaceSnapshotItem.id.asc())
+        .all()
+    )
+    data = serialize_marketplace_snapshot(snapshot)
+    data["items"] = [serialize_marketplace_item(item) for item in items]
+    return data
+
+
+@app.get("/marketplaces/mercadolivre/status")
+def mercadolivre_status():
+    return mercadolivre_adapter.get_status()
+
+
+@app.post("/calculator/profit")
+def calculator_profit(payload: ProfitCalculatorRequest):
+    return calculate_profit(**payload.model_dump())

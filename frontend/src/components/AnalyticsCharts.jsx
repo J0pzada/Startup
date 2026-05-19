@@ -4,6 +4,8 @@ import {
   Bar,
   BarChart as ReBarChart,
   Cell,
+  Line,
+  LineChart as ReLineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -106,6 +108,19 @@ export function Sparkline({ data = [] }) {
         <Tooltip content={<ChartTooltip />} />
         <Area type="monotone" dataKey="value" stroke="#35D5E8" strokeWidth={2} fill="url(#sparkGradient)" />
       </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function TrendLineChart({ data = [], dataKey = "value" }) {
+  return (
+    <ResponsiveContainer width="100%" height={220}>
+      <ReLineChart data={data} margin={{ top: 12, right: 12, left: -18, bottom: 0 }}>
+        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 11 }} />
+        <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 11 }} />
+        <Tooltip content={<ChartTooltip />} />
+        <Line type="monotone" dataKey={dataKey} stroke="#35D5E8" strokeWidth={2.4} dot={{ r: 3, fill: "#F5F5F5" }} />
+      </ReLineChart>
     </ResponsiveContainer>
   );
 }

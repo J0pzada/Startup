@@ -714,6 +714,8 @@ a {
 .orbit-grid,
 .action-grid,
 .kpi-grid,
+.intel-metrics-grid,
+.similar-grid,
 .pill-grid,
 .diagnostic-grid,
 .market-grid,
@@ -1185,6 +1187,9 @@ a {
 .recommendation-list div,
 .action-item,
 .market-card,
+.marketplace-recommendation,
+.intel-metric,
+.similar-card,
 .decision-line,
 .copy-block,
 .diagnostic-item,
@@ -1689,6 +1694,306 @@ select.input-premium {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.marketplace-kpis {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.marketplace-kpis strong {
+  font-size: 1.28rem;
+}
+
+.ml-status-row,
+.marketplace-recommendation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ml-status-row {
+  flex-wrap: wrap;
+  margin: 12px 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
+.marketplace-recommendation {
+  padding: 12px;
+}
+
+.marketplace-recommendation h4 {
+  margin: 5px 0 0;
+  color: var(--text-primary);
+  font-size: 0.94rem;
+}
+
+.marketplace-recommendation p {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.marketplace-table {
+  min-width: 720px;
+}
+
+.marketplace-table-wrap {
+  max-height: 360px;
+}
+
+.intelligence-page {
+  --intel-line: rgba(53, 213, 232, 0.18);
+}
+
+.intelligence-command {
+  display: grid;
+  gap: 12px;
+}
+
+.segment-control {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(420px, 100%);
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #030303;
+}
+
+.segment-control button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 760;
+}
+
+.segment-control button.is-active {
+  color: #000000;
+  background: var(--silver);
+}
+
+.intelligence-form {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.intelligence-form.link-mode {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+}
+
+.intelligence-form .wide {
+  grid-column: span 4;
+}
+
+.intel-metrics-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.intel-metric {
+  min-height: 100px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.014));
+}
+
+.intel-metric span,
+.price-dynamics span,
+.profit-line span {
+  display: block;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+}
+
+.intel-metric strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1.42rem;
+}
+
+.intel-metric.success strong {
+  color: var(--success);
+}
+
+.intel-metric.danger strong {
+  color: var(--danger);
+}
+
+.price-dynamics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.price-dynamics > div {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.026);
+}
+
+.price-dynamics strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+}
+
+.similar-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.similar-card {
+  display: grid;
+  gap: 8px;
+  padding: 11px;
+}
+
+.similar-card > div {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.similar-card h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.similar-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.73rem;
+  line-height: 1.4;
+}
+
+.similar-card strong {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+}
+
+.intelligence-table {
+  min-width: 1040px;
+}
+
+.intelligence-table-wrap {
+  max-height: 460px;
+}
+
+.profit-panel,
+.profit-lines {
+  display: grid;
+  gap: 8px;
+}
+
+.profit-hero {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.profit-hero > div,
+.profit-line {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.026);
+}
+
+.profit-hero strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1.28rem;
+}
+
+.profit-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.profit-line strong {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.keyword-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.intelligence-recommendation {
+  margin-bottom: 10px;
+}
+
+.analysis-context-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.source-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.context-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.context-line {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.024);
+}
+
+.context-line span {
+  display: block;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+}
+
+.context-line strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.context-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
 .market-card {
   display: grid;
   gap: 4px;
@@ -1816,11 +2121,21 @@ select.input-premium {
   .command-strip,
   .action-grid,
   .kpi-grid,
+  .intel-metrics-grid,
+  .similar-grid,
   .pill-grid,
   .diagnostic-grid,
   .market-grid,
+  .intelligence-form,
+  .intelligence-form.link-mode,
+  .price-dynamics,
+  .context-grid,
   .filters-layout {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .intelligence-form .wide {
+    grid-column: auto;
   }
 
   .health-panel {

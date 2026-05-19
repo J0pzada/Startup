@@ -7,3 +7,10 @@ class MarketplaceAdapter(ABC):
     @abstractmethod
     def get_product_snapshot(self, product):
         raise NotImplementedError
+
+    def get_status(self):
+        return {
+            "enabled": False,
+            "configured": False,
+            "mode": "mock",
+        }

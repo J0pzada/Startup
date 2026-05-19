@@ -6,6 +6,7 @@ const items = [
   { label: "Produtos", to: "/produtos", icon: "P" },
   { label: "Oportunidades", to: "/oportunidades", icon: "O" },
   { label: "Marketplaces", to: "/marketplaces", icon: "M" },
+  { label: "Inteligência ML", to: "/marketplaces/mercadolivre", icon: "ML" },
   { label: "Anúncios", to: "/anuncios", icon: "A" },
   { label: "Configurações", to: "/configuracoes", icon: "C" },
 ];
