@@ -1,8 +1,18 @@
-export function PlaceholderPage({ title }) {
+import { PremiumCard } from "../components/PremiumCard";
+import { SectionHeader } from "../components/SectionHeader";
+
+export function PlaceholderPage({ title, description }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-lg p-6">
-      <h2 className="text-2xl font-semibold text-slate-800">{title}</h2>
-      <p className="text-slate-600 mt-2">Módulo base preparado para evolução nas próximas etapas.</p>
+    <div className="page-grid">
+      <SectionHeader title={title} description={description} />
+      <PremiumCard>
+        <div className="placeholder-block">
+          <h3>Módulo em evolução</h3>
+          <p>
+            Esta área já está preparada para expansão funcional sem alterar a base estável do MapaSeller.
+          </p>
+        </div>
+      </PremiumCard>
     </div>
   );
 }

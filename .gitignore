@@ -1,0 +1,25 @@
+
+# macOS
+.DS_Store
+
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+
+# Local database
+backend/*.db
+*.db
+
+# Local/generated spreadsheets
+backend/sample_data/fm_real/
+backend/sample_data/*.xlsx
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Env
+.env
+.env.*
+!.env.example

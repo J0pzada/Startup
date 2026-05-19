@@ -1,34 +1,45 @@
 import { NavLink } from "react-router-dom";
 
 const items = [
-  { label: "Dashboard", to: "/" },
-  { label: "Importar XLSX", to: "/importar" },
-  { label: "Produtos", to: "/produtos" },
-  { label: "Oportunidades", to: "/oportunidades" },
-  { label: "Marketplaces", to: "/marketplaces" },
-  { label: "Criador de Anúncios", to: "/anuncios" },
-  { label: "Configurações", to: "/configuracoes" },
+  { label: "Dashboard", to: "/", icon: "D" },
+  { label: "Importar XLSX", to: "/importar", icon: "I" },
+  { label: "Produtos", to: "/produtos", icon: "P" },
+  { label: "Oportunidades", to: "/oportunidades", icon: "O" },
+  { label: "Marketplaces", to: "/marketplaces", icon: "M" },
+  { label: "Anúncios", to: "/anuncios", icon: "A" },
+  { label: "Configurações", to: "/configuracoes", icon: "C" },
 ];
 
 export function Sidebar() {
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 p-4">
-      <h1 className="text-lg font-semibold text-slate-800 mb-6">Radar Marketplace FM</h1>
-      <nav className="space-y-1">
+    <aside className="sidebar glass-panel">
+      <div className="brand">
+        <div className="brand-mark">MS</div>
+        <div>
+          <h1>MapaSeller</h1>
+          <p>Analytics Console</p>
+        </div>
+      </div>
+
+      <nav className="sidebar-nav">
         {items.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            className={({ isActive }) =>
-              `block px-3 py-2 rounded-md text-sm ${
-                isActive ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"
-              }`
-            }
+            className={({ isActive }) => `sidebar-link ${isActive ? "is-active" : ""}`.trim()}
           >
+            <span className="sidebar-icon" aria-hidden="true">
+              {item.icon}
+            </span>
             {item.label}
           </NavLink>
         ))}
       </nav>
+
+      <div className="sidebar-footer">
+        <p>FM Auto Peças</p>
+        <span>Operational workspace</span>
+      </div>
     </aside>
   );
 }

@@ -1,4 +1,4 @@
-# Radar Marketplace FM (MVP Base)
+# MapaSeller (MVP Base)
 
 Base funcional do MVP interno para importar planilhas XLSX da FM Auto Peças, calcular score de oportunidade e simular análise por marketplace (sem integrações externas reais nesta etapa).
 
@@ -6,6 +6,15 @@ Base funcional do MVP interno para importar planilhas XLSX da FM Auto Peças, ca
 
 - Backend: FastAPI + SQLAlchemy + SQLite + pandas/openpyxl
 - Frontend: React + Vite + Tailwind CSS
+
+
+## Experiência de UI
+
+- Tema claro/escuro com persistência em `localStorage`
+- Respeita `prefers-color-scheme` no primeiro acesso
+- Respeita `prefers-reduced-motion` para animações
+- Layout premium dark-first com cards densos, badges, gráficos e fluxo de importação em preview
+- Design system documentado em `docs/design/MAPASELLER_PREMIUM_UI.md`
 
 ## Estrutura
 
@@ -57,7 +66,9 @@ npm install
 ```bash
 cd backend
 source .venv/bin/activate
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload --reload-dir . --reload-exclude ".venv/*" --port 8000
+# Se houver problema com --reload-exclude, use:
+# uvicorn main:app --reload --reload-dir . --port 8000
 ```
 
 ### Frontend (porta 5173)
@@ -95,3 +106,24 @@ Isso gera `backend/sample_data/produtos_exemplo.xlsx`.
 3. Incluir autenticação e permissões.
 4. Integrar APIs reais de marketplaces.
 5. Evoluir algoritmo de score com métricas históricas.
+
+## Importação XLSX (fluxo recomendado)
+
+1. Envie a planilha em `Importar XLSX` e use **Analisar planilha (preview)**.
+2. Revise colunas detectadas e linhas de preview.
+3. Clique em **Confirmar importação** para salvar no banco.
+
+### Limpar base local para reimportar
+
+- Endpoint: `DELETE /products`
+- UI: botão **Limpar produtos importados** na tela `Importar XLSX`.
+
+## Diagnóstico de planilha real (utilitário)
+
+```bash
+cd backend
+source .venv/bin/activate
+python tools/analyze_xlsx.py /caminho/para/sua_planilha.xlsx
+```
+
+O utilitário mostra abas, cabeçalho detectado, amostra útil de linhas, colunas mais preenchidas e mapeamento sugerido.
