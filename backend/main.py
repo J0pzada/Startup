@@ -1,13 +1,17 @@
 import json
+import logging
+import os
 import secrets as _stdlib_secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 import secrets_store
 from database import Base, SessionLocal, engine, ensure_columns, get_database_info, get_db
@@ -35,9 +39,16 @@ from scoring import (
 
 app = FastAPI(title="MapaSeller API")
 
+_cors_env = os.getenv("ALLOWED_ORIGINS", "") or os.getenv("FRONTEND_ORIGIN", "")
+_allowed_origins: list = (
+    [o.strip() for o in _cors_env.split(",") if o.strip()]
+    if _cors_env
+    else ["http://localhost:5173", "http://localhost:8000"]
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -296,9 +307,19 @@ def _save_ml_snapshot(db: Session, analysis: dict, product_id: Optional[int] = N
     return snapshot, analysis
 
 
+@app.get("/")
+def root():
+    return {"app": "MapaSeller API", "ok": True, "docs": "/docs"}
+
+
 @app.get("/health")
 def health():
-    return {"ok": True}
+    return {
+        "ok": True,
+        "app": "MapaSeller",
+        "env": os.getenv("APP_ENV", "development"),
+        "database": get_database_info(),
+    }
 
 
 def _alertas_counter(products):
@@ -948,6 +969,20 @@ def mercadolivre_auth_refresh(db: Session = Depends(get_db)):
         "ok": True,
         "token_expires_at": account.token_expires_at.isoformat() if account.token_expires_at else None,
     }
+
+
+_ML_NOTIFICATION_SAFE_FIELDS = ("topic", "resource", "user_id", "application_id", "attempts", "sent", "received")
+
+
+@app.post("/mercadolivre/notifications")
+async def mercadolivre_notifications(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    safe_log = {k: body.get(k) for k in _ML_NOTIFICATION_SAFE_FIELDS if body.get(k) is not None}
+    logger.info("ML notification received: %s", safe_log)
+    return {"ok": True}
 
 
 @app.post("/calculator/profit")
