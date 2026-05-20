@@ -159,6 +159,8 @@ export function MercadoLivreIntelligencePage() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mlStatus, setMlStatus] = useState(null);
+  const [connectLoading, setConnectLoading] = useState(false);
 
   useEffect(() => {
     api.get("/products", { params: { limit: 500, offset: 0 } }).then((res) => {
@@ -166,7 +168,24 @@ export function MercadoLivreIntelligencePage() {
       setProducts(list);
       if (!selectedProductId && list.length > 0) setSelectedProductId(String(list[0].id));
     });
+    api.get("/marketplaces/mercadolivre/status").then((res) => setMlStatus(res.data)).catch(() => {});
   }, []);
+
+  async function connectMercadoLivre() {
+    setConnectLoading(true);
+    try {
+      const res = await api.get("/mercadolivre/auth/url");
+      if (res.data?.configured && res.data?.authorization_url) {
+        window.open(res.data.authorization_url, "_blank", "noopener,noreferrer");
+      } else {
+        setError(res.data?.reason || "Backend não está configurado para OAuth Mercado Livre.");
+      }
+    } catch (requestError) {
+      setError(requestError?.response?.data?.detail || "Não foi possível iniciar a conexão OAuth.");
+    } finally {
+      setConnectLoading(false);
+    }
+  }
 
   async function analyzeProduct() {
     if (!selectedProductId) return;
@@ -224,6 +243,16 @@ export function MercadoLivreIntelligencePage() {
     return "manter preço";
   }, [price]);
 
+  const integrationState = (() => {
+    if (!mlStatus) return { tone: "muted", label: "Carregando integração..." };
+    if (!mlStatus.configured) return { tone: "muted", label: "Mock local — backend não configurado para OAuth" };
+    if (mlStatus.secret_storage !== "configured") return { tone: "warning", label: "Backend ok, secret storage não configurado" };
+    if (!mlStatus.connected) return { tone: "warning", label: "Mercado Livre não conectado" };
+    return { tone: "success", label: "Mercado Livre conectado" };
+  })();
+  const dbKind = mlStatus?.database?.url_kind;
+  const dbLabel = dbKind === "postgres" ? "Banco cloud (Postgres)" : dbKind === "sqlite" ? "Banco local (SQLite/dev)" : null;
+
   return (
     <div className="page-grid intelligence-page">
       <SectionHeader
@@ -231,6 +260,27 @@ export function MercadoLivreIntelligencePage() {
         description="Precifique com inteligência, venda com excelência. Monitore a dinâmica de preços, concorrência e rentabilidade para manter vantagem competitiva."
         actions={<Badge tone={analysis?.mode === "live" ? "success" : "muted"}>{modeLabel}</Badge>}
       />
+
+      <PremiumCard className="intelligence-status-card">
+        <div className="ml-status-row">
+          <Badge tone={integrationState.tone}>{integrationState.label}</Badge>
+          {dbLabel ? <Badge tone={dbKind === "postgres" ? "success" : "muted"}>{dbLabel}</Badge> : null}
+          {mlStatus?.fallback_to_mock ? <Badge tone="muted">Fallback mock ativo</Badge> : null}
+          {mlStatus?.nickname ? <Badge tone="accent">{mlStatus.nickname}</Badge> : null}
+        </div>
+        {mlStatus?.configured && mlStatus?.secret_storage === "configured" && !mlStatus?.connected ? (
+          <ActionButton variant="primary" size="sm" onClick={connectMercadoLivre} disabled={connectLoading} icon="ML">
+            {connectLoading ? "Abrindo..." : "Conectar Mercado Livre"}
+          </ActionButton>
+        ) : null}
+        {!mlStatus?.configured ? (
+          <p className="context-note">
+            Para conectar uma conta real, configure no backend: MERCADOLIVRE_CLIENT_ID, MERCADOLIVRE_CLIENT_SECRET,
+            MERCADOLIVRE_REDIRECT_URI e habilite o Supabase (SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY).
+            Enquanto isso, a análise continua em modo mock seguro.
+          </p>
+        ) : null}
+      </PremiumCard>
 
       <PremiumCard className="intelligence-command">
         <div className="segment-control">

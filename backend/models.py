@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text, func
 
 from database import Base
 
@@ -84,6 +84,31 @@ class MarketplaceSnapshotItem(Base):
     category_id = Column(String, nullable=True)
     position = Column(Integer, nullable=True)
     raw_json = Column(Text, nullable=True)
+
+
+class MercadoLivreAccount(Base):
+    """Metadados de uma conta Mercado Livre conectada via OAuth.
+
+    Tokens reais NUNCA ficam aqui. Esta tabela guarda apenas referências
+    (token_secret_ref / refresh_token_secret_ref) que apontam para o secret
+    storage (Supabase Vault ou equivalente). Tokens não são expostos ao frontend.
+    """
+
+    __tablename__ = "mercadolivre_accounts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    workspace_id = Column(String, nullable=True, index=True)
+    user_label = Column(String, nullable=True)
+    site_id = Column(String, nullable=False, default="MLB")
+    seller_user_id = Column(String, nullable=True, index=True)
+    nickname = Column(String, nullable=True)
+    token_secret_ref = Column(String, nullable=True)
+    refresh_token_secret_ref = Column(String, nullable=True)
+    token_expires_at = Column(DateTime(timezone=True), nullable=True)
+    scope = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
 
 PRODUCT_EXTRA_COLUMNS = {

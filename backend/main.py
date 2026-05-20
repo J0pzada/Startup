@@ -1,4 +1,5 @@
 import json
+import secrets as _stdlib_secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -8,13 +9,21 @@ from pydantic import BaseModel
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from database import Base, engine, ensure_columns, get_db
+import secrets_store
+from database import Base, SessionLocal, engine, ensure_columns, get_database_info, get_db
 from importer import preview_xlsx, read_xlsx
 from marketplace.amazon import AmazonAdapter
 from marketplace.magalu import MagaluAdapter
 from marketplace.mercadolivre import MercadoLivreAdapter, build_mercadolivre_query
 from marketplace.shopee import ShopeeAdapter
-from models import MARKETPLACE_SNAPSHOT_EXTRA_COLUMNS, PRODUCT_EXTRA_COLUMNS, MarketplaceSnapshot, MarketplaceSnapshotItem, Product
+from models import (
+    MARKETPLACE_SNAPSHOT_EXTRA_COLUMNS,
+    PRODUCT_EXTRA_COLUMNS,
+    MarketplaceSnapshot,
+    MarketplaceSnapshotItem,
+    MercadoLivreAccount,
+    Product,
+)
 from profit_calculator import calculate_profit
 from scoring import (
     calculate_score,
@@ -40,6 +49,44 @@ ensure_columns("marketplace_snapshots", MARKETPLACE_SNAPSHOT_EXTRA_COLUMNS)
 
 mercadolivre_adapter = MercadoLivreAdapter()
 adapters = [mercadolivre_adapter, ShopeeAdapter(), AmazonAdapter(), MagaluAdapter()]
+
+
+def _resolve_active_ml_token():
+    """Lê o access_token da conta Mercado Livre ativa via secret storage.
+
+    Retorna (token, account_meta). Em caso de falha (sem conta, sem Vault,
+    erro de leitura), retorna (None, None) — o adapter cai em mock.
+    Nunca loga o valor do token.
+    """
+    if not secrets_store.is_cloud_secrets_enabled():
+        return None, None
+    db = SessionLocal()
+    try:
+        account = (
+            db.query(MercadoLivreAccount)
+            .filter(MercadoLivreAccount.is_active == True)  # noqa: E712
+            .order_by(MercadoLivreAccount.updated_at.desc(), MercadoLivreAccount.id.desc())
+            .first()
+        )
+        if not account or not account.token_secret_ref:
+            return None, None
+        try:
+            token = secrets_store.read_secret(account.token_secret_ref)
+        except (secrets_store.SecretStorageNotConfigured, secrets_store.SecretStorageError):
+            return None, None
+        meta = {
+            "seller_user_id": account.seller_user_id,
+            "nickname": account.nickname,
+            "token_expires_at": account.token_expires_at.isoformat() if account.token_expires_at else None,
+            "scope": account.scope,
+            "site_id": account.site_id,
+        }
+        return token, meta
+    finally:
+        db.close()
+
+
+mercadolivre_adapter.set_token_resolver(_resolve_active_ml_token)
 
 
 class MercadoLivreAnalyzeRequest(BaseModel):
@@ -751,7 +798,156 @@ def get_mercadolivre_snapshot(snapshot_id: int, db: Session = Depends(get_db)):
 
 @app.get("/marketplaces/mercadolivre/status")
 def mercadolivre_status():
-    return mercadolivre_adapter.get_status()
+    status = mercadolivre_adapter.get_status()
+    status["database"] = get_database_info()
+    return status
+
+
+# -------------------------------------------------------------------------
+# Mercado Livre OAuth (cloud-ready, sem armazenar token local)
+# -------------------------------------------------------------------------
+
+
+@app.get("/mercadolivre/auth/url")
+def mercadolivre_auth_url():
+    state = _stdlib_secrets.token_urlsafe(16)
+    info = mercadolivre_adapter.get_auth_url(state=state)
+    # state é gerado por chamada; o frontend recebe e usa no fluxo OAuth.
+    info["state"] = state
+    return info
+
+
+@app.get("/mercadolivre/auth/callback")
+def mercadolivre_auth_callback(
+    code: Optional[str] = None,
+    state: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    if not code:
+        raise HTTPException(status_code=400, detail="Parâmetro 'code' ausente no callback.")
+    if not mercadolivre_adapter.configured:
+        raise HTTPException(status_code=400, detail="Mercado Livre OAuth não configurado no backend.")
+    if not secrets_store.is_cloud_secrets_enabled():
+        # Política firme: NÃO salvamos token localmente em hipótese alguma.
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Secret storage cloud não configurado. Configure Supabase Vault "
+                "(SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY) antes de conectar o Mercado Livre."
+            ),
+        )
+
+    try:
+        token_payload = mercadolivre_adapter.exchange_code(code)
+    except (ValueError, RuntimeError) as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+
+    access_token = token_payload.get("access_token")
+    refresh_token = token_payload.get("refresh_token")
+    expires_in = int(token_payload.get("expires_in") or 0)
+    if not access_token:
+        raise HTTPException(status_code=502, detail="Mercado Livre não retornou access_token.")
+
+    try:
+        access_ref = secrets_store.save_secret(
+            "mercadolivre_access_token", access_token, "MapaSeller ML access_token"
+        )
+        refresh_ref = None
+        if refresh_token:
+            refresh_ref = secrets_store.save_secret(
+                "mercadolivre_refresh_token", refresh_token, "MapaSeller ML refresh_token"
+            )
+    except (secrets_store.SecretStorageNotConfigured, secrets_store.SecretStorageError) as exc:
+        raise HTTPException(status_code=502, detail="Falha ao guardar token no Vault: {0}".format(exc))
+
+    expires_at = datetime.now(timezone.utc) + timedelta(seconds=max(60, expires_in)) if expires_in else None
+
+    account = (
+        db.query(MercadoLivreAccount)
+        .filter(MercadoLivreAccount.seller_user_id == str(token_payload.get("user_id") or ""))
+        .first()
+    )
+    if not account:
+        account = MercadoLivreAccount(site_id=mercadolivre_adapter.site_id)
+        db.add(account)
+
+    account.seller_user_id = str(token_payload.get("user_id") or "") or None
+    account.scope = token_payload.get("scope")
+    account.token_secret_ref = access_ref
+    if refresh_ref:
+        account.refresh_token_secret_ref = refresh_ref
+    account.token_expires_at = expires_at
+    account.is_active = True
+    db.commit()
+    db.refresh(account)
+
+    return {
+        "ok": True,
+        "connected": True,
+        "site_id": account.site_id,
+        "seller_user_id": account.seller_user_id,
+        "nickname": account.nickname,
+        "token_expires_at": account.token_expires_at.isoformat() if account.token_expires_at else None,
+        "state": state,
+    }
+
+
+@app.post("/mercadolivre/auth/refresh")
+def mercadolivre_auth_refresh(db: Session = Depends(get_db)):
+    if not mercadolivre_adapter.configured:
+        raise HTTPException(status_code=400, detail="Mercado Livre OAuth não configurado no backend.")
+    if not secrets_store.is_cloud_secrets_enabled():
+        raise HTTPException(status_code=503, detail="Secret storage cloud não configurado.")
+
+    account = (
+        db.query(MercadoLivreAccount)
+        .filter(MercadoLivreAccount.is_active == True)  # noqa: E712
+        .order_by(MercadoLivreAccount.updated_at.desc(), MercadoLivreAccount.id.desc())
+        .first()
+    )
+    if not account or not account.refresh_token_secret_ref:
+        raise HTTPException(status_code=404, detail="Nenhuma conta Mercado Livre conectada para renovar.")
+
+    try:
+        refresh_token = secrets_store.read_secret(account.refresh_token_secret_ref)
+    except (secrets_store.SecretStorageNotConfigured, secrets_store.SecretStorageError) as exc:
+        raise HTTPException(status_code=502, detail="Falha ao ler refresh_token: {0}".format(exc))
+
+    try:
+        token_payload = mercadolivre_adapter.refresh_tokens(refresh_token)
+    except (ValueError, RuntimeError) as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+
+    new_access = token_payload.get("access_token")
+    new_refresh = token_payload.get("refresh_token")
+    expires_in = int(token_payload.get("expires_in") or 0)
+    if not new_access:
+        raise HTTPException(status_code=502, detail="Mercado Livre não retornou novo access_token.")
+
+    try:
+        if account.token_secret_ref:
+            secrets_store.update_secret(account.token_secret_ref, new_access)
+        else:
+            account.token_secret_ref = secrets_store.save_secret(
+                "mercadolivre_access_token", new_access, "MapaSeller ML access_token"
+            )
+        if new_refresh:
+            if account.refresh_token_secret_ref:
+                secrets_store.update_secret(account.refresh_token_secret_ref, new_refresh)
+            else:
+                account.refresh_token_secret_ref = secrets_store.save_secret(
+                    "mercadolivre_refresh_token", new_refresh, "MapaSeller ML refresh_token"
+                )
+    except (secrets_store.SecretStorageNotConfigured, secrets_store.SecretStorageError) as exc:
+        raise HTTPException(status_code=502, detail="Falha ao gravar novo token: {0}".format(exc))
+
+    account.token_expires_at = datetime.now(timezone.utc) + timedelta(seconds=max(60, expires_in)) if expires_in else None
+    account.scope = token_payload.get("scope") or account.scope
+    db.commit()
+    return {
+        "ok": True,
+        "token_expires_at": account.token_expires_at.isoformat() if account.token_expires_at else None,
+    }
 
 
 @app.post("/calculator/profit")

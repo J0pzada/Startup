@@ -218,10 +218,24 @@ export function ProductDetailPage() {
           />
 
           <div className="ml-status-row">
-            <Badge tone={mlStatus?.enabled ? "success" : "muted"}>
-              {mlStatus?.enabled ? "Dados reais Mercado Livre" : "Análise simulada"}
+            <Badge tone={mlStatus?.connected ? "success" : mlStatus?.configured ? "warning" : "muted"}>
+              {mlStatus?.connected
+                ? "Mercado Livre conectado"
+                : mlStatus?.configured
+                  ? (mlStatus?.secret_storage === "configured" ? "Conectar conta Mercado Livre" : "Configurar secret storage")
+                  : "Mock local — backend OAuth não configurado"}
             </Badge>
+            {mlAnalysis ? (
+              <Badge tone={mlAnalysis.source === "live" ? "success" : "muted"}>
+                {mlAnalysis.source === "live" ? "Análise live" : "Análise mock"}
+              </Badge>
+            ) : null}
             <span>Query prevista: {mercadoLivre?.query_preview || "-"}</span>
+            {mlStatus?.configured && mlStatus?.secret_storage === "configured" && !mlStatus?.connected ? (
+              <ActionButton as={Link} to="/marketplaces/mercadolivre" variant="outline" size="sm" icon="ML">
+                Conectar Mercado Livre
+              </ActionButton>
+            ) : null}
           </div>
 
           {mlError ? <div className="inline-alert strong">{mlError}</div> : null}

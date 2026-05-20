@@ -191,31 +191,151 @@ class MercadoLivreAdapter(MarketplaceAdapter):
     def __init__(self):
         self.enabled = _env_bool("MERCADOLIVRE_ENABLED", False)
         self.site_id = os.getenv("MERCADOLIVRE_SITE_ID", "MLB").strip() or "MLB"
-        self.access_token = os.getenv("MERCADOLIVRE_ACCESS_TOKEN", "").strip()
+        self.client_id = os.getenv("MERCADOLIVRE_CLIENT_ID", "").strip()
+        self.client_secret = os.getenv("MERCADOLIVRE_CLIENT_SECRET", "").strip()
+        self.redirect_uri = os.getenv("MERCADOLIVRE_REDIRECT_URI", "").strip()
+        self.fallback_to_mock = _env_bool("MERCADOLIVRE_FALLBACK_TO_MOCK", True)
         self.max_results = max(1, min(_env_int("MERCADOLIVRE_MAX_RESULTS", DEFAULT_MAX_RESULTS), 50))
         timeout_default = os.getenv("MARKETPLACE_TIMEOUT_SECONDS", "10")
         self.timeout_seconds = _env_float("MERCADOLIVRE_TIMEOUT_SECONDS", timeout_default)
         self.cache_ttl_hours = max(1, _env_int("MERCADOLIVRE_CACHE_TTL_HOURS", 24))
+        # Token resolver é injetado pelo main em runtime (lê do Vault via
+        # backend/secrets_store.py + conta ativa em mercadolivre_accounts).
+        # Default: None — sem conta conectada, força mock.
+        self._token_resolver = None
+
+    def set_token_resolver(self, resolver):
+        """Injeta uma função que retorna (access_token, account_meta) ou (None, None)."""
+        self._token_resolver = resolver
+
+    def _current_access_token(self):
+        if self._token_resolver is None:
+            return None, None
+        try:
+            return self._token_resolver()
+        except Exception:
+            # Nunca propagar exceção do secret storage para a UI.
+            return None, None
 
     @property
     def configured(self):
-        return bool(self.site_id)
+        # 'configured' agora significa: backend tem o suficiente para OAuth.
+        return bool(self.site_id and self.client_id and self.client_secret and self.redirect_uri)
 
     @property
     def mode(self):
-        if self.enabled and self.configured:
-            return "live"
-        return "mock"
+        if not (self.enabled and self.configured):
+            return "mock"
+        token, _ = self._current_access_token()
+        if not token:
+            return "mock"
+        return "live"
+
+    @property
+    def connected(self):
+        token, _ = self._current_access_token()
+        return bool(token)
 
     def get_status(self):
+        from secrets_store import is_cloud_secrets_enabled
+        token, account = self._current_access_token()
         return {
+            "marketplace": self.marketplace_key,
             "enabled": self.enabled,
             "configured": self.configured,
+            "connected": bool(token),
             "mode": self.mode,
             "site_id": self.site_id,
+            "client_id_present": bool(self.client_id),
+            "client_secret_present": bool(self.client_secret),
+            "redirect_uri": self.redirect_uri or None,
             "cache_ttl_hours": self.cache_ttl_hours,
             "max_results": self.max_results,
+            "fallback_to_mock": self.fallback_to_mock,
+            "secret_storage": "configured" if is_cloud_secrets_enabled() else "not_configured",
+            "seller_user_id": (account or {}).get("seller_user_id"),
+            "nickname": (account or {}).get("nickname"),
+            "token_expires_at": (account or {}).get("token_expires_at"),
         }
+
+    def get_auth_url(self, state=None):
+        """Monta o authorization_url OAuth do Mercado Livre.
+
+        Não inclui client_secret. Retorna `configured=False` se faltar
+        configuração no backend.
+        """
+        if not self.configured:
+            return {
+                "configured": False,
+                "authorization_url": None,
+                "redirect_uri": self.redirect_uri or None,
+                "mode": self.mode,
+                "reason": "Configure MERCADOLIVRE_CLIENT_ID, MERCADOLIVRE_CLIENT_SECRET e MERCADOLIVRE_REDIRECT_URI no backend.",
+            }
+        params = {
+            "response_type": "code",
+            "client_id": self.client_id,
+            "redirect_uri": self.redirect_uri,
+        }
+        if state:
+            params["state"] = state
+        base = "https://auth.mercadolivre.com.br/authorization"
+        return {
+            "configured": True,
+            "authorization_url": "{0}?{1}".format(base, urlencode(params)),
+            "redirect_uri": self.redirect_uri,
+            "mode": self.mode,
+        }
+
+    def exchange_code(self, code):
+        """Troca code por tokens chamando o endpoint oficial do Mercado Livre.
+
+        Retorna um dict com access_token, refresh_token, expires_in, user_id,
+        scope. Nunca loga o token. Se faltar configuração, levanta ValueError.
+        """
+        if not self.configured:
+            raise ValueError("Mercado Livre OAuth não configurado no backend.")
+        payload = {
+            "grant_type": "authorization_code",
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+            "redirect_uri": self.redirect_uri,
+        }
+        return self._token_request(payload)
+
+    def refresh_tokens(self, refresh_token):
+        if not self.configured:
+            raise ValueError("Mercado Livre OAuth não configurado no backend.")
+        payload = {
+            "grant_type": "refresh_token",
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "refresh_token": refresh_token,
+        }
+        return self._token_request(payload)
+
+    def _token_request(self, payload):
+        import urllib.request
+        import urllib.parse
+
+        data = urllib.parse.urlencode(payload).encode("utf-8")
+        request = urllib.request.Request(
+            "https://api.mercadolibre.com/oauth/token",
+            data=data,
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "MapaSeller/0.2",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            raise RuntimeError("Mercado Livre OAuth retornou HTTP {0}.".format(exc.code))
+        except (URLError, TimeoutError, ValueError, json.JSONDecodeError):
+            raise RuntimeError("Falha ao trocar code por token no Mercado Livre.")
 
     def get_product_snapshot(self, product):
         return {
@@ -312,13 +432,13 @@ class MercadoLivreAdapter(MarketplaceAdapter):
     def search_market(self, product, limit=None, query_override=None):
         query = query_override or build_search_query(product)
         safe_limit = max(1, min(int(limit or self.max_results), self.max_results, 50))
-        if self.mode != "live":
+        token, _ = self._current_access_token()
+        # Só vai live se: enabled + configured + secret storage devolveu token.
+        if not (self.enabled and self.configured and token):
             return self._mock_results(product, query, safe_limit), "mock", None
 
         try:
-            headers = {}
-            if self.access_token:
-                headers["Authorization"] = "Bearer {0}".format(self.access_token)
+            headers = {"Authorization": "Bearer {0}".format(token)}
             payload = safe_fetch_json(
                 "https://api.mercadolibre.com/sites/{0}/search".format(self.site_id),
                 params={"q": query, "limit": safe_limit},
@@ -328,8 +448,12 @@ class MercadoLivreAdapter(MarketplaceAdapter):
             return [self.normalize_ml_item(item, index) for index, item in enumerate(payload.get("results") or [])], "live", None
         except HTTPError as exc:
             message = "Mercado Livre limitou temporariamente as consultas." if exc.code == 429 else "Mercado Livre retornou HTTP {0}.".format(exc.code)
+            if not self.fallback_to_mock:
+                return [], "error", message
             return self._mock_results(product, query, safe_limit), "mock", message
         except (URLError, TimeoutError, ValueError, json.JSONDecodeError):
+            if not self.fallback_to_mock:
+                return [], "error", "Não foi possível consultar o Mercado Livre agora."
             return self._mock_results(product, query, safe_limit), "mock", "Não foi possível consultar o Mercado Livre agora."
 
     def get_similar_products(self, product_or_url):
@@ -649,11 +773,10 @@ class MercadoLivreAdapter(MarketplaceAdapter):
         }
 
     def _product_from_url(self, parsed):
-        if self.mode != "live":
+        token, _ = self._current_access_token()
+        if not (self.enabled and self.configured and token):
             return {"source": "mock", "query": parsed["inferred_query"], "title": parsed["slug"], "item_id": parsed["item_id"], "product_id": parsed["product_id"]}
-        headers = {}
-        if self.access_token:
-            headers["Authorization"] = "Bearer {0}".format(self.access_token)
+        headers = {"Authorization": "Bearer {0}".format(token)}
         try:
             if parsed.get("item_id"):
                 item = safe_fetch_json("https://api.mercadolibre.com/items/{0}".format(parsed["item_id"]), headers=headers, timeout=self.timeout_seconds)

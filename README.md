@@ -4,8 +4,16 @@ Base funcional do MVP interno para importar planilhas XLSX da FM Auto Peças, ca
 
 ## Stack
 
-- Backend: FastAPI + SQLAlchemy + SQLite + pandas/openpyxl
+- Backend: FastAPI + SQLAlchemy + (SQLite dev / Postgres Supabase produção) + pandas/openpyxl
 - Frontend: React + Vite + Tailwind CSS
+- Secrets: Supabase Vault para tokens OAuth (Mercado Livre etc.)
+
+## Ambientes
+
+- **Dev local**: `DATABASE_URL=sqlite:///./radar_marketplace.db` (default). Sem Supabase, sem OAuth real — tudo em mock seguro.
+- **Equipe/produção**: backend deployado apontando para Supabase Postgres via `DATABASE_URL=postgresql+psycopg2://...`. Tokens do Mercado Livre ficam no Supabase Vault, nunca no SQLite, nunca no Git.
+
+Veja [`docs/CLOUD_DEPLOYMENT.md`](docs/CLOUD_DEPLOYMENT.md) para o passo-a-passo completo de deploy compartilhado.
 
 
 ## Experiência de UI
@@ -94,10 +102,11 @@ Isso gera `backend/sample_data/produtos_exemplo.xlsx`.
 
 ## Limitações atuais
 
-- Marketplaces em modo mock (sem APIs reais)
-- Sem scraping
-- Sem autenticação/usuários
-- Sem histórico de importações e deduplicação avançada
+- Mercado Livre: live disponível atrás de OAuth + Supabase Vault. Sem configuração cloud, fica em mock.
+- Shopee/Amazon/Magalu: ainda em mock.
+- Sem scraping HTML em nenhum marketplace.
+- Sem autenticação multi-tenant no backend (workspace_id já reservado).
+- Sem histórico de importações e deduplicação avançada.
 
 ## Próximos passos sugeridos
 
