@@ -20,7 +20,7 @@
 --   - integrar com workspace/team_id quando o multi-tenant for adicionado.
 -- =============================================================
 
-create extension if not exists vault with schema vault;
+create extension if not exists supabase_vault with schema vault;
 
 -- -------------------------------------------------------------
 -- mapaseller_save_secret: cria um secret novo e retorna seu id (uuid::text)
