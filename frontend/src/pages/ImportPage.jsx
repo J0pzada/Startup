@@ -39,7 +39,11 @@ export function ImportPage() {
       setPreview(res.data);
       setResult(null);
     } catch (err) {
-      setError(err?.response?.data?.detail || "Falha ao gerar preview da planilha.");
+      if (!err.response) {
+        setError("Erro de rede: não foi possível conectar ao servidor. Verifique se ALLOWED_ORIGINS no backend inclui a URL do frontend.");
+      } else {
+        setError(err?.response?.data?.detail || "Falha ao gerar preview da planilha.");
+      }
     } finally {
       setLoadingPreview(false);
     }

@@ -221,7 +221,11 @@ export function MercadoLivreIntelligencePage() {
       const res = await api.post("/marketplaces/mercadolivre/analyze-url", payload);
       setAnalysis(res.data);
     } catch (requestError) {
-      setError(requestError?.response?.data?.detail || "Não foi possível analisar o link agora.");
+      if (!requestError.response) {
+        setError("Erro de rede: não foi possível conectar ao servidor. Verifique se ALLOWED_ORIGINS no backend inclui a URL do frontend.");
+      } else {
+        setError(requestError?.response?.data?.detail || "Não foi possível analisar o link agora.");
+      }
     } finally {
       setLoading(false);
     }

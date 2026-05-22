@@ -248,7 +248,7 @@ def _save_ml_snapshot(db: Session, analysis: dict, product_id: Optional[int] = N
     market = analysis.get("market_summary") or {}
     sales = analysis.get("sales_intelligence") or {}
     recommendation = analysis.get("recommendation") or {}
-    db_product_id = product_id if product_id is not None else 0
+    db_product_id = product_id  # nullable=True — None vira NULL; 0 violaria FK no Postgres
     snapshot = MarketplaceSnapshot(
         product_id=db_product_id,
         marketplace=mercadolivre_adapter.marketplace_key,
@@ -393,7 +393,11 @@ async def upload_xlsx_preview(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Arquivo deve ser .xlsx")
 
     content = await file.read()
-    return preview_xlsx(content)
+    try:
+        return preview_xlsx(content)
+    except Exception as exc:
+        logger.exception("preview_xlsx failed")
+        raise HTTPException(status_code=500, detail="Erro ao processar planilha: {0}".format(str(exc)))
 
 
 @app.post("/preview-xlsx")
@@ -402,7 +406,11 @@ async def preview_xlsx_alias(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Arquivo deve ser .xlsx")
 
     content = await file.read()
-    return preview_xlsx(content)
+    try:
+        return preview_xlsx(content)
+    except Exception as exc:
+        logger.exception("preview_xlsx failed")
+        raise HTTPException(status_code=500, detail="Erro ao processar planilha: {0}".format(str(exc)))
 
 
 def _find_existing(db: Session, sku: Optional[str], nome_normalizado: Optional[str]):
@@ -797,7 +805,10 @@ def analyze_mercadolivre_url(payload: MercadoLivreUrlAnalyzeRequest, db: Session
         profit_inputs={**payload.model_dump(), "result": profit_result},
     )
     if analysis.get("valid"):
-        _, analysis = _save_ml_snapshot(db, analysis, product_id=None, source_url=payload.url)
+        try:
+            _, analysis = _save_ml_snapshot(db, analysis, product_id=None, source_url=payload.url)
+        except Exception:
+            logger.exception("_save_ml_snapshot failed for URL analysis — returning analysis without persisting")
     return analysis
 
 
