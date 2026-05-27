@@ -40,21 +40,33 @@ def ensure_columns(table_name, columns_spec):
     Em produção Postgres a fonte de verdade é supabase/migrations. Esta função
     cobre dev SQLite e bootstrap simples em Postgres. Usa ADD COLUMN IF NOT EXISTS
     quando suportado, e PRAGMA table_info no SQLite.
+
+    NUNCA levanta exceção — falha é logada e ignorada para não derrubar o app.
     """
+    import logging as _logging
+    _log = _logging.getLogger(__name__)
+
     if IS_SQLITE:
-        with engine.begin() as conn:
-            existing = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info({0})".format(table_name)).fetchall()}
-            for col_name, col_type in columns_spec.items():
-                if col_name not in existing:
-                    conn.exec_driver_sql("ALTER TABLE {0} ADD COLUMN {1} {2}".format(table_name, col_name, col_type))
+        try:
+            with engine.begin() as conn:
+                existing = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info({0})".format(table_name)).fetchall()}
+                for col_name, col_type in columns_spec.items():
+                    if col_name not in existing:
+                        conn.exec_driver_sql("ALTER TABLE {0} ADD COLUMN {1} {2}".format(table_name, col_name, col_type))
+        except Exception as exc:
+            _log.warning("ensure_columns(%s) SQLite failed (non-fatal): %s", table_name, exc)
         return
 
     if IS_POSTGRES:
-        with engine.begin() as conn:
-            for col_name, col_type in columns_spec.items():
-                conn.exec_driver_sql(
-                    "ALTER TABLE {0} ADD COLUMN IF NOT EXISTS {1} {2}".format(table_name, col_name, col_type)
-                )
+        # Each column in its own transaction so a timeout on one doesn't block others.
+        for col_name, col_type in columns_spec.items():
+            try:
+                with engine.begin() as conn:
+                    conn.exec_driver_sql(
+                        "ALTER TABLE {0} ADD COLUMN IF NOT EXISTS {1} {2}".format(table_name, col_name, col_type)
+                    )
+            except Exception as exc:
+                _log.warning("ensure_columns(%s.%s) Postgres failed (non-fatal): %s", table_name, col_name, exc)
         return
 
 

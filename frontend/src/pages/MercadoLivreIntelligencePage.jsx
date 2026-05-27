@@ -192,13 +192,20 @@ export function MercadoLivreIntelligencePage() {
     setLoading(true);
     setError("");
     try {
-      const res = await api.post(`/products/${selectedProductId}/marketplaces/mercadolivre/analyze`, {
-        limit: 50,
-        force_refresh: true,
-      });
+      const res = await api.post(
+        `/products/${selectedProductId}/marketplaces/mercadolivre/analyze`,
+        { limit: 50, force_refresh: true },
+        { timeout: 30_000 },
+      );
+      console.debug("[ML] analyze-product ok — status:", res.status, "| keys:", Object.keys(res.data), "| mode:", res.data.mode);
       setAnalysis(res.data);
     } catch (requestError) {
-      setError(requestError?.response?.data?.detail || "Não foi possível analisar o produto agora.");
+      console.debug("[ML] analyze-product error — status:", requestError?.response?.status, "| msg:", requestError?.message);
+      if (!requestError.response) {
+        setError("Erro de rede ou timeout ao analisar produto.");
+      } else {
+        setError(requestError?.response?.data?.detail || "Não foi possível analisar o produto agora.");
+      }
     } finally {
       setLoading(false);
     }
@@ -218,11 +225,13 @@ export function MercadoLivreIntelligencePage() {
         shipping_cost: numberOrUndefined(linkForm.shipping_cost) ?? 0,
         additional_cost: numberOrUndefined(linkForm.additional_cost) ?? 0,
       };
-      const res = await api.post("/marketplaces/mercadolivre/analyze-url", payload);
+      const res = await api.post("/marketplaces/mercadolivre/analyze-url", payload, { timeout: 30_000 });
+      console.debug("[ML] analyze-url ok — status:", res.status, "| keys:", Object.keys(res.data), "| valid:", res.data.valid, "| mode:", res.data.mode);
       setAnalysis(res.data);
     } catch (requestError) {
+      console.debug("[ML] analyze-url error — status:", requestError?.response?.status, "| msg:", requestError?.message);
       if (!requestError.response) {
-        setError("Erro de rede: não foi possível conectar ao servidor. Verifique se ALLOWED_ORIGINS no backend inclui a URL do frontend.");
+        setError("Erro de rede ou timeout: não foi possível conectar ao servidor. Verifique se ALLOWED_ORIGINS no backend inclui a URL do frontend.");
       } else {
         setError(requestError?.response?.data?.detail || "Não foi possível analisar o link agora.");
       }

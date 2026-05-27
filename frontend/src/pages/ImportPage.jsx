@@ -35,12 +35,14 @@ export function ImportPage() {
     form.append("file", file);
 
     try {
-      const res = await api.post("/upload-xlsx/preview", form);
+      const res = await api.post("/upload-xlsx/preview", form, { timeout: 120_000 });
+      console.debug("[ImportPage] preview ok — status:", res.status, "| keys:", Object.keys(res.data), "| preview_rows:", res.data.preview_rows?.length ?? "n/a", "| produtos_validos:", res.data.produtos_validos ?? "n/a");
       setPreview(res.data);
       setResult(null);
     } catch (err) {
+      console.debug("[ImportPage] preview error — status:", err?.response?.status, "| msg:", err?.message);
       if (!err.response) {
-        setError("Erro de rede: não foi possível conectar ao servidor. Verifique se ALLOWED_ORIGINS no backend inclui a URL do frontend.");
+        setError("Erro de rede ou timeout: não foi possível conectar ao servidor. Verifique se ALLOWED_ORIGINS no backend inclui a URL do frontend.");
       } else {
         setError(err?.response?.data?.detail || "Falha ao gerar preview da planilha.");
       }
@@ -58,10 +60,16 @@ export function ImportPage() {
     form.append("file", file);
 
     try {
-      const res = await api.post("/upload-xlsx", form);
+      const res = await api.post("/upload-xlsx", form, { timeout: 180_000 });
+      console.debug("[ImportPage] import ok — status:", res.status, "| imported:", res.data.imported, "| total_after:", res.data.total_after);
       setResult(res.data);
     } catch (err) {
-      setError(err?.response?.data?.detail || "Falha ao importar planilha.");
+      console.debug("[ImportPage] import error — status:", err?.response?.status, "| msg:", err?.message);
+      if (!err.response) {
+        setError("Erro de rede ou timeout ao importar. Tente novamente.");
+      } else {
+        setError(err?.response?.data?.detail || "Falha ao importar planilha.");
+      }
     } finally {
       setLoadingImport(false);
     }

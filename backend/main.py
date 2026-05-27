@@ -40,11 +40,12 @@ from scoring import (
 app = FastAPI(title="MapaSeller API")
 
 _cors_env = os.getenv("ALLOWED_ORIGINS", "") or os.getenv("FRONTEND_ORIGIN", "")
-_allowed_origins: list = (
-    [o.strip() for o in _cors_env.split(",") if o.strip()]
-    if _cors_env
-    else ["http://localhost:5173", "http://localhost:8000"]
-)
+_prod_origins = [o.strip() for o in _cors_env.split(",") if o.strip()] if _cors_env else []
+_dev_origins = ["http://localhost:5173", "http://localhost:8000"]
+# Always include localhost so dev works even when ALLOWED_ORIGINS is set for prod.
+_allowed_origins: list = list(dict.fromkeys(_prod_origins + _dev_origins))
+
+logger.info("CORS allowed_origins=%s (from ALLOWED_ORIGINS=%r)", _allowed_origins, _cors_env or "(not set)")
 
 app.add_middleware(
     CORSMiddleware,
@@ -52,11 +53,21 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
-Base.metadata.create_all(bind=engine)
-ensure_columns("products", PRODUCT_EXTRA_COLUMNS)
-ensure_columns("marketplace_snapshots", MARKETPLACE_SNAPSHOT_EXTRA_COLUMNS)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as _exc:
+    logger.warning("create_all failed (non-fatal): %s", _exc)
+
+_run_migrations = os.getenv("RUN_STARTUP_MIGRATIONS", "0").strip().lower() in ("1", "true", "yes")
+if _run_migrations:
+    logger.info("RUN_STARTUP_MIGRATIONS=1 — running ensure_columns")
+    ensure_columns("products", PRODUCT_EXTRA_COLUMNS)
+    ensure_columns("marketplace_snapshots", MARKETPLACE_SNAPSHOT_EXTRA_COLUMNS)
+else:
+    logger.info("RUN_STARTUP_MIGRATIONS not set — skipping ensure_columns (run backend/tools/ensure_schema.py manually if needed)")
 
 mercadolivre_adapter = MercadoLivreAdapter()
 adapters = [mercadolivre_adapter, ShopeeAdapter(), AmazonAdapter(), MagaluAdapter()]
