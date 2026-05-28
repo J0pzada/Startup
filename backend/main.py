@@ -41,7 +41,13 @@ app = FastAPI(title="MapaSeller API")
 
 _cors_env = os.getenv("ALLOWED_ORIGINS", "") or os.getenv("FRONTEND_ORIGIN", "")
 _prod_origins = [o.strip() for o in _cors_env.split(",") if o.strip()] if _cors_env else []
-_dev_origins = ["http://localhost:5173", "http://localhost:8000"]
+_dev_origins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    "http://localhost:8000",
+]
 # Always include localhost so dev works even when ALLOWED_ORIGINS is set for prod.
 _allowed_origins: list = list(dict.fromkeys(_prod_origins + _dev_origins))
 

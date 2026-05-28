@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>MapaSeller · Oportunidades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../mapaseller-tokens.css">
+<style>
+  .opp-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--ms-grid-gap); }
+  .opp-card {
+    background: var(--ms-surface);
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .opp-head {
+    padding: 18px 20px 14px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--ms-line);
+  }
+  .opp-rank {
+    font-family: var(--ms-font-mono); font-size: var(--ms-fs-11);
+    color: var(--ms-text-3);
+  }
+  .opp-prio {
+    margin-left: auto;
+    font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .opp-prio--high { background: var(--ms-positive-bg); color: var(--ms-positive-fg); }
+  .opp-prio--med  { background: var(--ms-warning-bg); color: var(--ms-warning-fg); }
+  .opp-prio--low  { background: var(--ms-info-bg); color: var(--ms-info-fg); }
+  .opp-thumb {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: var(--ms-surface-2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ms-text-3); font-size: 10px; font-weight: 600;
+  }
+  .opp-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+  .opp-title { font-size: var(--ms-fs-16); font-weight: 600; color: var(--ms-ink); line-height: 1.3; }
+  .opp-meta  { font-size: var(--ms-fs-12); color: var(--ms-text-2); }
+  .opp-reason {
+    background: var(--ms-brand-50); border-radius: var(--ms-radius-md);
+    padding: 12px 14px;
+    font-size: var(--ms-fs-13); color: var(--ms-brand-700); line-height: 1.5;
+  }
+  .opp-reason strong { color: var(--ms-brand-900); }
+  .opp-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .opp-stat .lab { font-size: var(--ms-fs-11); color: var(--ms-text-2); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .opp-stat .val { font-size: var(--ms-fs-18); font-weight: 600; color: var(--ms-ink); margin-top: 2px; letter-spacing: -0.01em; }
+  .opp-stat .sub { font-size: var(--ms-fs-11); color: var(--ms-text-2); margin-top: 2px; }
+  .opp-score-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .opp-score-ring {
+    width: 56px; height: 56px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .opp-score-num {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--ms-fs-16); font-weight: 700; color: var(--ms-ink);
+    letter-spacing: -0.02em;
+  }
+  .opp-foot {
+    padding: 14px 20px;
+    background: var(--ms-surface-2);
+    border-top: 1px solid var(--ms-line);
+    display: flex; gap: 10px; align-items: center;
+  }
+
+  .leader-card {
+    background: linear-gradient(135deg, var(--ms-brand-900), var(--ms-brand-600));
+    color: #fff;
+    border-radius: var(--ms-radius-lg);
+    padding: 28px;
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .leader-card::before {
+    content: ''; position: absolute;
+    right: -60px; top: -60px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 60%);
+    border-radius: 50%;
+  }
+  .leader-card .eyebrow {
+    font-size: var(--ms-fs-11); font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: rgba(255,255,255,.7);
+    margin: 0;
+  }
+  .leader-card h2 {
+    font-size: 32px; font-weight: 600; letter-spacing: -0.02em;
+    margin: 12px 0 8px; line-height: 1.1;
+  }
+  .leader-card p {
+    margin: 0; color: rgba(255,255,255,.8);
+    font-size: var(--ms-fs-15); line-height: 1.5; max-width: 520px;
+  }
+  .leader-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    position: relative; z-index: 1;
+  }
+  .leader-stat { background: rgba(255,255,255,.1); border-radius: var(--ms-radius-md); padding: 14px 16px; backdrop-filter: blur(8px); }
+  .leader-stat .lab { font-size: var(--ms-fs-11); color: rgba(255,255,255,.7); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .leader-stat .val { font-size: var(--ms-fs-24); font-weight: 600; letter-spacing: -0.02em; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="ms-shell">
+  <aside class="ms-sidebar">
+    <div class="ms-sidebar-brand">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#5B5BF0" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span class="name">MapaSeller</span>
+      <span class="ver">v1.1</span>
+    </div>
+    <nav class="ms-sidebar-nav">
+      <div class="ms-sidebar-section">Operação</div>
+      <a class="ms-nav-item" href="./dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>Dashboard</a>
+      <a class="ms-nav-item" href="./importar.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2Z"></path><path d="M12 18V9M8 13l4-4 4 4"></path></svg>Importar XLSX</a>
+      <a class="ms-nav-item" href="./produtos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>Produtos</a>
+      <a class="ms-nav-item is-active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>Oportunidades<span class="count">12</span></a>
+      <div class="ms-sidebar-section">Inteligência</div>
+      <a class="ms-nav-item" href="./mercadolivre.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21V3l-6 3v18l6-3 6 3 6-3V3l-6 3"></path><path d="M9 3l6 3"></path></svg>Marketplaces</a>
+      <a class="ms-nav-item" href="./mercadolivre.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path><circle cx="20" cy="4" r="1.5" fill="currentColor"></circle></svg>Inteligência ML</a>
+      <a class="ms-nav-item" href="./anuncios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3l11 5V6L3 11ZM14 9v7M18 12h2M18 8l2-1M18 16l2 1"></path></svg>Anúncios</a>
+      <div class="ms-sidebar-section">Sistema</div>
+      <a class="ms-nav-item" href="./configuracoes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1A2 2 0 1 1 4.4 17l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 4.4l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5h.1a1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 19.6 7l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"></path></svg>Configurações</a>
+    </nav>
+    <div class="ms-sidebar-foot">
+      <div class="ms-sidebar-workspace">
+        <div class="ms-avatar ms-avatar--sq ms-avatar--teal">CL</div>
+        <div class="info"><div class="label">Workspace</div><div class="name">Casa &amp; Lar Brasil</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"></path></svg>
+      </div>
+    </div>
+  </aside>
+
+  <div>
+    <header class="ms-topbar">
+      <div class="ms-topbar-crumbs">
+        <span>Operação</span><span class="sep">/</span><span class="current">Oportunidades</span>
+      </div>
+      <div class="ms-topbar-actions">
+        <div class="ms-search ms-topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input placeholder="Buscar SKU, pedido, anúncio…" />
+          <span class="ms-kbd">⌘ K</span>
+        </div>
+        <button class="ms-topbar-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg></button>
+        <div class="ms-avatar ms-avatar--sm">RM</div>
+      </div>
+    </header>
+
+    <main class="ms-content">
+      <div class="ms-page-head">
+        <div>
+          <h1 class="ms-page-title">Oportunidades</h1>
+          <p class="ms-page-desc">Produtos com potencial não explorado, sugestões de reprecificação e ações priorizadas pelo motor de inteligência do MapaSeller.</p>
+        </div>
+        <div class="ms-page-actions">
+          <button class="ms-btn ms-btn--secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"></path><path d="M21 3v5h-5"></path></svg>
+            Atualizar ranking
+          </button>
+          <button class="ms-btn ms-btn--primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path><path d="M5 21h14"></path></svg>
+            Exportar plano
+          </button>
+        </div>
+      </div>
+
+      <!-- Leader -->
+      <div class="leader-card">
+        <div style="position: relative; z-index: 1;">
+          <p class="eyebrow">Oportunidade #1 da semana</p>
+          <h2>Jogo Panelas Antiaderente 5 pç</h2>
+          <p>Você está R$ 14,90 acima da concorrência média. Reduzindo o preço para <strong style="color:#fff;">R$ 274,90</strong>, projetamos 2,1× mais vendas mantendo margem ≥ 32%.</p>
+          <div style="display:flex; gap:10px; margin-top: 22px;">
+            <button class="ms-btn ms-btn--primary" style="background:#fff; color: var(--ms-brand-700);">
+              Aplicar sugestão
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"></path></svg>
+            </button>
+            <button class="ms-btn" style="background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.2);">Ver análise completa</button>
+          </div>
+        </div>
+        <div class="leader-stats">
+          <div class="leader-stat"><div class="lab">Score</div><div class="val">94</div></div>
+          <div class="leader-stat"><div class="lab">Upside estimado</div><div class="val">+R$ 38k</div></div>
+          <div class="leader-stat"><div class="lab">Tempo de execução</div><div class="val">2 min</div></div>
+          <div class="leader-stat"><div class="lab">Confiança</div><div class="val">Alta</div></div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div style="display:flex; align-items:center; gap: 12px; margin: 32px 0 18px; flex-wrap: wrap;">
+        <span class="ms-caps" style="margin-right: 4px;">Filtros</span>
+        <button class="ms-chip ms-chip--active">Todos · 12</button>
+        <button class="ms-chip">Reprecificar · 5</button>
+        <button class="ms-chip">Novo anúncio · 3</button>
+        <button class="ms-chip">Otimizar título · 2</button>
+        <button class="ms-chip">Repor estoque · 2</button>
+        <div style="margin-left: auto; display: flex; gap: 8px;">
+          <button class="ms-chip">Mercado Livre</button>
+          <button class="ms-chip">Shopee</button>
+          <button class="ms-chip">Amazon</button>
+        </div>
+      </div>
+
+      <!-- Opportunities grid -->
+      <div class="opp-grid">
+        <!-- Card 1 -->
+        <div class="opp-card">
+          <div class="opp-head">
+            <div class="opp-thumb">IMG</div>
+            <div style="flex:1; min-width:0;">
+              <div class="opp-rank">#02 · Reprecificação</div>
+              <div class="opp-title" style="font-size:var(--ms-fs-15);">Conjunto Taças Cristal 6 un</div>
+            </div>
+            <span class="opp-prio opp-prio--high">Alta</span>
+          </div>
+          <div class="opp-body">
+            <div class="opp-score-row">
+              <div class="opp-score-ring">
+                <svg viewBox="0 0 42 42" style="transform: rotate(-90deg);">
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-surface-2)" stroke-width="4"></circle>
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-positive-fg)" stroke-width="4" stroke-dasharray="91 100" stroke-dashoffset="0" pathLength="100" stroke-linecap="round"></circle>
+                </svg>
+                <div class="opp-score-num">91</div>
+              </div>
+              <div>
+                <div class="opp-meta">Score de oportunidade</div>
+                <div style="font-size:var(--ms-fs-13); color: var(--ms-text); font-weight: 500;">+R$ 22,1k projetados em 60d</div>
+              </div>
+            </div>
+            <div class="opp-reason">
+              <strong>Por quê:</strong> preço atual 12% acima da média dos 5 anúncios concorrentes em Buy Box. Histórico mostra que cada R$ 5 de redução dobra a velocidade de venda.
+            </div>
+            <div class="opp-stats">
+              <div class="opp-stat">
+                <div class="lab">Atual</div>
+                <div class="val">R$ 138</div>
+                <div class="sub">você</div>
+              </div>
+              <div class="opp-stat">
+                <div class="lab">Sugerido</div>
+                <div class="val" style="color: var(--ms-positive-fg);">R$ 124</div>
+                <div class="sub">−10%</div>
+              </div>
+              <div class="opp-stat">
+                <div class="lab">Margem</div>
+                <div class="val">34%</div>
+                <div class="sub">mantém</div>
+              </div>
+            </div>
+          </div>
+          <div class="opp-foot">
+            <span class="ms-app-ico ms-app-ico--ml" style="width:22px;height:22px;font-size:9px;">ML</span>
+            <span class="ms-meta">SKU TAC-088</span>
+            <button class="ms-btn ms-btn--primary ms-btn--sm" style="margin-left: auto;">Aplicar</button>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="opp-card">
+          <div class="opp-head">
+            <div class="opp-thumb">IMG</div>
+            <div style="flex:1; min-width:0;">
+              <div class="opp-rank">#03 · Novo anúncio</div>
+              <div class="opp-title" style="font-size:var(--ms-fs-15);">Faqueiro Inox 24 peças</div>
+            </div>
+            <span class="opp-prio opp-prio--high">Alta</span>
+          </div>
+          <div class="opp-body">
+            <div class="opp-score-row">
+              <div class="opp-score-ring">
+                <svg viewBox="0 0 42 42" style="transform: rotate(-90deg);">
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-surface-2)" stroke-width="4"></circle>
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-positive-fg)" stroke-width="4" stroke-dasharray="88 100" pathLength="100" stroke-linecap="round"></circle>
+                </svg>
+                <div class="opp-score-num">88</div>
+              </div>
+              <div>
+                <div class="opp-meta">Score de oportunidade</div>
+                <div style="font-size:var(--ms-fs-13); color: var(--ms-text); font-weight: 500;">+R$ 18,7k em novos canais</div>
+              </div>
+            </div>
+            <div class="opp-reason">
+              <strong>Por quê:</strong> SKU vende bem na Shopee mas não está listado no Mercado Livre. Detectamos 142 buscas/dia pelo termo "faqueiro 24 peças" no ML.
+            </div>
+            <div class="opp-stats">
+              <div class="opp-stat"><div class="lab">Buscas/dia</div><div class="val">142</div><div class="sub">ML</div></div>
+              <div class="opp-stat"><div class="lab">Concorrentes</div><div class="val">23</div><div class="sub">ativos</div></div>
+              <div class="opp-stat"><div class="lab">Preço alvo</div><div class="val">R$ 189</div><div class="sub">−</div></div>
+            </div>
+          </div>
+          <div class="opp-foot">
+            <span class="ms-app-ico ms-app-ico--ml" style="width:22px;height:22px;font-size:9px;">ML</span>
+            <span class="ms-meta">SKU FAQ-141</span>
+            <button class="ms-btn ms-btn--primary ms-btn--sm" style="margin-left: auto;">Criar anúncio</button>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="opp-card">
+          <div class="opp-head">
+            <div class="opp-thumb">IMG</div>
+            <div style="flex:1; min-width:0;">
+              <div class="opp-rank">#04 · Otimizar título</div>
+              <div class="opp-title" style="font-size:var(--ms-fs-15);">Organizador Modular Cozinha</div>
+            </div>
+            <span class="opp-prio opp-prio--med">Média</span>
+          </div>
+          <div class="opp-body">
+            <div class="opp-score-row">
+              <div class="opp-score-ring">
+                <svg viewBox="0 0 42 42" style="transform: rotate(-90deg);">
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-surface-2)" stroke-width="4"></circle>
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-brand-600)" stroke-width="4" stroke-dasharray="74 100" pathLength="100" stroke-linecap="round"></circle>
+                </svg>
+                <div class="opp-score-num">74</div>
+              </div>
+              <div>
+                <div class="opp-meta">Score de oportunidade</div>
+                <div style="font-size:var(--ms-fs-13); color: var(--ms-text); font-weight: 500;">+R$ 9,2k via melhor SEO</div>
+              </div>
+            </div>
+            <div class="opp-reason">
+              <strong>Por quê:</strong> título atual não usa termos com alto volume de busca. Sugerimos incluir "kit", "modular" e dimensão em cm logo no início.
+            </div>
+            <div class="opp-stats">
+              <div class="opp-stat"><div class="lab">CTR atual</div><div class="val">2,1%</div><div class="sub">−</div></div>
+              <div class="opp-stat"><div class="lab">CTR alvo</div><div class="val" style="color: var(--ms-positive-fg);">3,8%</div><div class="sub">+80%</div></div>
+              <div class="opp-stat"><div class="lab">Esforço</div><div class="val">Baixo</div><div class="sub">2 min</div></div>
+            </div>
+          </div>
+          <div class="opp-foot">
+            <span class="ms-app-ico ms-app-ico--ml" style="width:22px;height:22px;font-size:9px;">ML</span>
+            <span class="ms-meta">SKU ORG-066</span>
+            <button class="ms-btn ms-btn--primary ms-btn--sm" style="margin-left: auto;">Gerar título</button>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="opp-card">
+          <div class="opp-head">
+            <div class="opp-thumb">IMG</div>
+            <div style="flex:1; min-width:0;">
+              <div class="opp-rank">#05 · Repor estoque</div>
+              <div class="opp-title" style="font-size:var(--ms-fs-15);">Travessa Refratária 2,5L</div>
+            </div>
+            <span class="opp-prio opp-prio--high">Alta</span>
+          </div>
+          <div class="opp-body">
+            <div class="opp-score-row">
+              <div class="opp-score-ring">
+                <svg viewBox="0 0 42 42" style="transform: rotate(-90deg);">
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-surface-2)" stroke-width="4"></circle>
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-positive-fg)" stroke-width="4" stroke-dasharray="82 100" pathLength="100" stroke-linecap="round"></circle>
+                </svg>
+                <div class="opp-score-num">82</div>
+              </div>
+              <div>
+                <div class="opp-meta">Score de oportunidade</div>
+                <div style="font-size:var(--ms-fs-13); color: var(--ms-text); font-weight: 500;">Risco de ruptura em 3 dias</div>
+              </div>
+            </div>
+            <div class="opp-reason">
+              <strong>Por quê:</strong> média de venda é 6 un/dia mas só há 12 em estoque. Sem reposição, a página perde reputação e cai do Buy Box.
+            </div>
+            <div class="opp-stats">
+              <div class="opp-stat"><div class="lab">Estoque</div><div class="val">12</div><div class="sub">unidades</div></div>
+              <div class="opp-stat"><div class="lab">Cobertura</div><div class="val" style="color: var(--ms-negative-fg);">2 dias</div><div class="sub">crítico</div></div>
+              <div class="opp-stat"><div class="lab">Sugerido</div><div class="val">+ 60</div><div class="sub">un</div></div>
+            </div>
+          </div>
+          <div class="opp-foot">
+            <span class="ms-app-ico ms-app-ico--ml" style="width:22px;height:22px;font-size:9px;">ML</span>
+            <span class="ms-meta">SKU REF-302</span>
+            <button class="ms-btn ms-btn--primary ms-btn--sm" style="margin-left: auto;">Solicitar reposição</button>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="opp-card">
+          <div class="opp-head">
+            <div class="opp-thumb">IMG</div>
+            <div style="flex:1; min-width:0;">
+              <div class="opp-rank">#06 · Reprecificação</div>
+              <div class="opp-title" style="font-size:var(--ms-fs-15);">Liquidificador 1200W Inox</div>
+            </div>
+            <span class="opp-prio opp-prio--med">Média</span>
+          </div>
+          <div class="opp-body">
+            <div class="opp-score-row">
+              <div class="opp-score-ring">
+                <svg viewBox="0 0 42 42" style="transform: rotate(-90deg);">
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-surface-2)" stroke-width="4"></circle>
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-brand-600)" stroke-width="4" stroke-dasharray="68 100" pathLength="100" stroke-linecap="round"></circle>
+                </svg>
+                <div class="opp-score-num">68</div>
+              </div>
+              <div>
+                <div class="opp-meta">Score de oportunidade</div>
+                <div style="font-size:var(--ms-fs-13); color: var(--ms-text); font-weight: 500;">+R$ 6,4k recuperando Buy Box</div>
+              </div>
+            </div>
+            <div class="opp-reason">
+              <strong>Por quê:</strong> perdeu Buy Box há 6 dias para vendedor com preço R$ 18 menor. Margem ainda permite igualar o concorrente.
+            </div>
+            <div class="opp-stats">
+              <div class="opp-stat"><div class="lab">Atual</div><div class="val">R$ 248</div><div class="sub">você</div></div>
+              <div class="opp-stat"><div class="lab">Concorrente</div><div class="val">R$ 230</div><div class="sub">−R$ 18</div></div>
+              <div class="opp-stat"><div class="lab">Margem</div><div class="val">28%</div><div class="sub">após</div></div>
+            </div>
+          </div>
+          <div class="opp-foot">
+            <span class="ms-app-ico ms-app-ico--magalu" style="width:22px;height:22px;font-size:9px;">MG</span>
+            <span class="ms-meta">SKU ELE-077</span>
+            <button class="ms-btn ms-btn--primary ms-btn--sm" style="margin-left: auto;">Aplicar</button>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="opp-card">
+          <div class="opp-head">
+            <div class="opp-thumb">IMG</div>
+            <div style="flex:1; min-width:0;">
+              <div class="opp-rank">#07 · Otimizar título</div>
+              <div class="opp-title" style="font-size:var(--ms-fs-15);">Tábua Bambu Premium 45cm</div>
+            </div>
+            <span class="opp-prio opp-prio--low">Baixa</span>
+          </div>
+          <div class="opp-body">
+            <div class="opp-score-row">
+              <div class="opp-score-ring">
+                <svg viewBox="0 0 42 42" style="transform: rotate(-90deg);">
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-surface-2)" stroke-width="4"></circle>
+                  <circle cx="21" cy="21" r="18" fill="none" stroke="var(--ms-info-fg)" stroke-width="4" stroke-dasharray="54 100" pathLength="100" stroke-linecap="round"></circle>
+                </svg>
+                <div class="opp-score-num">54</div>
+              </div>
+              <div>
+                <div class="opp-meta">Score de oportunidade</div>
+                <div style="font-size:var(--ms-fs-13); color: var(--ms-text); font-weight: 500;">+R$ 2,1k via SEO</div>
+              </div>
+            </div>
+            <div class="opp-reason">
+              <strong>Por quê:</strong> termo "bambu sustentável" tem alto volume de busca e não está no título atual. Esforço baixo.
+            </div>
+            <div class="opp-stats">
+              <div class="opp-stat"><div class="lab">CTR atual</div><div class="val">1,4%</div><div class="sub">−</div></div>
+              <div class="opp-stat"><div class="lab">Buscas/sem</div><div class="val">812</div><div class="sub">termo</div></div>
+              <div class="opp-stat"><div class="lab">Esforço</div><div class="val">Baixo</div><div class="sub">2 min</div></div>
+            </div>
+          </div>
+          <div class="opp-foot">
+            <span class="ms-app-ico ms-app-ico--shopee" style="width:22px;height:22px;font-size:9px;">SP</span>
+            <span class="ms-meta">SKU TBU-044</span>
+            <button class="ms-btn ms-btn--primary ms-btn--sm" style="margin-left: auto;">Gerar título</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination/footer -->
+      <div style="text-align: center; margin-top: 32px; color: var(--ms-text-2); font-size: var(--ms-fs-13);">
+        Mostrando 6 de 12 oportunidades · <a href="#" style="color: var(--ms-brand-600); font-weight: 600; text-decoration: none;">Ver todas →</a>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

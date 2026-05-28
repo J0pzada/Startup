@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>MapaSeller · Importar XLSX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../mapaseller-tokens.css">
+<style>
+  .imp-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--ms-grid-gap); }
+  .file-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px;
+    background: var(--ms-surface-2);
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-md);
+  }
+  .file-row .ico {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--ms-brand-50); color: var(--ms-brand-700);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .file-row .ico svg { width: 20px; height: 20px; }
+  .file-row .info { flex: 1; min-width: 0; }
+  .file-row .name { font-size: var(--ms-fs-14); font-weight: 600; color: var(--ms-ink); }
+  .file-row .meta { font-size: var(--ms-fs-12); color: var(--ms-text-2); margin-top: 2px; }
+  .step-list { display: grid; gap: 16px; }
+  .step {
+    display: grid; grid-template-columns: 32px 1fr; gap: 14px; align-items: flex-start;
+  }
+  .step .num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--ms-surface-2); border: 1px solid var(--ms-line-2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--ms-font-mono); font-size: var(--ms-fs-12); font-weight: 600;
+    color: var(--ms-text-2);
+  }
+  .step.is-done .num {
+    background: var(--ms-positive-bg); border-color: var(--ms-positive-bg);
+    color: var(--ms-positive-fg);
+  }
+  .step.is-active .num {
+    background: var(--ms-brand-600); border-color: var(--ms-brand-600);
+    color: #fff;
+  }
+  .step .title { font-size: var(--ms-fs-14); font-weight: 600; color: var(--ms-ink); }
+  .step .desc { font-size: var(--ms-fs-13); color: var(--ms-text-2); margin-top: 2px; }
+  .summary-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .summary-cell {
+    background: var(--ms-surface-2);
+    border-radius: var(--ms-radius-md);
+    padding: 14px;
+  }
+  .summary-cell .lab { font-size: var(--ms-fs-11); color: var(--ms-text-2); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+  .summary-cell .val { font-size: var(--ms-fs-20); font-weight: 600; letter-spacing: -0.01em; color: var(--ms-ink); margin-top: 4px; }
+  .summary-cell .sub { font-size: var(--ms-fs-12); color: var(--ms-text-2); margin-top: 2px; }
+
+  .state-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ms-grid-gap); }
+  .state-card {
+    background: var(--ms-surface); border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg); overflow: hidden;
+  }
+  .state-head {
+    padding: 14px 18px; border-bottom: 1px dashed var(--ms-line);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .state-head .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .state-head .label { font-family: var(--ms-font-mono); font-size: var(--ms-fs-11); color: var(--ms-text-2); }
+  .state-body { padding: 24px; min-height: 180px; }
+</style>
+</head>
+<body>
+
+<div class="ms-shell">
+
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="ms-sidebar">
+    <div class="ms-sidebar-brand">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#5B5BF0" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span class="name">MapaSeller</span>
+      <span class="ver">v1.1</span>
+    </div>
+    <nav class="ms-sidebar-nav">
+      <div class="ms-sidebar-section">Operação</div>
+      <a class="ms-nav-item" href="./dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+        Dashboard
+      </a>
+      <a class="ms-nav-item is-active" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2Z"></path><path d="M12 18V9M8 13l4-4 4 4"></path></svg>
+        Importar XLSX
+      </a>
+      <a class="ms-nav-item" href="./produtos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>
+        Produtos
+      </a>
+      <a class="ms-nav-item" href="./oportunidades.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>
+        Oportunidades
+        <span class="count">12</span>
+      </a>
+
+      <div class="ms-sidebar-section">Inteligência</div>
+      <a class="ms-nav-item" href="./mercadolivre.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21V3l-6 3v18l6-3 6 3 6-3V3l-6 3"></path><path d="M9 3l6 3"></path></svg>
+        Marketplaces
+      </a>
+      <a class="ms-nav-item" href="./mercadolivre.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path><circle cx="20" cy="4" r="1.5" fill="currentColor"></circle></svg>
+        Inteligência ML
+      </a>
+      <a class="ms-nav-item" href="./anuncios.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3l11 5V6L3 11ZM14 9v7M18 12h2M18 8l2-1M18 16l2 1"></path></svg>
+        Anúncios
+      </a>
+
+      <div class="ms-sidebar-section">Sistema</div>
+      <a class="ms-nav-item" href="./configuracoes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1A2 2 0 1 1 4.4 17l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 4.4l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5h.1a1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 19.6 7l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"></path></svg>
+        Configurações
+      </a>
+    </nav>
+    <div class="ms-sidebar-foot">
+      <div class="ms-sidebar-workspace">
+        <div class="ms-avatar ms-avatar--sq ms-avatar--teal">CL</div>
+        <div class="info">
+          <div class="label">Workspace</div>
+          <div class="name">Casa &amp; Lar Brasil</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"></path></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============== MAIN ============== -->
+  <div>
+    <header class="ms-topbar">
+      <div class="ms-topbar-crumbs">
+        <span>Operação</span>
+        <span class="sep">/</span>
+        <span class="current">Importar XLSX</span>
+      </div>
+      <div class="ms-topbar-actions">
+        <div class="ms-search ms-topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input placeholder="Buscar SKU, pedido, anúncio…" />
+          <span class="ms-kbd">⌘ K</span>
+        </div>
+        <button class="ms-topbar-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg></button>
+        <div class="ms-avatar ms-avatar--sm">RM</div>
+      </div>
+    </header>
+
+    <main class="ms-content">
+      <div class="ms-page-head">
+        <div>
+          <h1 class="ms-page-title">Importar planilha</h1>
+          <p class="ms-page-desc">Faça upload do seu XLSX de vendidos e estoque. Detectamos as abas, sugerimos o mapeamento e mostramos um preview antes de gravar nada no banco.</p>
+        </div>
+        <div class="ms-page-actions">
+          <button class="ms-btn ms-btn--ghost">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+            Ver formato esperado
+          </button>
+          <button class="ms-btn ms-btn--secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"></path></svg>
+            Limpar produtos
+          </button>
+        </div>
+      </div>
+
+      <!-- Main flow card -->
+      <div class="imp-grid">
+        <div class="ms-card" style="padding: 0;">
+          <!-- File loaded state -->
+          <div style="padding: 24px;">
+            <div class="ms-caps">Arquivo carregado</div>
+            <div class="file-row" style="margin-top: 14px;">
+              <div class="ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2Z"></path><path d="M7 13h10M7 17h7M7 9h4"></path></svg>
+              </div>
+              <div class="info">
+                <div class="name">vendidos_estoque_outubro_2026.xlsx</div>
+                <div class="meta">2,4 MB · enviado há 12 segundos · 4 abas detectadas</div>
+              </div>
+              <span class="ms-badge ms-badge--pos ms-badge--dot">Analisado</span>
+              <button class="ms-btn ms-btn--icon" aria-label="Remover">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Detected sheets / summary -->
+          <div style="padding: 0 24px 24px;">
+            <div class="ms-caps" style="margin-bottom: 12px;">Resumo da análise</div>
+            <div class="summary-row">
+              <div class="summary-cell">
+                <div class="lab">Abas</div>
+                <div class="val">4</div>
+                <div class="sub">Vendidos · Estoque · SKUs · Preços</div>
+              </div>
+              <div class="summary-cell">
+                <div class="lab">Linhas válidas</div>
+                <div class="val">3.842</div>
+                <div class="sub">98,2% de aproveitamento</div>
+              </div>
+              <div class="summary-cell">
+                <div class="lab">Match por SKU</div>
+                <div class="val">2.623</div>
+                <div class="sub">68,2% exato · 18,7% fuzzy</div>
+              </div>
+              <div class="summary-cell">
+                <div class="lab">A revisar</div>
+                <div class="val" style="color: var(--ms-warning-fg);">71</div>
+                <div class="sub">Erros, duplicatas e campos vazios</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview table -->
+          <div style="border-top: 1px solid var(--ms-line);">
+            <div style="padding: 18px 24px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <div class="ms-caps">Preview</div>
+                <div class="ms-h3" style="margin-top:4px;">Aba Vendidos · primeiras 5 linhas</div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="ms-chip ms-chip--active">Vendidos</button>
+                <button class="ms-chip">Estoque</button>
+                <button class="ms-chip">SKUs</button>
+                <button class="ms-chip">Preços</button>
+              </div>
+            </div>
+            <table class="ms-table">
+              <thead>
+                <tr>
+                  <th style="padding-left: 24px;">SKU</th>
+                  <th>Produto</th>
+                  <th>Marketplace</th>
+                  <th class="ms-right">Qtd</th>
+                  <th class="ms-right">Preço médio</th>
+                  <th class="ms-right" style="padding-right: 24px;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="ms-num" style="padding-left: 24px;">CAS-218</td>
+                  <td>Jogo Panelas Antiaderente 5 pç</td>
+                  <td><div class="ms-app-cell"><span class="ms-app-ico ms-app-ico--ml" style="width:24px;height:24px;font-size:9px;">ML</span>Mercado Livre</div></td>
+                  <td class="ms-right ms-num">142</td>
+                  <td class="ms-right ms-num">R$ 289,90</td>
+                  <td class="ms-right" style="padding-right: 24px;"><span class="ms-badge ms-badge--pos">Match exato</span></td>
+                </tr>
+                <tr>
+                  <td class="ms-num" style="padding-left: 24px;">TAC-088</td>
+                  <td>Conjunto Taças Cristal 6 un</td>
+                  <td><div class="ms-app-cell"><span class="ms-app-ico ms-app-ico--ml" style="width:24px;height:24px;font-size:9px;">ML</span>Mercado Livre</div></td>
+                  <td class="ms-right ms-num">87</td>
+                  <td class="ms-right ms-num">R$ 138,00</td>
+                  <td class="ms-right" style="padding-right: 24px;"><span class="ms-badge ms-badge--pos">Match exato</span></td>
+                </tr>
+                <tr>
+                  <td class="ms-num" style="padding-left: 24px;">FAQ-141</td>
+                  <td>Faqueiro Inox 24 peças</td>
+                  <td><div class="ms-app-cell"><span class="ms-app-ico ms-app-ico--shopee" style="width:24px;height:24px;font-size:9px;">SP</span>Shopee</div></td>
+                  <td class="ms-right ms-num">64</td>
+                  <td class="ms-right ms-num">R$ 184,50</td>
+                  <td class="ms-right" style="padding-right: 24px;"><span class="ms-badge ms-badge--info">Match fuzzy</span></td>
+                </tr>
+                <tr>
+                  <td class="ms-num" style="padding-left: 24px;">ORG-066</td>
+                  <td>Organizador Modular Cozinha</td>
+                  <td><div class="ms-app-cell"><span class="ms-app-ico ms-app-ico--ml" style="width:24px;height:24px;font-size:9px;">ML</span>Mercado Livre</div></td>
+                  <td class="ms-right ms-num">58</td>
+                  <td class="ms-right ms-num">R$ 79,90</td>
+                  <td class="ms-right" style="padding-right: 24px;"><span class="ms-badge ms-badge--pos">Match exato</span></td>
+                </tr>
+                <tr>
+                  <td class="ms-num" style="padding-left: 24px;">—</td>
+                  <td style="color: var(--ms-text-2);">Toalha mesa 8 lugares (sem SKU)</td>
+                  <td><div class="ms-app-cell"><span class="ms-app-ico ms-app-ico--ml" style="width:24px;height:24px;font-size:9px;">ML</span>Mercado Livre</div></td>
+                  <td class="ms-right ms-num">12</td>
+                  <td class="ms-right ms-num">R$ 64,00</td>
+                  <td class="ms-right" style="padding-right: 24px;"><span class="ms-badge ms-badge--warn">A revisar</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Confirmation -->
+          <div style="padding: 20px 24px; border-top: 1px solid var(--ms-line); background: var(--ms-surface-2); border-radius: 0 0 var(--ms-radius-lg) var(--ms-radius-lg);">
+            <div class="ms-alert ms-alert--warn" style="margin-bottom: 14px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+              <div>
+                <strong>Atenção:</strong> confirmar a importação substitui os dados de Vendidos e Estoque dos últimos 60 dias. Recomendamos exportar o estado atual antes de prosseguir.
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button class="ms-btn ms-btn--ghost">Cancelar</button>
+              <button class="ms-btn ms-btn--secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path></svg>
+                Re-analisar planilha
+              </button>
+              <button class="ms-btn ms-btn--primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"></polyline></svg>
+                Confirmar importação
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side: progress + tips -->
+        <div style="display: grid; gap: var(--ms-grid-gap); align-content: start;">
+          <div class="ms-card">
+            <div class="ms-caps">Etapas</div>
+            <div class="step-list" style="margin-top: 16px;">
+              <div class="step is-done">
+                <div class="num">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"></polyline></svg>
+                </div>
+                <div>
+                  <div class="title">Upload do arquivo</div>
+                  <div class="desc">XLSX recebido e validado.</div>
+                </div>
+              </div>
+              <div class="step is-done">
+                <div class="num">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"></polyline></svg>
+                </div>
+                <div>
+                  <div class="title">Detecção de abas</div>
+                  <div class="desc">4 abas reconhecidas e mapeadas.</div>
+                </div>
+              </div>
+              <div class="step is-active">
+                <div class="num">3</div>
+                <div>
+                  <div class="title">Pré-visualização</div>
+                  <div class="desc">Revise o mapeamento antes de confirmar.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="num">4</div>
+                <div>
+                  <div class="title">Confirmar importação</div>
+                  <div class="desc">Os dados serão gravados no workspace.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="num">5</div>
+                <div>
+                  <div class="title">Recálculo de score</div>
+                  <div class="desc">Roda em background — leva ~2 min.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ms-card">
+            <div class="ms-caps">Boas práticas</div>
+            <ul style="margin: 12px 0 0; padding-left: 18px; color: var(--ms-text); font-size: var(--ms-fs-13); line-height: 1.7;">
+              <li>Sempre exporte o XLSX direto do painel do marketplace.</li>
+              <li>Mantenha a aba <strong>SKUs</strong> como dicionário canônico.</li>
+              <li>Use SKU pai/filho quando houver variações (cor, tamanho).</li>
+              <li>Itens sem SKU vão para <em>A revisar</em> antes de entrar na base.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estados visuais -->
+      <div style="margin-top: 56px;">
+        <div class="ms-caps">Estados desta tela</div>
+        <h2 class="ms-h3" style="margin: 6px 0 18px;">Variações que o componente assume durante o fluxo</h2>
+        <div class="state-grid">
+          <!-- Empty -->
+          <div class="state-card">
+            <div class="state-head">
+              <span class="dot" style="background: var(--ms-text-3);"></span>
+              <span class="label">01 · idle / aguardando arquivo</span>
+            </div>
+            <div class="state-body">
+              <div class="ms-dropzone">
+                <div class="ms-dropzone-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18V9M8 13l4-4 4 4"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg>
+                </div>
+                <div>
+                  <h3 class="ms-dropzone-title">Arraste seu XLSX aqui</h3>
+                  <p class="ms-dropzone-desc">ou clique para selecionar · máx. 25 MB</p>
+                </div>
+                <button class="ms-btn ms-btn--secondary">Selecionar arquivo</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analyzing -->
+          <div class="state-card">
+            <div class="state-head">
+              <span class="dot" style="background: var(--ms-brand-600);"></span>
+              <span class="label">02 · analisando planilha</span>
+            </div>
+            <div class="state-body">
+              <div class="file-row">
+                <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2Z"></path><path d="M7 13h10M7 17h7"></path></svg></div>
+                <div class="info">
+                  <div class="name">vendidos_estoque_outubro_2026.xlsx</div>
+                  <div class="meta">Analisando estrutura · 42% concluído</div>
+                </div>
+                <span class="ms-badge ms-badge--info ms-badge--dot">Em análise</span>
+              </div>
+              <div class="ms-progress" style="margin-top: 16px;"><div class="ms-progress-fill" style="width: 42%;"></div></div>
+              <div style="display:grid; gap:8px; margin-top: 16px;">
+                <div class="ms-skeleton" style="height: 14px; width: 80%;"></div>
+                <div class="ms-skeleton" style="height: 14px; width: 60%;"></div>
+                <div class="ms-skeleton" style="height: 14px; width: 70%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Success -->
+          <div class="state-card">
+            <div class="state-head">
+              <span class="dot" style="background: var(--ms-positive-fg);"></span>
+              <span class="label">03 · importação concluída</span>
+            </div>
+            <div class="state-body">
+              <div class="ms-empty" style="padding: 24px 0;">
+                <div class="ms-empty-ico" style="background: var(--ms-positive-bg); color: var(--ms-positive-fg);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"></polyline></svg>
+                </div>
+                <h3 class="ms-empty-title">3.842 produtos importados</h3>
+                <p class="ms-empty-desc">Recálculo de score iniciado em background. Você será notificado quando os dados estiverem prontos.</p>
+                <div style="display:flex; gap: 10px; margin-top: 4px;">
+                  <button class="ms-btn ms-btn--secondary">Importar outra</button>
+                  <button class="ms-btn ms-btn--primary">Ver produtos</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error -->
+          <div class="state-card">
+            <div class="state-head">
+              <span class="dot" style="background: var(--ms-negative-fg);"></span>
+              <span class="label">04 · erro / arquivo inválido</span>
+            </div>
+            <div class="state-body">
+              <div class="ms-error">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                <div>
+                  <div class="ms-error-title">Não foi possível ler a planilha</div>
+                  <div class="ms-error-msg">A aba <strong>Vendidos</strong> precisa ter colunas obrigatórias: SKU, Produto, Marketplace, Quantidade, Preço. Encontramos apenas 3 das 5 colunas.</div>
+                </div>
+              </div>
+              <ul style="margin: 14px 0 0; padding-left: 18px; color: var(--ms-text); font-size: var(--ms-fs-13); line-height: 1.7;">
+                <li>Verifique se a primeira linha contém os cabeçalhos.</li>
+                <li>Confira o formato esperado em <strong>Ver formato esperado</strong>.</li>
+                <li>Salve o arquivo como <strong>.xlsx</strong> (não .xls).</li>
+              </ul>
+              <button class="ms-btn ms-btn--secondary" style="margin-top: 16px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v8M12 16h.01"></path></svg>
+                Tentar novamente
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

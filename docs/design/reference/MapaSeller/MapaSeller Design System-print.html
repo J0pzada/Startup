@@ -1,0 +1,1148 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280" />
+<title>MapaSeller — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* — Brand — */
+    --brand-50:  #EEEEFE;
+    --brand-200: #C7BAFD;
+    --brand-400: #A78BFA;
+    --brand-500: #6E6EF5;
+    --brand-600: #5B5BF0;
+    --brand-700: #4747D9;
+    --brand-900: #2E2D8F;
+
+    /* — Chart palette (sampled from the bar chart) — */
+    --chart-indigo-900: #2E2D8F;
+    --chart-indigo-700: #4747D9;
+    --chart-violet-500: #A78BFA;
+    --chart-violet-300: #C7BAFD;
+    --chart-blue-500:   #3B82F6;
+    --chart-teal-500:   #14B8A6;
+    --chart-mint-300:   #6EE7CF;
+    --chart-mint-100:   #C7F4E7;
+    --chart-track:      #ECECFB;
+
+    /* — Neutrals — */
+    --ink:        #0F1115;
+    --text:       #2C3243;
+    --text-2:     #6B7280;
+    --text-3:     #9CA3AF;
+    --line:       #ECEEF2;
+    --line-2:     #E4E7EC;
+    --surface:    #FFFFFF;
+    --surface-2:  #F7F8FA;
+    --app-bg:     #F2F3F5;
+
+    /* — Semantic — */
+    --pos-bg:   #D5F8E9;
+    --pos-fg:   #0F8A5C;
+    --neg-bg:   #FEE0E0;
+    --neg-fg:   #D33F3F;
+
+    /* — Radius — */
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-xl: 20px;
+    --r-pill: 999px;
+
+    /* — Shadow — */
+    --shadow-card: 0 1px 0 rgba(15,17,21,.02), 0 1px 2px rgba(15,17,21,.04);
+    --shadow-pop:  0 12px 32px -8px rgba(46,45,143,.18), 0 2px 8px rgba(15,17,21,.05);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--app-bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11","ss01";
+  }
+
+  .page { max-width: 1240px; margin: 0 auto; padding: 64px 56px 120px; }
+
+  /* — Page header — */
+  .doc-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding-bottom: 32px; border-bottom: 1px solid var(--line); margin-bottom: 56px;
+  }
+  .doc-eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .14em;
+    color: var(--text-2); text-transform: uppercase; margin: 0 0 12px;
+  }
+  .doc-title {
+    font-size: 56px; line-height: 1; letter-spacing: -0.03em;
+    font-weight: 700; margin: 0; color: var(--ink);
+  }
+  .doc-title em { font-style: normal; color: var(--brand-600); }
+  .doc-sub {
+    font-size: 16px; color: var(--text-2); margin: 16px 0 0;
+    max-width: 540px; line-height: 1.5;
+  }
+  .doc-stamp {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 14px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-pill); font-size: 12px; color: var(--text-2); font-weight: 500;
+  }
+  .doc-stamp .dot { width: 8px; height: 8px; background: var(--chart-teal-500); border-radius: 50%; }
+
+  /* — Section — */
+  .section { margin-bottom: 88px; }
+  .section-head { margin-bottom: 28px; display: flex; align-items: baseline; gap: 16px; }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--brand-600); letter-spacing: .05em;
+  }
+  .section-title {
+    font-size: 28px; font-weight: 600; letter-spacing: -0.02em;
+    color: var(--ink); margin: 0;
+  }
+  .section-desc {
+    font-size: 14px; color: var(--text-2); margin: 8px 0 28px;
+    max-width: 720px; line-height: 1.6;
+  }
+
+  .grid { display: grid; gap: 20px; }
+  .g-2 { grid-template-columns: repeat(2, 1fr); }
+  .g-3 { grid-template-columns: repeat(3, 1fr); }
+  .g-4 { grid-template-columns: repeat(4, 1fr); }
+  .g-5 { grid-template-columns: repeat(5, 1fr); }
+  .g-6 { grid-template-columns: repeat(6, 1fr); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-lg); padding: 24px; box-shadow: var(--shadow-card);
+  }
+
+  /* ============================= */
+  /*  1 — Brand                    */
+  /* ============================= */
+  .brand-row { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; }
+  .brand-hero {
+    background: var(--ink); color: #fff; border-radius: var(--r-lg);
+    padding: 48px; position: relative; overflow: hidden;
+  }
+  .brand-hero .glyph { display: inline-flex; align-items: center; gap: 14px; color: #fff; }
+  .brand-hero .glyph svg { width: 44px; height: 44px; }
+  .brand-hero .glyph .name {
+    font-size: 36px; font-weight: 700; letter-spacing: -0.02em;
+  }
+  .brand-hero .tagline {
+    margin-top: 36px; font-size: 14px; color: rgba(255,255,255,.55);
+    max-width: 280px; line-height: 1.5;
+  }
+  .brand-hero .corner {
+    position: absolute; right: -40px; bottom: -40px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle at 30% 30%, var(--brand-600), transparent 60%);
+    opacity: .55; border-radius: 50%;
+  }
+  .logo-variants { display: grid; grid-template-rows: repeat(3, 1fr); gap: 12px; }
+  .lv {
+    border: 1px solid var(--line); border-radius: var(--r-md); padding: 20px;
+    display: flex; align-items: center; gap: 16px; background: var(--surface);
+  }
+  .lv.dark { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .lv.tinted { background: var(--brand-50); border-color: var(--brand-50); }
+  .lv-label {
+    margin-left: auto; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text-2);
+  }
+  .lv.dark .lv-label { color: rgba(255,255,255,.5); }
+  .lv .logo-mark {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.01em;
+  }
+  .lv .logo-mark svg { width: 24px; height: 24px; }
+
+  /* ============================= */
+  /*  2 — Colors                   */
+  /* ============================= */
+  .swatch {
+    border-radius: var(--r-md); border: 1px solid var(--line);
+    overflow: hidden; background: var(--surface);
+  }
+  .swatch .chip {
+    height: 92px; display: flex; align-items: flex-end; padding: 12px;
+    color: rgba(255,255,255,.92);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  }
+  .swatch .meta {
+    padding: 12px 14px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .swatch .name { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .swatch .hex { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-2); }
+
+  .ramp {
+    display: grid; gap: 0; border-radius: var(--r-md);
+    overflow: hidden; border: 1px solid var(--line);
+  }
+  .ramp .step {
+    height: 52px; display: flex; align-items: center; padding: 0 16px;
+    justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  }
+  .ramp .step .lab { font-weight: 600; }
+
+  /* ============================= */
+  /*  3 — Typography               */
+  /* ============================= */
+  .type-stack { display: grid; gap: 0; }
+  .type-row {
+    display: grid; grid-template-columns: 140px 1fr 240px;
+    align-items: baseline; padding: 22px 0; border-bottom: 1px dashed var(--line);
+  }
+  .type-row:last-child { border-bottom: 0; }
+  .type-label {
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text-2); font-weight: 600;
+  }
+  .type-spec {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--text-2); text-align: right;
+  }
+  .t-display { font-size: 56px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .t-h1 { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+  .t-h2 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+  .t-kpi { font-size: 34px; font-weight: 500; letter-spacing: -0.02em; }
+  .t-h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  .t-body { font-size: 15px; line-height: 1.55; color: var(--text); }
+  .t-small { font-size: 13px; color: var(--text-2); }
+  .t-caps { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--text-2); }
+  .t-mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); }
+
+  /* ============================= */
+  /*  4 — Geometry                 */
+  /* ============================= */
+  .radius-row, .spacing-row, .shadow-row { display: grid; gap: 20px; }
+  .radius-row { grid-template-columns: repeat(5, 1fr); }
+  .shape {
+    border: 1px solid var(--brand-50); background: var(--brand-50);
+    height: 90px; display: flex; align-items: center; justify-content: center;
+    color: var(--brand-700);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  }
+  .shape.s-sm  { border-radius: var(--r-sm); }
+  .shape.s-md  { border-radius: var(--r-md); }
+  .shape.s-lg  { border-radius: var(--r-lg); }
+  .shape.s-xl  { border-radius: var(--r-xl); }
+  .shape.s-pill{ border-radius: var(--r-pill); }
+  .geo-cap {
+    text-align: center; font-size: 12px; color: var(--text-2);
+    margin-top: 10px; font-family: 'JetBrains Mono', monospace;
+  }
+  .spacing-row { grid-template-columns: repeat(6, 1fr); align-items: end; }
+  .sp-box {
+    background: var(--brand-50); border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-700);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  }
+
+  .shadow-row { grid-template-columns: repeat(3, 1fr); }
+  .sh-card {
+    background: var(--surface); height: 120px; border-radius: var(--r-lg);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-2); font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  }
+  .sh-card.s1 { box-shadow: var(--shadow-card); border: 1px solid var(--line); }
+  .sh-card.s2 { box-shadow: var(--shadow-pop); }
+  .sh-card.s3 { box-shadow: 0 24px 48px -12px rgba(46,45,143,.28); }
+
+  /* ============================= */
+  /*  5 — Components               */
+  /* ============================= */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    padding: 10px 16px; border-radius: 10px; border: 1px solid transparent;
+    cursor: pointer; line-height: 1;
+    transition: background .15s ease, box-shadow .15s ease;
+  }
+  .btn svg { width: 16px; height: 16px; }
+  .btn-primary {
+    background: var(--brand-600); color: #fff;
+    box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 1px 2px rgba(46,45,143,.4);
+  }
+  .btn-primary:hover { background: var(--brand-700); }
+  .btn-secondary { background: var(--surface); border-color: var(--line-2); color: var(--text); }
+  .btn-secondary:hover { background: var(--surface-2); }
+  .btn-ghost { background: transparent; color: var(--text); }
+  .btn-ghost:hover { background: var(--surface-2); }
+  .btn-danger { background: var(--neg-bg); color: var(--neg-fg); }
+  .btn-icon {
+    width: 36px; height: 36px; padding: 0; justify-content: center;
+    background: var(--surface); border-color: var(--line-2); color: var(--text);
+  }
+
+  .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 8px; font-size: 12px; font-weight: 600;
+    border-radius: 6px; line-height: 1;
+  }
+  .badge svg { width: 12px; height: 12px; }
+  .badge-pos { background: var(--pos-bg); color: var(--pos-fg); }
+  .badge-neg { background: var(--neg-bg); color: var(--neg-fg); }
+  .badge-neutral { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--line); }
+  .badge-brand { background: var(--brand-50); color: var(--brand-700); }
+  .badge-beta {
+    background: #EEF0F4; color: var(--text-2);
+    padding: 3px 7px; font-size: 10px; letter-spacing: .04em;
+    border-radius: 6px; text-transform: uppercase;
+  }
+
+  .kpi {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-lg); padding: 20px 22px;
+  }
+  .kpi-head {
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--text-2); font-size: 14px; font-weight: 500; margin-bottom: 14px;
+  }
+  .kpi-head .left { display: flex; align-items: center; gap: 10px; }
+  .kpi-head .ico {
+    width: 22px; height: 22px; display: inline-flex;
+    align-items: center; justify-content: center; color: var(--text-2);
+  }
+  .kpi-body { display: flex; align-items: baseline; gap: 12px; }
+  .kpi-val { font-size: 34px; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); }
+
+  .nav-mock {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-lg); padding: 16px; display: grid; gap: 4px;
+  }
+  .nav-section {
+    font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--text-3); padding: 8px 12px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+  .nav-item svg { width: 16px; height: 16px; color: var(--text-2); }
+  .nav-item:hover { background: var(--surface-2); }
+  .nav-item.active { background: var(--ink); color: #fff; }
+  .nav-item.active svg { color: #fff; }
+  .nav-item .count {
+    margin-left: auto; background: var(--surface-2); color: var(--text-2);
+    border-radius: 6px; font-size: 11px; font-weight: 600; padding: 2px 7px;
+  }
+  .nav-item.active .count { background: rgba(255,255,255,.15); color: #fff; }
+
+  .search-mock {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 10px 14px;
+    color: var(--text-3); font-size: 14px;
+  }
+  .search-mock .kbd {
+    margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 6px; padding: 2px 6px; color: var(--text-2);
+  }
+
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #F4C6A5, #E89870);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 600; font-size: 14px;
+  }
+  .avatar.lg { width: 48px; height: 48px; font-size: 16px; }
+
+  .progress {
+    height: 6px; width: 100%; background: var(--surface-2);
+    border-radius: var(--r-pill); overflow: hidden;
+  }
+  .progress .fill { height: 100%; background: var(--brand-600); border-radius: var(--r-pill); }
+
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.tbl thead th {
+    text-align: left; font-size: 11px; font-weight: 600;
+    letter-spacing: .12em; color: var(--text-3); text-transform: uppercase;
+    padding: 12px 8px; border-bottom: 1px solid var(--line);
+  }
+  table.tbl tbody td {
+    padding: 14px 8px; border-bottom: 1px solid var(--line); color: var(--text);
+  }
+  table.tbl tbody tr:last-child td { border-bottom: 0; }
+  .app-cell { display: flex; align-items: center; gap: 12px; font-weight: 500; color: var(--ink); }
+  .app-ico {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff; font-size: 13px;
+  }
+  .app-ico.ml { background: #FFE600; color: #2D3277; }
+  .app-ico.shopee { background: #EE4D2D; }
+  .app-ico.amazon { background: #232F3E; }
+  .app-ico.magalu { background: #0086FF; }
+  .check {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--line-2); border-radius: 5px; display: inline-block;
+  }
+
+  /* Chart token bars */
+  .barchart {
+    display: flex; align-items: flex-end; gap: 18px;
+    height: 200px; padding: 16px 0 0;
+  }
+  .barchart .col {
+    flex: 1; display: flex; flex-direction: column; gap: 4px;
+    align-items: stretch; justify-content: flex-end;
+  }
+  .bar { border-radius: 5px; }
+  .legend {
+    display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+    font-size: 12px; color: var(--text-2); margin-top: 16px;
+  }
+  .legend .key {
+    width: 10px; height: 10px; border-radius: 3px;
+    display: inline-block; margin-right: 6px;
+  }
+
+  /* Icon grid */
+  .icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; }
+  .ic-cell {
+    aspect-ratio: 1 / 1; border: 1px solid var(--line); border-radius: var(--r-md);
+    background: var(--surface);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: var(--text);
+  }
+  .ic-cell svg { width: 22px; height: 22px; }
+  .ic-cell .lab {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-3);
+  }
+
+  .donut { width: 160px; height: 160px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .uneven { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+
+  .principle h4 { margin: 0 0 8px; font-size: 18px; letter-spacing: -0.01em; color: var(--ink); }
+  .principle p { margin: 0; color: var(--text-2); font-size: 14px; line-height: 1.55; }
+  .principle .num {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--brand-600); margin-bottom: 12px; display: inline-block;
+  }
+
+  /* ============================= */
+  /*  PRINT                        */
+  /* ============================= */
+  @media print {
+    @page { size: A4 portrait; margin: 14mm 12mm; }
+    html, body {
+      background: #fff !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .page { padding: 0 !important; max-width: 100% !important; }
+
+    /* Color fidelity for all decorated blocks */
+    .card, .kpi, .swatch, .swatch .chip, .swatch .meta,
+    .ramp, .ramp .step, .shape, .sp-box,
+    .brand-hero, .brand-hero .corner,
+    .lv, .lv.dark, .lv.tinted,
+    .nav-mock, .nav-item, .nav-item.active,
+    .search-mock, .btn, .btn-primary, .btn-secondary, .btn-ghost, .btn-danger, .btn-icon,
+    .badge, .badge-pos, .badge-neg, .badge-brand, .badge-neutral, .badge-beta,
+    .avatar, .progress, .progress .fill,
+    .bar, .ic-cell, .sh-card, .doc-stamp, table.tbl thead th,
+    .app-ico, .app-ico.ml, .app-ico.shopee, .app-ico.amazon, .app-ico.magalu {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    /* No animations or hovers */
+    *, *::before, *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+
+    /* Page breaks per section */
+    .doc-header { break-after: page; }
+    .section { break-before: page; break-inside: avoid; margin-bottom: 0 !important; }
+    .section-head { break-after: avoid; }
+
+    /* Keep critical groups together */
+    .card, .kpi, .swatch, .lv, .brand-hero, .nav-mock,
+    .principle, .ic-cell, .shape, .sh-card, .barchart, .donut,
+    .type-row {
+      break-inside: avoid;
+    }
+    .brand-row, .two-col, .uneven, .grid, .radius-row, .spacing-row,
+    .shadow-row, .icon-grid, .ramp {
+      break-inside: avoid;
+    }
+
+    /* Slightly tighten for print */
+    .doc-title { font-size: 44px; }
+    .doc-sub { font-size: 14px; }
+    .section-title { font-size: 24px; }
+    .barchart { height: 160px; }
+    .donut { width: 130px; height: 130px; }
+    .icon-grid { grid-template-columns: repeat(8, 1fr); gap: 8px; }
+    .ic-cell { aspect-ratio: 1 / 1; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============ HEADER ============ -->
+  <header class="doc-header">
+    <div>
+      <p class="doc-eyebrow">Design System · v1.0 · ERP &amp; Market Intelligence</p>
+      <h1 class="doc-title">MapaSeller <em>UI Kit</em></h1>
+      <p class="doc-sub">Sistema de design do MapaSeller — ERP e análise de mercado para sellers em marketplaces. Foco em densidade de dados, hierarquia clara entre operação (pedidos, estoque, fiscal) e inteligência (Buy Box, preço, concorrência).</p>
+    </div>
+    <div class="doc-stamp"><span class="dot"></span> ERP · Marketplace Analytics</div>
+  </header>
+
+  <!-- ============ 1 BRAND ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-num">01 /</span>
+      <h2 class="section-title">Brand</h2>
+    </div>
+    <p class="section-desc">O símbolo combina um <strong>pin de mapa</strong> com uma <strong>seta de crescimento</strong> — referência direta ao papel do produto: mapear o mercado e mover o seller na direção certa. Wordmark em Inter Bold com tracking apertado.</p>
+
+    <div class="brand-row">
+      <div class="brand-hero">
+        <div class="glyph">
+          <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#A5A5FA" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 9h3v3" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span class="name">MapaSeller</span>
+        </div>
+        <p class="tagline">ERP + inteligência de mercado para sellers em marketplaces. Veja onde está e para onde crescer.</p>
+        <div class="corner"></div>
+      </div>
+      <div class="logo-variants">
+        <div class="lv">
+          <div class="logo-mark">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#5B5BF0" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            MapaSeller
+          </div>
+          <span class="lv-label">light / primary</span>
+        </div>
+        <div class="lv dark">
+          <div class="logo-mark">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#A5A5FA" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#A5A5FA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            MapaSeller
+          </div>
+          <span class="lv-label">dark / inverted</span>
+        </div>
+        <div class="lv tinted">
+          <div class="logo-mark" style="color: var(--brand-700);">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#4747D9" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#4747D9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            MapaSeller
+          </div>
+          <span class="lv-label">tinted bg</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 COLOR ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-num">02 /</span>
+      <h2 class="section-title">Color</h2>
+    </div>
+    <p class="section-desc">Indigo é a cor principal do produto — CTAs, links, estado ativo. Verde-menta marca deltas positivos (vendas em alta, Buy Box ganho); vermelho marca quedas e alertas fiscais. A interface, em sua maior parte, permanece neutra para deixar os números falarem.</p>
+
+    <h3 class="t-caps" style="margin: 0 0 12px;">Primary · Indigo</h3>
+    <div class="grid g-5">
+      <div class="swatch"><div class="chip" style="background:#EEEEFE;color:#4747D9">#EEEEFE</div><div class="meta"><span class="name">Brand 50</span><span class="hex">tint</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#C7BAFD;color:#2E2D8F">#C7BAFD</div><div class="meta"><span class="name">Brand 200</span><span class="hex">soft</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#A78BFA">#A78BFA</div><div class="meta"><span class="name">Brand 400</span><span class="hex">violet</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#5B5BF0">#5B5BF0</div><div class="meta"><span class="name">Brand 600</span><span class="hex">primary</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#2E2D8F">#2E2D8F</div><div class="meta"><span class="name">Brand 900</span><span class="hex">deep</span></div></div>
+    </div>
+
+    <h3 class="t-caps" style="margin: 36px 0 12px;">Accent · Teal &amp; Chart Palette</h3>
+    <div class="grid g-5">
+      <div class="swatch"><div class="chip" style="background:#C7F4E7;color:#0F8A5C">#C7F4E7</div><div class="meta"><span class="name">Mint 100</span><span class="hex">chart</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#6EE7CF;color:#0F8A5C">#6EE7CF</div><div class="meta"><span class="name">Mint 300</span><span class="hex">chart</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#14B8A6">#14B8A6</div><div class="meta"><span class="name">Teal 500</span><span class="hex">accent</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#3B82F6">#3B82F6</div><div class="meta"><span class="name">Blue 500</span><span class="hex">chart</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#4747D9">#4747D9</div><div class="meta"><span class="name">Indigo 700</span><span class="hex">chart</span></div></div>
+    </div>
+
+    <div class="two-col" style="margin-top: 36px;">
+      <div>
+        <h3 class="t-caps" style="margin: 0 0 12px;">Semantic</h3>
+        <div class="grid g-2">
+          <div class="swatch"><div class="chip" style="background:#D5F8E9;color:#0F8A5C">#D5F8E9</div><div class="meta"><span class="name">Positive · bg</span><span class="hex">+ delta</span></div></div>
+          <div class="swatch"><div class="chip" style="background:#0F8A5C">#0F8A5C</div><div class="meta"><span class="name">Positive · fg</span><span class="hex">text/icon</span></div></div>
+          <div class="swatch"><div class="chip" style="background:#FEE0E0;color:#D33F3F">#FEE0E0</div><div class="meta"><span class="name">Negative · bg</span><span class="hex">− delta</span></div></div>
+          <div class="swatch"><div class="chip" style="background:#D33F3F">#D33F3F</div><div class="meta"><span class="name">Negative · fg</span><span class="hex">text/icon</span></div></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="t-caps" style="margin: 0 0 12px;">Neutrals</h3>
+        <div class="ramp">
+          <div class="step" style="background:#FFFFFF;color:#6B7280"><span class="lab" style="color:#0F1115">Surface</span><span>#FFFFFF</span></div>
+          <div class="step" style="background:#F7F8FA;color:#6B7280"><span class="lab" style="color:#0F1115">Surface-2</span><span>#F7F8FA</span></div>
+          <div class="step" style="background:#F2F3F5;color:#6B7280"><span class="lab" style="color:#0F1115">App-bg</span><span>#F2F3F5</span></div>
+          <div class="step" style="background:#ECEEF2;color:#6B7280"><span class="lab" style="color:#0F1115">Line</span><span>#ECEEF2</span></div>
+          <div class="step" style="background:#9CA3AF;color:#fff"><span class="lab">Text-3</span><span>#9CA3AF</span></div>
+          <div class="step" style="background:#6B7280;color:#fff"><span class="lab">Text-2</span><span>#6B7280</span></div>
+          <div class="step" style="background:#2C3243;color:#fff"><span class="lab">Text</span><span>#2C3243</span></div>
+          <div class="step" style="background:#0F1115;color:#fff"><span class="lab">Ink</span><span>#0F1115</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 TYPOGRAPHY ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-num">03 /</span>
+      <h2 class="section-title">Typography</h2>
+    </div>
+    <p class="section-desc">Família única: <strong>Inter</strong>. Hierarquia construída por peso + tamanho + tracking negativo nos títulos. Métricas exibidas em peso 500 com tracking levemente apertado.</p>
+
+    <div class="card" style="padding: 4px 28px;">
+      <div class="type-stack">
+        <div class="type-row">
+          <span class="type-label">Display</span>
+          <span class="t-display">Aa</span>
+          <span class="type-spec">Inter 700 · 56 / 100% · -0.03em</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">H1</span>
+          <span class="t-h1">Painel do Seller</span>
+          <span class="type-spec">Inter 600 · 36 / 110% · -0.02em</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">H2 / Section</span>
+          <span class="t-h2">Análise de Buy Box</span>
+          <span class="type-spec">Inter 600 · 28 / 120% · -0.02em</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">KPI Value</span>
+          <span class="t-kpi">R$ 9.257,51</span>
+          <span class="type-spec">Inter 500 · 34 / 100% · -0.02em</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">H3 / Card</span>
+          <span class="t-h3">Pedidos hoje</span>
+          <span class="type-spec">Inter 600 · 20 / 130% · -0.01em</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Body</span>
+          <span class="t-body">Compare seu preço com a concorrência em tempo real e receba sugestões de reprecificação para manter o Buy Box.</span>
+          <span class="type-spec">Inter 400 · 15 / 155%</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Small / Meta</span>
+          <span class="t-small">+ R$ 143,50 vs. mês anterior</span>
+          <span class="type-spec">Inter 400 · 13 / 140%</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Caps / Label</span>
+          <span class="t-caps">Operação · Inteligência · Suporte</span>
+          <span class="type-spec">Inter 600 · 11 · tracking .14em</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Mono / Code</span>
+          <span class="t-mono">SKU-2381 · R$ 4.005,65 · +15,8% ↗</span>
+          <span class="type-spec">JetBrains Mono 400 · 13</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 GEOMETRY ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-num">04 /</span>
+      <h2 class="section-title">Geometry — radius, spacing, shadow</h2>
+    </div>
+    <p class="section-desc">Raios generosos em cartões (16px), médios em controles (10–12px) e pílulas completas em badges e avatars. Sombras são quase imperceptíveis — a separação é feita por borda.</p>
+
+    <h3 class="t-caps" style="margin: 0 0 14px;">Radius</h3>
+    <div class="radius-row">
+      <div><div class="shape s-sm">8</div><div class="geo-cap">--r-sm · controls inner</div></div>
+      <div><div class="shape s-md">12</div><div class="geo-cap">--r-md · inputs</div></div>
+      <div><div class="shape s-lg">16</div><div class="geo-cap">--r-lg · cards</div></div>
+      <div><div class="shape s-xl">20</div><div class="geo-cap">--r-xl · panels</div></div>
+      <div><div class="shape s-pill">∞</div><div class="geo-cap">--r-pill · badge / avatar</div></div>
+    </div>
+
+    <h3 class="t-caps" style="margin: 36px 0 14px;">Spacing — 4pt scale</h3>
+    <div class="spacing-row">
+      <div><div class="sp-box" style="height: 4px;"></div><div class="geo-cap">4 · space-1</div></div>
+      <div><div class="sp-box" style="height: 8px;"></div><div class="geo-cap">8 · space-2</div></div>
+      <div><div class="sp-box" style="height: 12px;"></div><div class="geo-cap">12 · space-3</div></div>
+      <div><div class="sp-box" style="height: 16px;"></div><div class="geo-cap">16 · space-4</div></div>
+      <div><div class="sp-box" style="height: 24px;">24</div><div class="geo-cap">24 · space-6</div></div>
+      <div><div class="sp-box" style="height: 40px;">40</div><div class="geo-cap">40 · space-10</div></div>
+    </div>
+
+    <h3 class="t-caps" style="margin: 36px 0 14px;">Elevation</h3>
+    <div class="shadow-row">
+      <div><div class="sh-card s1">shadow-card</div><div class="geo-cap">0 1px 2px rgba(15,17,21,.04)</div></div>
+      <div><div class="sh-card s2">shadow-pop</div><div class="geo-cap">0 12px 32px -8px rgba(46,45,143,.18)</div></div>
+      <div><div class="sh-card s3">shadow-overlay</div><div class="geo-cap">0 24px 48px -12px rgba(46,45,143,.28)</div></div>
+    </div>
+  </section>
+
+  <!-- ============ 5 ICONOGRAPHY ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-num">05 /</span>
+      <h2 class="section-title">Iconography</h2>
+    </div>
+    <p class="section-desc">Linhas de 1.75px, cantos arredondados, tamanho base 20px em UI. Estilo consistente com Lucide/Phosphor — outline, geométrico, neutro.</p>
+
+    <div class="icon-grid">
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+        <span class="lab">painel</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18"></path></svg>
+        <span class="lab">financeiro</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"></circle><path d="M3 20c.5-3.5 3-5.5 6-5.5s5.5 2 6 5.5"></path><circle cx="17" cy="7" r="2.5"></circle><path d="M16 13.5c2.5.5 4.5 2 5 6.5"></path></svg>
+        <span class="lab">clientes</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-12.5 6.6L4 20l1.4-4.5A8 8 0 1 1 21 12Z"></path></svg>
+        <span class="lab">mensagens</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1.5 12.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5L6 7Z"></path><path d="M9 7V5a3 3 0 0 1 6 0v2"></path></svg>
+        <span class="lab">produto</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"></path><path d="M15 3v4h4"></path><path d="M9 13h6M9 17h6"></path></svg>
+        <span class="lab">NF-e</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path></svg>
+        <span class="lab">análise</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"></path><circle cx="12" cy="12" r="3.5"></circle></svg>
+        <span class="lab">automação</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1A2 2 0 1 1 4.4 17l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 4.4l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5h.1a1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 19.6 7l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"></path></svg>
+        <span class="lab">ajustes</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3Z"></path></svg>
+        <span class="lab">segurança</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 1-1 1.7"></path><circle cx="12" cy="17" r=".75" fill="currentColor"></circle></svg>
+        <span class="lab">ajuda</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 9v6l-4-2v-4L3 5Z"></path></svg>
+        <span class="lab">filtrar</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path><path d="M5 21h14"></path></svg>
+        <span class="lab">exportar</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        <span class="lab">buscar</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+        <span class="lab">alertas</span>
+      </div>
+      <div class="ic-cell">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="5"></rect><path d="M5 13v8h14v-8M12 8v13"></path><path d="M12 8s-2-5-5-3 1 3 5 3Zm0 0s2-5 5-3-1 3-5 3Z"></path></svg>
+        <span class="lab">novidades</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6 COMPONENTS ============ -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-num">06 /</span>
+      <h2 class="section-title">Components</h2>
+    </div>
+    <p class="section-desc">Os blocos centrais do dashboard: KPI cards, badges com delta, navegação lateral, controles de busca, tabela de integrações e barras de gráficos. Tudo construído sobre os tokens acima.</p>
+
+    <h3 class="t-caps" style="margin: 0 0 14px;">Botões</h3>
+    <div class="card">
+      <div class="row" style="gap: 14px;">
+        <button class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Novo relatório
+        </button>
+        <button class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 9v6l-4-2v-4L3 5Z"></path></svg>
+          Filtrar
+        </button>
+        <button class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path></svg>
+          Exportar
+        </button>
+        <button class="btn btn-ghost">Cancelar</button>
+        <button class="btn btn-danger">Excluir</button>
+        <button class="btn btn-icon" aria-label="more">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.2"></circle><circle cx="12" cy="12" r="1.2"></circle><circle cx="19" cy="12" r="1.2"></circle></svg>
+        </button>
+      </div>
+    </div>
+
+    <h3 class="t-caps" style="margin: 36px 0 14px;">Badges &amp; chips de status</h3>
+    <div class="card">
+      <div class="row" style="gap: 12px;">
+        <span class="badge badge-pos">15,8% <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"></path></svg></span>
+        <span class="badge badge-neg">34,0% <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 9v8H9"></path></svg></span>
+        <span class="badge badge-brand">Pro</span>
+        <span class="badge badge-neutral">8</span>
+        <span class="badge-beta">Beta</span>
+        <span class="badge badge-neutral" style="padding: 6px 10px; gap: 6px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"></circle></svg>
+          Mensal
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"></path></svg>
+        </span>
+      </div>
+    </div>
+
+    <h3 class="t-caps" style="margin: 36px 0 14px;">KPI cards</h3>
+    <div class="grid g-3">
+      <div class="kpi">
+        <div class="kpi-head">
+          <div class="left">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1.5 12.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5L6 7Z"></path><path d="M9 7V5a3 3 0 0 1 6 0v2"></path></svg></span>
+            Pedidos (24h)
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-val">1.284</span>
+          <span class="badge badge-pos">15,8% ↗</span>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-head">
+          <div class="left">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path></svg></span>
+            GMV do mês
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-val">R$ 363,9k</span>
+          <span class="badge badge-neg">3,4% ↘</span>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-head">
+          <div class="left">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg></span>
+            Buy Box ganho
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+        </div>
+        <div class="kpi-body">
+          <span class="kpi-val">86,5%</span>
+          <span class="badge badge-pos">24,2% ↗</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="t-caps" style="margin: 36px 0 14px;">Navegação, busca &amp; usuário</h3>
+    <div class="uneven">
+      <div class="nav-mock">
+        <div class="nav-section">Operação</div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+          Painel
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1.5 12.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5L6 7Z"></path><path d="M9 7V5a3 3 0 0 1 6 0v2"></path></svg>
+          Pedidos
+          <span class="count">42</span>
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>
+          Estoque
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"></path><path d="M15 3v4h4"></path><path d="M9 13h6M9 17h6"></path></svg>
+          Fiscal
+        </div>
+        <div class="nav-section" style="margin-top: 12px;">Inteligência</div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path></svg>
+          Análise de mercado
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"></path><path d="M5 7l4 4-4 4M19 7l-4 4 4 4"></path></svg>
+          Concorrência
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 3v2M12 19v2M3 12h2M19 12h2"></path></svg>
+          Reprecificação
+          <span class="count" style="background: var(--brand-50); color: var(--brand-700);">BETA</span>
+        </div>
+      </div>
+
+      <div style="display: grid; gap: 16px; align-content: start;">
+        <div class="search-mock">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <span>Buscar SKU, pedido, anuncio…</span>
+          <span class="kbd">⌘ + K</span>
+        </div>
+
+        <div class="card" style="padding: 18px;">
+          <div class="row" style="gap: 14px;">
+            <div class="avatar lg">RM</div>
+            <div>
+              <div style="font-size: 15px; font-weight: 600; color: var(--ink);">Rafael Mendes</div>
+              <div style="font-size: 13px; color: var(--text-2);">Plano Crescimento</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding: 18px; background: linear-gradient(135deg, #F5F6FF, #ffffff);">
+          <div class="row" style="justify-content: space-between;">
+            <div>
+              <div style="font-size: 12px; color: var(--text-2); font-weight: 600;">Loja conectada</div>
+              <div style="font-size: 16px; font-weight: 600; color: var(--ink);">Casa &amp; Lar Brasil</div>
+            </div>
+            <div class="avatar lg" style="background: var(--chart-teal-500); border-radius: 12px;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="t-caps" style="margin: 36px 0 14px;">Tabela — desempenho por marketplace</h3>
+    <div class="card" style="padding: 8px 24px 16px;">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th style="width: 32px;"></th>
+            <th>Marketplace</th>
+            <th>Categoria</th>
+            <th style="width: 30%;">Share de GMV</th>
+            <th style="text-align: right;">Margem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="check"></span></td>
+            <td><div class="app-cell"><span class="app-ico ml">ML</span>Mercado Livre</div></td>
+            <td style="color: var(--text-2);">Casa &amp; Lar</td>
+            <td>
+              <div class="row" style="gap: 12px;">
+                <div class="progress" style="flex: 1;"><div class="fill" style="width: 62%;"></div></div>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text);">62%</span>
+              </div>
+            </td>
+            <td style="text-align: right; font-weight: 600;">R$ 18.420</td>
+          </tr>
+          <tr>
+            <td><span class="check"></span></td>
+            <td><div class="app-cell"><span class="app-ico shopee">SP</span>Shopee</div></td>
+            <td style="color: var(--text-2);">Utilidades</td>
+            <td>
+              <div class="row" style="gap: 12px;">
+                <div class="progress" style="flex: 1;"><div class="fill" style="width: 24%; background: var(--brand-700);"></div></div>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text);">24%</span>
+              </div>
+            </td>
+            <td style="text-align: right; font-weight: 600;">R$ 6.310</td>
+          </tr>
+          <tr>
+            <td><span class="check"></span></td>
+            <td><div class="app-cell"><span class="app-ico amazon">AZ</span>Amazon</div></td>
+            <td style="color: var(--text-2);">Cozinha</td>
+            <td>
+              <div class="row" style="gap: 12px;">
+                <div class="progress" style="flex: 1;"><div class="fill" style="width: 9%; background: var(--chart-violet-500);"></div></div>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text);">9%</span>
+              </div>
+            </td>
+            <td style="text-align: right; font-weight: 600;">R$ 2.840</td>
+          </tr>
+          <tr>
+            <td><span class="check"></span></td>
+            <td><div class="app-cell"><span class="app-ico magalu">MG</span>Magalu</div></td>
+            <td style="color: var(--text-2);">Decoração</td>
+            <td>
+              <div class="row" style="gap: 12px;">
+                <div class="progress" style="flex: 1;"><div class="fill" style="width: 5%; background: var(--chart-teal-500);"></div></div>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text);">5%</span>
+              </div>
+            </td>
+            <td style="text-align: right; font-weight: 600;">R$ 1.490</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="t-caps" style="margin: 36px 0 14px;">Gráficos &amp; visualizações</h3>
+    <div class="card">
+      <div class="row" style="justify-content: space-between; align-items: flex-start;">
+        <div>
+          <div class="t-caps" style="color: var(--text-2);">GMV por marketplace</div>
+          <div style="font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin-top: 4px;">R$ 9.257,51</div>
+          <div class="row" style="margin-top: 10px; gap: 8px;">
+            <span class="badge badge-pos">15,8% ↗</span>
+            <span style="font-size: 13px; color: var(--text-2);">+ R$ 143,50 vs. mês anterior</span>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 9v6l-4-2v-4L3 5Z"></path></svg>Filtrar
+          </button>
+          <button class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h13M3 12h9M3 18h5M16 9l4-4 4 4M20 5v14"></path></svg>Ordenar
+          </button>
+        </div>
+      </div>
+
+      <div class="barchart">
+        <div class="col">
+          <div class="bar" style="height: 22px; background: var(--chart-mint-300);"></div>
+          <div class="bar" style="height: 14px; background: var(--chart-mint-100);"></div>
+          <div class="bar" style="height: 18px; background: var(--chart-track);"></div>
+          <div class="bar" style="height: 36px; background: var(--chart-blue-500);"></div>
+          <div class="bar" style="height: 28px; background: var(--chart-violet-500);"></div>
+          <div class="bar" style="height: 40px; background: var(--chart-indigo-900);"></div>
+          <div style="text-align:center; font-size: 12px; color: var(--text-2); margin-top: 8px;">Oct</div>
+        </div>
+        <div class="col">
+          <div class="bar" style="height: 12px; background: var(--chart-track);"></div>
+          <div class="bar" style="height: 26px; background: var(--chart-teal-500);"></div>
+          <div class="bar" style="height: 16px; background: var(--chart-track);"></div>
+          <div class="bar" style="height: 14px; background: var(--chart-blue-500);"></div>
+          <div class="bar" style="height: 18px; background: var(--chart-violet-500);"></div>
+          <div class="bar" style="height: 22px; background: var(--chart-indigo-700);"></div>
+          <div style="text-align:center; font-size: 12px; color: var(--text-2); margin-top: 8px;">Nov</div>
+        </div>
+        <div class="col">
+          <div class="bar" style="height: 46px; background: var(--chart-mint-300);"></div>
+          <div class="bar" style="height: 24px; background: var(--chart-teal-500);"></div>
+          <div class="bar" style="height: 14px; background: var(--chart-track);"></div>
+          <div class="bar" style="height: 32px; background: var(--chart-blue-500);"></div>
+          <div class="bar" style="height: 26px; background: var(--chart-violet-500);"></div>
+          <div class="bar" style="height: 36px; background: var(--chart-indigo-900);"></div>
+          <div style="text-align:center; font-size: 12px; color: var(--text-2); margin-top: 8px;">Dec</div>
+        </div>
+      </div>
+      <div class="legend">
+        <span><span class="key" style="background: var(--chart-indigo-900);"></span>Mercado Livre</span>
+        <span><span class="key" style="background: var(--chart-violet-500);"></span>Shopee</span>
+        <span><span class="key" style="background: var(--chart-blue-500);"></span>Amazon</span>
+        <span><span class="key" style="background: var(--chart-teal-500);"></span>Magalu</span>
+        <span><span class="key" style="background: var(--chart-mint-300);"></span>Outros</span>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top: 20px;">
+      <div class="card">
+        <div class="t-caps" style="color: var(--text-2);">Origem das vendas</div>
+        <div class="row" style="gap: 28px; margin-top: 18px;">
+          <svg class="donut" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="15.9" fill="none" stroke="#F2F3F5" stroke-width="6"></circle>
+            <circle cx="21" cy="21" r="15.9" fill="none" stroke="#2E2D8F" stroke-width="6" stroke-dasharray="62 38" stroke-dashoffset="25"></circle>
+            <circle cx="21" cy="21" r="15.9" fill="none" stroke="#14B8A6" stroke-width="6" stroke-dasharray="24 76" stroke-dashoffset="-37"></circle>
+            <circle cx="21" cy="21" r="15.9" fill="none" stroke="#A78BFA" stroke-width="6" stroke-dasharray="14 86" stroke-dashoffset="-61"></circle>
+          </svg>
+          <div style="display: grid; gap: 16px;">
+            <div>
+              <div style="font-size: 12px; color: var(--text-2); border-left: 3px solid var(--chart-indigo-900); padding-left: 8px;">Mercado Livre</div>
+              <div style="font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin-top: 4px;">R$ 374,82k</div>
+            </div>
+            <div>
+              <div style="font-size: 12px; color: var(--text-2); border-left: 3px solid var(--chart-teal-500); padding-left: 8px;">Shopee</div>
+              <div style="font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin-top: 4px;">R$ 241,60k</div>
+            </div>
+            <div>
+              <div style="font-size: 12px; color: var(--text-2); border-left: 3px solid var(--chart-violet-500); padding-left: 8px;">Outros</div>
+              <div style="font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin-top: 4px;">R$ 213,42k</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="t-caps" style="color: var(--text-2);">Pedidos por dia da semana</div>
+        <div style="font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin-top: 4px;">24.473</div>
+        <div class="row" style="gap: 8px; margin-top: 10px;">
+          <span class="badge badge-pos">8,3% ↗</span>
+          <span style="font-size: 13px; color: var(--text-2);">+ 749 vs. semana anterior</span>
+        </div>
+        <div style="display:flex; align-items:flex-end; gap:14px; height:170px; margin-top:18px;">
+          <div style="flex:1; text-align:center;"><div style="background: var(--chart-track); height: 28px; border-radius: 5px;"></div><div style="font-size: 12px; color: var(--text-2); margin-top: 8px;">Dom</div></div>
+          <div style="flex:1; text-align:center;"><div style="background: var(--chart-track); height: 56px; border-radius: 5px;"></div><div style="font-size: 12px; color: var(--text-2); margin-top: 8px;">Seg</div></div>
+          <div style="flex:1; text-align:center;">
+            <div style="font-size: 12px; color: var(--ink); font-weight: 600; margin-bottom: 4px;">3.874</div>
+            <div style="background: linear-gradient(to top, var(--chart-indigo-900), var(--brand-500)); height: 120px; border-radius: 5px;"></div>
+            <div style="font-size: 12px; color: var(--ink); font-weight: 600; margin-top: 8px;">Ter</div>
+          </div>
+          <div style="flex:1; text-align:center;"><div style="background: var(--chart-track); height: 84px; border-radius: 5px;"></div><div style="font-size: 12px; color: var(--text-2); margin-top: 8px;">Qua</div></div>
+          <div style="flex:1; text-align:center;"><div style="background: var(--chart-track); height: 70px; border-radius: 5px;"></div><div style="font-size: 12px; color: var(--text-2); margin-top: 8px;">Qui</div></div>
+          <div style="flex:1; text-align:center;"><div style="background: var(--chart-track); height: 50px; border-radius: 5px;"></div><div style="font-size: 12px; color: var(--text-2); margin-top: 8px;">Sex</div></div>
+          <div style="flex:1; text-align:center;"><div style="background: var(--chart-track); height: 38px; border-radius: 5px;"></div><div style="font-size: 12px; color: var(--text-2); margin-top: 8px;">Sáb</div></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ 7 PRINCIPLES ============ -->
+  <section class="section" style="margin-bottom: 0;">
+    <div class="section-head">
+      <span class="section-num">07 /</span>
+      <h2 class="section-title">Principles</h2>
+    </div>
+    <div class="grid g-3">
+      <div class="card principle">
+        <span class="num">01 — Densidade com calma</span>
+        <h4>Muitos dados, pouca decoração</h4>
+        <p>ERP exige densidade — listas longas, tabelas, múltiplos KPIs por tela. Cor só entra quando carrega significado: ação primária, delta, alerta fiscal, segmento de gráfico.</p>
+      </div>
+      <div class="card principle">
+        <span class="num">02 — Marketplace neutro</span>
+        <h4>Sem favoritos visuais</h4>
+        <p>Mercado Livre, Shopee, Amazon e Magalu compartilham os mesmos slots e a mesma paleta de gráfico. Cores oficiais aparecem apenas em ícones de marca — nunca dominam o layout.</p>
+      </div>
+      <div class="card principle">
+        <span class="num">03 — Número é o protagonista</span>
+        <h4>Tipografia tabular</h4>
+        <p>Valores monetários em peso 500 com tracking apertado. JetBrains Mono em SKUs, códigos de pedido e ratios. O olho deve achar o número antes do rótulo.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+<script>
+  (async () => {
+    try {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+    } catch (e) {}
+    setTimeout(() => window.print(), 500);
+  })();
+</script>
+</body>
+</html>

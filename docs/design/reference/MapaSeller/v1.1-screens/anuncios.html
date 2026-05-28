@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>MapaSeller · Central de Anúncios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../mapaseller-tokens.css">
+<style>
+  .conn-bar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px;
+    background: var(--ms-surface);
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg);
+  }
+  .conn-bar .logo {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--ms-ml); color: var(--ms-ml-fg);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+
+  .actions-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-top: var(--ms-grid-gap); }
+  .action-card {
+    background: var(--ms-surface); border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-md); padding: 18px;
+    display: flex; flex-direction: column; gap: 10px;
+    cursor: pointer; transition: border-color var(--ms-dur-fast) var(--ms-ease), box-shadow var(--ms-dur-fast) var(--ms-ease);
+  }
+  .action-card:hover { border-color: var(--ms-brand-400); box-shadow: var(--ms-shadow-card-hi); }
+  .action-ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--ms-brand-50); color: var(--ms-brand-700);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .action-ico svg { width: 18px; height: 18px; }
+  .action-title { font-size: var(--ms-fs-14); font-weight: 600; color: var(--ms-ink); }
+  .action-desc { font-size: var(--ms-fs-12); color: var(--ms-text-2); line-height: 1.4; }
+
+  .editor-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--ms-grid-gap); margin-top: var(--ms-grid-gap); }
+
+  .editor-pane {
+    background: var(--ms-surface); border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg); padding: 0; overflow: hidden;
+  }
+  .editor-head {
+    padding: 18px 24px; border-bottom: 1px solid var(--ms-line);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .editor-body { padding: 24px; display: grid; gap: 18px; }
+  .ed-row { display: grid; gap: 8px; }
+  .ed-row.cols { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .ed-row.cols .ed-row { display: grid; gap: 8px; }
+  .textarea {
+    display: block; width: 100%;
+    font-family: inherit; font-size: var(--ms-fs-14);
+    padding: 12px 14px; min-height: 100px;
+    background: var(--ms-surface); border: 1px solid var(--ms-line-2);
+    border-radius: 10px; color: var(--ms-ink); resize: vertical;
+  }
+  .ai-strip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; background: var(--ms-brand-50);
+    border-radius: 8px; color: var(--ms-brand-700);
+    font-size: var(--ms-fs-12); font-weight: 600;
+  }
+  .preview-pane {
+    background: #FAFAFB;
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg);
+    overflow: hidden;
+  }
+  .preview-bar {
+    height: 32px; background: var(--ms-ml); color: var(--ms-ml-fg);
+    display: flex; align-items: center; padding: 0 14px;
+    font-size: 11px; font-weight: 600;
+  }
+  .preview-content { padding: 20px; background: #fff; }
+  .preview-thumb {
+    width: 100%; aspect-ratio: 1; background: var(--ms-surface-2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ms-text-3); font-size: 12px; font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .preview-cond { font-size: var(--ms-fs-11); color: var(--ms-text-2); letter-spacing: .04em; text-transform: uppercase; font-weight: 600; }
+  .preview-title { font-size: var(--ms-fs-16); font-weight: 600; color: var(--ms-ink); line-height: 1.3; margin: 6px 0 12px; letter-spacing: -0.01em; }
+  .preview-price { font-size: 28px; font-weight: 300; color: var(--ms-ink); letter-spacing: -0.02em; }
+  .preview-installments { font-size: var(--ms-fs-13); color: var(--ms-positive-fg); font-weight: 600; margin-top: 2px; }
+  .preview-shipping {
+    margin-top: 14px; padding: 10px 12px;
+    background: var(--ms-positive-bg); color: var(--ms-positive-fg);
+    border-radius: 8px;
+    font-size: var(--ms-fs-12); font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .check-list { display: grid; gap: 8px; }
+  .check-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 10px;
+    background: var(--ms-surface-2);
+    font-size: var(--ms-fs-13); color: var(--ms-text);
+  }
+  .check-item .mark {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .check-item.ok .mark { background: var(--ms-positive-bg); color: var(--ms-positive-fg); }
+  .check-item.miss .mark { background: var(--ms-surface); border: 1.5px solid var(--ms-line-2); }
+  .check-item.warn .mark { background: var(--ms-warning-bg); color: var(--ms-warning-fg); }
+  .check-item .body { flex: 1; }
+  .check-item .body .label { font-weight: 500; color: var(--ms-ink); }
+  .check-item .body .desc { font-size: var(--ms-fs-12); color: var(--ms-text-2); margin-top: 2px; }
+
+  .audit-list { display: grid; gap: 10px; }
+  .audit-item {
+    display: grid; grid-template-columns: 28px 1fr auto; gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px; border-radius: 10px;
+    background: var(--ms-surface-2);
+  }
+  .audit-item .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--ms-brand-600);
+    margin-top: 6px;
+  }
+  .audit-item .who { font-weight: 600; color: var(--ms-ink); font-size: var(--ms-fs-13); }
+  .audit-item .what { color: var(--ms-text); font-size: var(--ms-fs-13); }
+  .audit-item .time { font-size: var(--ms-fs-12); color: var(--ms-text-2); }
+
+  .prio-list { display: grid; gap: 10px; }
+  .prio-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 10px;
+    border: 1px solid var(--ms-line); background: var(--ms-surface);
+  }
+  .prio-tag {
+    font-family: var(--ms-font-mono); font-size: 11px; font-weight: 700;
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ms-text-2); background: var(--ms-surface-2);
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="ms-shell">
+  <aside class="ms-sidebar">
+    <div class="ms-sidebar-brand">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#5B5BF0" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span class="name">MapaSeller</span><span class="ver">v1.1</span>
+    </div>
+    <nav class="ms-sidebar-nav">
+      <div class="ms-sidebar-section">Operação</div>
+      <a class="ms-nav-item" href="./dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>Dashboard</a>
+      <a class="ms-nav-item" href="./importar.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2Z"></path><path d="M12 18V9M8 13l4-4 4 4"></path></svg>Importar XLSX</a>
+      <a class="ms-nav-item" href="./produtos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>Produtos</a>
+      <a class="ms-nav-item" href="./oportunidades.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>Oportunidades<span class="count">12</span></a>
+      <div class="ms-sidebar-section">Inteligência</div>
+      <a class="ms-nav-item" href="./mercadolivre.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21V3l-6 3v18l6-3 6 3 6-3V3l-6 3"></path><path d="M9 3l6 3"></path></svg>Marketplaces</a>
+      <a class="ms-nav-item" href="./mercadolivre.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path><circle cx="20" cy="4" r="1.5" fill="currentColor"></circle></svg>Inteligência ML</a>
+      <a class="ms-nav-item is-active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3l11 5V6L3 11ZM14 9v7M18 12h2M18 8l2-1M18 16l2 1"></path></svg>Anúncios</a>
+      <div class="ms-sidebar-section">Sistema</div>
+      <a class="ms-nav-item" href="./configuracoes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1A2 2 0 1 1 4.4 17l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 4.4l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5h.1a1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 19.6 7l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"></path></svg>Configurações</a>
+    </nav>
+    <div class="ms-sidebar-foot">
+      <div class="ms-sidebar-workspace"><div class="ms-avatar ms-avatar--sq ms-avatar--teal">CL</div><div class="info"><div class="label">Workspace</div><div class="name">Casa &amp; Lar Brasil</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"></path></svg></div>
+    </div>
+  </aside>
+
+  <div>
+    <header class="ms-topbar">
+      <div class="ms-topbar-crumbs"><span>Inteligência</span><span class="sep">/</span><span class="current">Central de Anúncios</span></div>
+      <div class="ms-topbar-actions">
+        <div class="ms-search ms-topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input placeholder="Buscar SKU, pedido, anúncio…" /><span class="ms-kbd">⌘ K</span>
+        </div>
+        <button class="ms-topbar-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg></button>
+        <div class="ms-avatar ms-avatar--sm">RM</div>
+      </div>
+    </header>
+
+    <main class="ms-content">
+      <div class="ms-page-head">
+        <div>
+          <h1 class="ms-page-title">Central de Anúncios</h1>
+          <p class="ms-page-desc">Crie, otimize e sincronize seus anúncios Mercado Livre direto do MapaSeller. Tudo com histórico, checklist de publicação e sugestões automáticas.</p>
+        </div>
+      </div>
+
+      <!-- Connection bar -->
+      <div class="conn-bar">
+        <div class="logo">ML</div>
+        <div style="flex:1;">
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span style="font-size:var(--ms-fs-15); font-weight:600; color: var(--ms-ink);">Mercado Livre · Casa &amp; Lar Brasil</span>
+            <span class="ms-badge ms-badge--pos ms-badge--dot">Conectado</span>
+          </div>
+          <div class="ms-small" style="margin-top: 4px;">Última sincronização há <strong style="color:var(--ms-ink);">8 minutos</strong> · 1.247 anúncios sincronizados · token válido até 28/05/2026</div>
+        </div>
+        <button class="ms-btn ms-btn--secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"></path><path d="M21 3v5h-5"></path></svg>
+          Sincronizar agora
+        </button>
+        <button class="ms-btn ms-btn--ghost">Gerenciar conexão</button>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="actions-grid">
+        <div class="action-card">
+          <div class="action-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+          </div>
+          <div class="action-title">Criar anúncio</div>
+          <div class="action-desc">Novo anúncio a partir de um SKU existente.</div>
+        </div>
+        <div class="action-card">
+          <div class="action-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path><path d="m18.4 3.6 2 2L11 15l-3 1 1-3 9.4-9.4Z"></path></svg>
+          </div>
+          <div class="action-title">Otimizar título</div>
+          <div class="action-desc">IA reescreve com palavras-chave de alto volume.</div>
+        </div>
+        <div class="action-card">
+          <div class="action-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 13h6M9 17h4M14 3v5h5"></path><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-5Z"></path></svg>
+          </div>
+          <div class="action-title">Gerar descrição</div>
+          <div class="action-desc">Descrição estruturada com bullets e benefícios.</div>
+        </div>
+        <div class="action-card">
+          <div class="action-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path></svg>
+          </div>
+          <div class="action-title">Sincronizar preço</div>
+          <div class="action-desc">Aplica preço do ERP em todos os anúncios.</div>
+        </div>
+        <div class="action-card">
+          <div class="action-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>
+          </div>
+          <div class="action-title">Sincronizar estoque</div>
+          <div class="action-desc">Empurra estoque atualizado para o ML.</div>
+        </div>
+        <div class="action-card">
+          <div class="action-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-12.5 6.6L4 20l1.4-4.5A8 8 0 1 1 21 12Z"></path></svg>
+          </div>
+          <div class="action-title">Perguntas &amp; respostas</div>
+          <div class="action-desc">28 pendentes · IA sugere respostas.</div>
+        </div>
+      </div>
+
+      <!-- Editor + Preview -->
+      <div class="editor-grid">
+        <div class="editor-pane">
+          <div class="editor-head">
+            <div>
+              <div class="ms-caps">Editando anúncio</div>
+              <div class="ms-h3" style="margin-top:4px;">MLB-2847391 · Jogo Panelas Antiaderente 5 pç</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="ms-btn ms-btn--ghost ms-btn--sm">Descartar</button>
+              <button class="ms-btn ms-btn--secondary ms-btn--sm">Salvar rascunho</button>
+              <button class="ms-btn ms-btn--primary ms-btn--sm">Publicar</button>
+            </div>
+          </div>
+          <div class="editor-body">
+
+            <div class="ed-row">
+              <label class="ms-label">Título <span style="color:var(--ms-text-3); font-weight:400;">· 58/60 caracteres</span></label>
+              <input class="ms-input" value="Jogo Panelas Antiaderente 5 Peças Indução Cabo Soft" />
+              <div class="ai-strip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"></path><path d="M9 9l-3-3M18 6l-3 3M6 18l3-3M15 15l3 3"></path></svg>
+                Sugestão: incluir "kit completo" — termo com 2,1k buscas/dia
+                <button class="ms-btn ms-btn--ghost ms-btn--sm" style="margin-left:auto; padding: 4px 8px;">Aplicar</button>
+              </div>
+            </div>
+
+            <div class="ed-row cols">
+              <div class="ed-row">
+                <label class="ms-label">Preço de venda</label>
+                <input class="ms-input" value="R$ 289,90" />
+              </div>
+              <div class="ed-row">
+                <label class="ms-label">Estoque</label>
+                <input class="ms-input" value="142" />
+              </div>
+            </div>
+
+            <div class="ed-row cols">
+              <div class="ed-row">
+                <label class="ms-label">Condição</label>
+                <input class="ms-input" value="Novo" />
+              </div>
+              <div class="ed-row">
+                <label class="ms-label">Tipo de anúncio</label>
+                <input class="ms-input" value="Clássico" />
+              </div>
+            </div>
+
+            <div class="ed-row">
+              <label class="ms-label">Descrição <span style="color:var(--ms-text-3); font-weight:400;">· markdown suportado</span></label>
+              <textarea class="textarea">**Jogo de panelas antiaderente 5 peças** — perfeito para sua cozinha completa.
+
+• Material: alumínio com revestimento antiaderente
+• Compatível com fogão a gás, elétrico e indução
+• Cabo soft-touch resistente ao calor
+• 1 panela 16cm, 1 panela 20cm, 1 frigideira 24cm, 1 caçarola 24cm, 1 leiteira 14cm
+• Tampa de vidro temperado em todas as peças
+
+Garantia: 12 meses contra defeitos de fabricação.
+              </textarea>
+              <div class="ai-strip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.6 1 1.3 1 2.1V18h6v-1.2c0-.8.4-1.5 1-2.1A7 7 0 0 0 12 2Z"></path></svg>
+                Gerar descrição completa com IA
+                <button class="ms-btn ms-btn--ghost ms-btn--sm" style="margin-left:auto; padding: 4px 8px;">Gerar</button>
+              </div>
+            </div>
+
+            <div class="ed-row">
+              <label class="ms-label">Imagens · 6 / 12</label>
+              <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+                <div style="aspect-ratio: 1; background: var(--ms-surface-2); border-radius: 8px; display:flex; align-items:center; justify-content:center; color: var(--ms-text-3); font-size: 11px; font-weight: 600;">Capa</div>
+                <div style="aspect-ratio: 1; background: var(--ms-surface-2); border-radius: 8px; display:flex; align-items:center; justify-content:center; color: var(--ms-text-3); font-size: 11px; font-weight: 600;">IMG 2</div>
+                <div style="aspect-ratio: 1; background: var(--ms-surface-2); border-radius: 8px; display:flex; align-items:center; justify-content:center; color: var(--ms-text-3); font-size: 11px; font-weight: 600;">IMG 3</div>
+                <div style="aspect-ratio: 1; background: var(--ms-surface-2); border-radius: 8px; display:flex; align-items:center; justify-content:center; color: var(--ms-text-3); font-size: 11px; font-weight: 600;">IMG 4</div>
+                <div style="aspect-ratio: 1; background: var(--ms-surface-2); border-radius: 8px; display:flex; align-items:center; justify-content:center; color: var(--ms-text-3); font-size: 11px; font-weight: 600;">IMG 5</div>
+                <div style="aspect-ratio: 1; background: var(--ms-surface); border: 2px dashed var(--ms-line-2); border-radius: 8px; display:flex; align-items:center; justify-content:center; color: var(--ms-text-3);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side: preview + checklist -->
+        <div style="display: grid; gap: var(--ms-grid-gap); align-content: start;">
+
+          <!-- ML preview -->
+          <div class="preview-pane">
+            <div class="preview-bar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              Preview · Mercado Livre
+            </div>
+            <div class="preview-content">
+              <div class="preview-thumb">IMAGEM PRINCIPAL</div>
+              <div class="preview-cond">Novo · 684 vendidos</div>
+              <h3 class="preview-title">Jogo Panelas Antiaderente 5 Peças Indução Cabo Soft</h3>
+              <div class="preview-price">R$ 289<span style="font-size: 16px;">,90</span></div>
+              <div class="preview-installments">em 12x R$ 24,16 sem juros</div>
+              <div class="preview-shipping">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                Frete GRÁTIS · Chega amanhã
+              </div>
+            </div>
+          </div>
+
+          <!-- Checklist -->
+          <div class="ms-card">
+            <div class="ms-caps">Checklist de publicação</div>
+            <div class="check-list" style="margin-top: 14px;">
+              <div class="check-item ok">
+                <div class="mark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"></polyline></svg></div>
+                <div class="body"><div class="label">Título dentro do limite</div><div class="desc">58/60 caracteres · keywords presentes</div></div>
+              </div>
+              <div class="check-item ok">
+                <div class="mark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"></polyline></svg></div>
+                <div class="body"><div class="label">Descrição com bullets</div><div class="desc">7 benefícios listados · ≥ 300 caracteres</div></div>
+              </div>
+              <div class="check-item warn">
+                <div class="mark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"></path></svg></div>
+                <div class="body"><div class="label">Imagens: 6 de 12 ideal</div><div class="desc">Adicione mais ângulos para subir o CTR</div></div>
+              </div>
+              <div class="check-item ok">
+                <div class="mark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"></polyline></svg></div>
+                <div class="body"><div class="label">Frete grátis ativado</div><div class="desc">Aumenta conversão em ~35%</div></div>
+              </div>
+              <div class="check-item miss">
+                <div class="mark"></div>
+                <div class="body"><div class="label">Ficha técnica completa</div><div class="desc">3 atributos obrigatórios pendentes</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Priorities -->
+          <div class="ms-card">
+            <div class="ms-caps">Prioridades operacionais</div>
+            <div class="prio-list" style="margin-top: 14px;">
+              <div class="prio-item">
+                <div class="prio-tag">01</div>
+                <div style="flex:1;">
+                  <div style="font-size: var(--ms-fs-13); font-weight: 600; color: var(--ms-ink);">Responder 28 perguntas pendentes</div>
+                  <div class="ms-meta">12 com SLA &lt; 4h</div>
+                </div>
+                <span class="ms-badge ms-badge--neg">Urgente</span>
+              </div>
+              <div class="prio-item">
+                <div class="prio-tag">02</div>
+                <div style="flex:1;">
+                  <div style="font-size: var(--ms-fs-13); font-weight: 600; color: var(--ms-ink);">Sincronizar estoque (37 SKUs)</div>
+                  <div class="ms-meta">Última sync há 8 min</div>
+                </div>
+                <span class="ms-badge ms-badge--warn">Atenção</span>
+              </div>
+              <div class="prio-item">
+                <div class="prio-tag">03</div>
+                <div style="flex:1;">
+                  <div style="font-size: var(--ms-fs-13); font-weight: 600; color: var(--ms-ink);">Reprecificar 42 anúncios</div>
+                  <div class="ms-meta">Sugestões prontas</div>
+                </div>
+                <span class="ms-badge ms-badge--brand">Em fila</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit -->
+          <div class="ms-card">
+            <div class="ms-caps">Histórico recente</div>
+            <div class="audit-list" style="margin-top: 14px;">
+              <div class="audit-item">
+                <div class="dot" style="background: var(--ms-positive-fg);"></div>
+                <div>
+                  <span class="who">Rafael</span> publicou alterações em <strong style="color:var(--ms-ink);">CAS-218</strong> — título e descrição.
+                </div>
+                <span class="time">2 min</span>
+              </div>
+              <div class="audit-item">
+                <div class="dot" style="background: var(--ms-brand-600);"></div>
+                <div>
+                  Sincronização automática · <strong style="color:var(--ms-ink);">37 SKUs</strong> atualizados.
+                </div>
+                <span class="time">8 min</span>
+              </div>
+              <div class="audit-item">
+                <div class="dot" style="background: var(--ms-warning-fg);"></div>
+                <div>
+                  <span class="who">IA</span> sugeriu reprecificação para <strong style="color:var(--ms-ink);">TAC-088</strong>.
+                </div>
+                <span class="time">1h</span>
+              </div>
+              <div class="audit-item">
+                <div class="dot" style="background: var(--ms-positive-fg);"></div>
+                <div>
+                  <span class="who">Rafael</span> criou anúncio <strong style="color:var(--ms-ink);">FAQ-141</strong> no ML.
+                </div>
+                <span class="time">3h</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

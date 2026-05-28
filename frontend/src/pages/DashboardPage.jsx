@@ -1,31 +1,46 @@
-import { gsap } from "gsap";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ActionButton } from "../components/ActionButton";
-import { AlertCard } from "../components/AlertCard";
-import { ChartCard, ColumnChart, DonutChart } from "../components/AnalyticsCharts";
-import { Badge } from "../components/Badge";
-import { EmptyState } from "../components/EmptyState";
-import { OperationalOrbit } from "../components/OperationalOrbit";
-import { PremiumCard } from "../components/PremiumCard";
-import { SectionHeader } from "../components/SectionHeader";
-import { StatCard } from "../components/StatCard";
+import { ChartCard, ColumnChart } from "../components/AnalyticsCharts";
+import { Icon } from "../components/ui/Icon";
 import { api } from "../services/api";
-import { formatCode, formatMoneyBRL, marginPct, recommendAction, scoreLabel, scoreTone } from "../services/formatters";
+import { formatCode, marginPct } from "../services/formatters";
 
-function prefersReducedMotion() {
-  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function KpiCard({ icon, label, value, badge, badgeTone = "pos", sub }) {
+  return (
+    <div className="ms-kpi-card">
+      <div className="ms-kpi-head">
+        <div className="left">
+          <span className="ms-kpi-ico"><Icon name={icon} size={18} /></span>
+          {label}
+        </div>
+      </div>
+      <div className="ms-kpi-body">
+        <span className="ms-kpi-val">{Number(value || 0).toLocaleString("pt-BR")}</span>
+        {badge ? <span className={`ms-badge ms-badge--${badgeTone}`}>{badge}</span> : null}
+      </div>
+      <span className="ms-kpi-sub">{sub}</span>
+    </div>
+  );
 }
+
+const STATUS_LABELS = {
+  announce_first: "Anunciar primeiro",
+  good_opportunity: "Boa oportunidade",
+  test_carefully: "Testar com cuidado",
+  replenishment_urgent: "Reposição urgente",
+  stalled_stock: "Estoque parado",
+  negative_stock: "Estoque negativo",
+  no_stock_general: "Sem estoque geral",
+  review: "Revisar",
+};
 
 export function DashboardPage() {
   const [dashboard, setDashboard] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const heroRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
-
     async function load() {
       setLoading(true);
       try {
@@ -40,242 +55,217 @@ export function DashboardPage() {
         if (mounted) setLoading(false);
       }
     }
-
     load();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
-  useEffect(() => {
-    if (!heroRef.current || loading || prefersReducedMotion()) return undefined;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".intro-animate",
-        { y: 12 },
-        { y: 0, duration: 0.42, stagger: 0.06, ease: "power2.out", clearProps: "transform" }
-      );
-    }, heroRef);
-
-    return () => ctx.revert();
-  }, [loading]);
-
-  const topOpportunities = useMemo(() => {
-    return [...products].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 6);
-  }, [products]);
-
-  const criticalAlerts = useMemo(() => {
-    const noSku = products.filter((p) => !p.sku).slice(0, 4);
-    const stalled = products.filter((p) => (p.stock || 0) > 0 && (p.sales_60d || 0) === 0).slice(0, 4);
-    const negative = products.filter((p) => (p.stock || 0) < 0).slice(0, 4);
-    return { noSku, stalled, negative };
-  }, [products]);
-
-  const stats = [
-    { title: "Total de produtos", value: dashboard?.total_products || 0, hint: "Base ativa", tone: "accent" },
-    { title: "Com estoque", value: dashboard?.products_with_stock || 0, hint: "Prontos para venda", tone: "success" },
-    { title: "Vendidos 60d", value: dashboard?.products_sold_60d || 0, hint: "Tração", tone: "accent" },
-    { title: "Score alto", value: dashboard?.products_high_score || 0, hint: "Oportunidade", tone: "success" },
-    { title: "Reposição urgente", value: dashboard?.products_replenishment_urgent || 0, hint: "Vendas sem estoque", tone: "danger" },
-    { title: "Estoque parado", value: dashboard?.stalled_stock_alert || 0, hint: "Atenção", tone: "warning" },
-    { title: "Estoque negativo", value: dashboard?.negative_stock_alert || 0, hint: "Crítico", tone: "danger" },
-    { title: "Sem estoque geral", value: dashboard?.products_without_stock_general || 0, hint: "Vendidos sem stock", tone: "warning" },
-    { title: "Somente estoque", value: dashboard?.products_only_stock || 0, hint: "Sem vendas 60d", tone: "muted" },
-    { title: "Sem SKU confiável", value: dashboard?.products_without_sku || 0, hint: "Revisar cadastro", tone: "warning" },
-    { title: "Match por SKU", value: dashboard?.match_sku || 0, hint: "Vendidos ∩ Estoque", tone: "success" },
-    { title: "Vendidos + Estoque", value: dashboard?.vendidos_plus_estoque || 0, hint: "Origem combinada", tone: "accent" },
-  ];
+  const topOpportunities = useMemo(
+    () => [...products].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 4),
+    [products]
+  );
 
   const statusDistribution = useMemo(() => {
-    const labels = {
-      announce_first: "Anunciar",
-      good_opportunity: "Boa",
-      test_carefully: "Teste",
-      negative_stock: "Estoque neg.",
-      review: "Revisar",
-    };
-    return Object.entries(
-      products.reduce((acc, product) => {
-        const key = product.status || "review";
-        acc[key] = (acc[key] || 0) + 1;
-        return acc;
-      }, {})
-    ).map(([key, value]) => ({ name: labels[key] || key, value }));
+    const counts = products.reduce((acc, p) => {
+      const key = p.status || "review";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts)
+      .map(([key, value]) => ({ key, name: STATUS_LABELS[key] || key, value }))
+      .sort((a, b) => b.value - a.value);
   }, [products]);
 
-  const operationMix = useMemo(() => {
-    return [
-      { name: "Prioridade", value: products.filter((p) => p.status === "announce_first").length },
-      { name: "Score alto", value: products.filter((p) => (p.score || 0) >= 70).length },
-      { name: "Sem SKU", value: products.filter((p) => !p.sku).length },
-      { name: "Estoque neg.", value: products.filter((p) => (p.stock || 0) < 0).length },
-      { name: "Parado", value: products.filter((p) => (p.stock || 0) > 0 && (p.sales_60d || 0) === 0).length },
-    ];
-  }, [products]);
+  const totalProducts = dashboard?.total_products || 0;
+  const matchSku = dashboard?.match_sku || 0;
+  const withoutSku = dashboard?.products_without_sku || 0;
+  const fuzzy = Math.max(0, totalProducts - matchSku - withoutSku);
+  const pct = (n) => (totalProducts ? Math.round((n / totalProducts) * 100) : 0);
 
-  const orbitMetrics = useMemo(
-    () => ({
-      totalProducts: dashboard?.total_products || 0,
-      sold60d: dashboard?.products_sold_60d || 0,
-      highScore: dashboard?.products_high_score || 0,
-      missingSku: products.filter((p) => !p.sku).length,
-      negativeStock: dashboard?.negative_stock_alert || 0,
-      opportunities: products.filter((p) => p.status === "announce_first" || p.status === "good_opportunity").length,
-      marketplaces: 4,
-    }),
-    [dashboard, products]
-  );
+  const alerts = [
+    { tone: "danger", icon: "alert", title: "Estoque negativo", desc: "Itens com divergência entre vendido e disponível.", count: dashboard?.negative_stock_alert || 0 },
+    { tone: "warn", icon: "sync", title: "Reposição urgente", desc: "SKUs vendidos sem cobertura de estoque suficiente.", count: dashboard?.products_replenishment_urgent || 0 },
+    { tone: "info", icon: "alert", title: "Sem SKU confiável", desc: "Itens sem código — revise antes da próxima importação.", count: withoutSku },
+    { tone: "warn", icon: "inventory", title: "Estoque parado", desc: "Itens com estoque e sem vendas nos últimos 60 dias.", count: dashboard?.stalled_stock_alert || 0 },
+  ];
 
-  const readiness = Math.max(
-    0,
-    Math.min(100, 100 - (operationMix[2]?.value || 0) - (operationMix[3]?.value || 0) * 3 - Math.round((operationMix[4]?.value || 0) / 10))
-  );
+  if (loading) {
+    return (
+      <>
+        <div className="ms-page-head">
+          <div>
+            <h1 className="ms-page-title">Visão geral</h1>
+            <p className="ms-page-desc">Carregando consolidação da operação…</p>
+          </div>
+        </div>
+        <div className="ms-grid ms-grid-4">
+          {Array.from({ length: 4 }).map((_, i) => <div key={i} className="ms-skeleton" style={{ height: 124 }} />)}
+        </div>
+        <div className="insight-row">
+          <div className="ms-skeleton" style={{ height: 320 }} />
+          <div className="ms-skeleton" style={{ height: 320 }} />
+        </div>
+      </>
+    );
+  }
 
   return (
-    <div className="page-grid" ref={heroRef}>
-      <SectionHeader
-        title="Control Room"
-        description="Operacao comercial, prioridade de anuncio e risco de catalogo em uma unica visao."
-        actions={
-          <ActionButton as={Link} to="/importar" variant="primary" icon="+">
-            Importar planilha
-          </ActionButton>
-        }
-      />
-
-      <div className="command-strip intro-animate">
+    <>
+      <div className="ms-page-head">
         <div>
-          <span>Readiness</span>
-          <strong>{readiness}%</strong>
-          <small>indice interno</small>
+          <h1 className="ms-page-title">Visão geral</h1>
+          <p className="ms-page-desc">Sua operação consolidada — catálogo, vendas, oportunidades e alertas em um único painel.</p>
         </div>
-        <div>
-          <span>Fila prioritaria</span>
-          <strong>{orbitMetrics.opportunities.toLocaleString("pt-BR")}</strong>
-          <small>produtos acionaveis</small>
-        </div>
-        <div>
-          <span>Bloqueios</span>
-          <strong>{(orbitMetrics.missingSku + orbitMetrics.negativeStock).toLocaleString("pt-BR")}</strong>
-          <small>cadastro + estoque</small>
+        <div className="ms-page-actions">
+          <Link className="ms-btn ms-btn--secondary" to="/produtos">
+            <Icon name="products" size={16} /> Ver produtos
+          </Link>
+          <Link className="ms-btn ms-btn--primary" to="/importar">
+            <Icon name="plus" size={16} /> Importar planilha
+          </Link>
         </div>
       </div>
 
-      <div className="stats-grid intro-animate">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} title={stat.title} value={stat.value} hint={stat.hint} tone={stat.tone} />
-        ))}
+      <div className="ms-grid ms-grid-4">
+        <KpiCard icon="products" label="Total de produtos" value={totalProducts}
+          badge={`${(dashboard?.products_with_stock || 0).toLocaleString("pt-BR")} c/ estoque`} badgeTone="brand"
+          sub={`${(dashboard?.products_with_stock || 0).toLocaleString("pt-BR")} com estoque · ${(dashboard?.products_only_stock || 0).toLocaleString("pt-BR")} só estoque`} />
+        <KpiCard icon="arrowUp" label="Vendidos 60d" value={dashboard?.products_sold_60d || 0}
+          badge="tração" badgeTone="pos" sub="Produtos com venda no período" />
+        <KpiCard icon="opportunities" label="Score alto" value={dashboard?.products_high_score || 0}
+          badge="≥ 80" badgeTone="brand" sub="Forte potencial de venda" />
+        <KpiCard icon="alert" label="Reposição urgente" value={dashboard?.products_replenishment_urgent || 0}
+          badge="crítico" badgeTone="neg" sub="Vendas sem estoque suficiente" />
       </div>
 
-      <div className="dashboard-grid intro-animate">
-        <ChartCard title="Distribuição por prioridade" caption="Mix atual da base importada">
-          <DonutChart data={statusDistribution} />
-        </ChartCard>
-        <ChartCard title="Mix operacional" caption="Sinais de decisão para marketplace">
-          <ColumnChart data={operationMix} />
-        </ChartCard>
-        <PremiumCard className="health-panel">
-          <SectionHeader title="Saude operacional" description="Leitura rapida dos principais bloqueios." />
-          <div className="health-score">
-            <strong>{readiness.toLocaleString("pt-BR")}</strong>
-            <span>Índice interno</span>
-          </div>
-          <div className="health-lines">
-            <div><span>Base ativa</span><strong>{dashboard?.total_products || 0}</strong></div>
-            <div><span>Pronto para anúncio</span><strong>{products.filter((p) => p.status === "announce_first").length}</strong></div>
-            <div><span>Risco de cadastro</span><strong>{products.filter((p) => !p.sku).length}</strong></div>
-          </div>
-        </PremiumCard>
-      </div>
-
-      <div className="orbit-grid intro-animate">
-        <OperationalOrbit metrics={orbitMetrics} />
-        <PremiumCard className="recommendation-panel">
-          <SectionHeader title="Acoes recomendadas" description="Sequencia pratica para limpar gargalos antes de escalar." />
-          <div className="recommendation-list">
-            <div>
-              <span>01</span>
-              <strong>Corrigir divergencias de estoque</strong>
-              <p>{orbitMetrics.negativeStock.toLocaleString("pt-BR")} itens negativos bloqueiam publicacao segura.</p>
-            </div>
-            <div>
-              <span>02</span>
-              <strong>Normalizar SKU/EAN</strong>
-              <p>{orbitMetrics.missingSku.toLocaleString("pt-BR")} registros precisam de codigo confiavel.</p>
-            </div>
-            <div>
-              <span>03</span>
-              <strong>Preparar anuncios de score alto</strong>
-              <p>{orbitMetrics.highScore.toLocaleString("pt-BR")} itens ja possuem sinal comercial forte.</p>
-            </div>
-          </div>
-        </PremiumCard>
-      </div>
-
-      <div className="two-col intro-animate">
-        <PremiumCard>
-          <SectionHeader title="Top oportunidades" description="Produtos com maior score para preparar anúncio." />
-          {topOpportunities.length === 0 ? (
-            <EmptyState title="Sem produtos ainda" description="Importe uma planilha para gerar oportunidades automaticamente." />
+      <div className="insight-row">
+        <ChartCard title="Distribuição por prioridade" caption="Mix atual da base importada por status operacional.">
+          {statusDistribution.length ? (
+            <ColumnChart data={statusDistribution} />
           ) : (
-            <div className="opportunity-list">
-              {topOpportunities.map((product) => {
-                const m = marginPct(product.cost, product.price);
+            <div className="ms-empty"><p className="ms-empty-desc">Importe produtos para ver a distribuição.</p></div>
+          )}
+        </ChartCard>
+
+        <div className="ms-card">
+          <div className="ms-row" style={{ justifyContent: "space-between" }}>
+            <div className="ms-caps">Match por SKU</div>
+            <span className="ms-badge ms-badge--brand">{pct(matchSku)}%</span>
+          </div>
+          <div className="ms-h2" style={{ marginTop: 8 }}>
+            {matchSku.toLocaleString("pt-BR")} / {totalProducts.toLocaleString("pt-BR")}
+          </div>
+          <p className="ms-small" style={{ margin: "8px 0 0" }}>SKUs reconhecidos com origem confiável entre as bases.</p>
+
+          <div className="ms-stack-sm" style={{ marginTop: 20 }}>
+            <div>
+              <div className="ms-row" style={{ justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+                <span>Match exato (SKU)</span><span className="ms-num">{matchSku.toLocaleString("pt-BR")}</span>
+              </div>
+              <div className="ms-progress"><div className="ms-progress-fill" style={{ width: `${pct(matchSku)}%` }} /></div>
+            </div>
+            <div>
+              <div className="ms-row" style={{ justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+                <span>Outras origens</span><span className="ms-num">{fuzzy.toLocaleString("pt-BR")}</span>
+              </div>
+              <div className="ms-progress"><div className="ms-progress-fill" style={{ width: `${pct(fuzzy)}%`, background: "var(--ms-chart-violet-500)" }} /></div>
+            </div>
+            <div>
+              <div className="ms-row" style={{ justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+                <span>Sem SKU confiável</span><span className="ms-num">{withoutSku.toLocaleString("pt-BR")}</span>
+              </div>
+              <div className="ms-progress"><div className="ms-progress-fill" style={{ width: `${pct(withoutSku)}%`, background: "var(--ms-warning-fg)" }} /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="secondary-row">
+        <div className="ms-card">
+          <div className="card-head-row">
+            <div>
+              <div className="ms-caps">Alertas operacionais</div>
+              <div className="ms-h3" style={{ marginTop: 4 }}>Ação recomendada</div>
+            </div>
+            <Link className="ms-btn ms-btn--ghost ms-btn--sm" to="/oportunidades">Ver todos</Link>
+          </div>
+          <div className="alert-list">
+            {alerts.map((a) => (
+              <div key={a.title} className={`alert-item ${a.tone}`}>
+                <div className="ico"><Icon name={a.icon} size={18} /></div>
+                <div className="body">
+                  <div className="title">{a.title}</div>
+                  <div className="desc">{a.desc}</div>
+                </div>
+                <div className="count">{Number(a.count).toLocaleString("pt-BR")}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="ms-card">
+          <div className="card-head-row">
+            <div>
+              <div className="ms-caps">Top oportunidades</div>
+              <div className="ms-h3" style={{ marginTop: 4 }}>Maior score</div>
+            </div>
+            <Link className="ms-btn ms-btn--ghost ms-btn--sm" to="/oportunidades">Abrir</Link>
+          </div>
+          {topOpportunities.length === 0 ? (
+            <p className="ms-empty-desc">Importe uma planilha para gerar oportunidades.</p>
+          ) : (
+            <div className="opp-mini-list">
+              {topOpportunities.map((p) => {
+                const m = marginPct(p.cost, p.price);
+                const code = formatCode(p.sku) !== "-" ? formatCode(p.sku) : formatCode(p.ean);
                 return (
-                  <Link key={product.id} to={`/produtos/${product.id}`} className="opportunity-row">
-                    <div>
-                      <h4>{product.name || "Produto sem nome"}</h4>
-                      <p>{formatCode(product.sku) !== "-" ? formatCode(product.sku) : formatCode(product.ean)}</p>
+                  <Link key={p.id} to={`/produtos/${p.id}`} className="opp-mini">
+                    <div className="thumb">IMG</div>
+                    <div className="info">
+                      <h4>{p.name || "Produto sem nome"}</h4>
+                      <div className="meta">SKU {code} · {m == null ? "margem n/d" : `margem ${m.toFixed(0)}%`}</div>
                     </div>
-                    <div className="opportunity-meta">
-                      <Badge tone={scoreTone(product.status)}>{scoreLabel(product)}</Badge>
-                      <span>Score {product.score}</span>
-                      <span>{m == null ? "Margem n/d" : `${m.toFixed(1)}% margem`}</span>
-                    </div>
+                    <span className="ms-badge ms-badge--pos">Score {p.score ?? 0}</span>
                   </Link>
                 );
               })}
             </div>
           )}
-        </PremiumCard>
-
-        <PremiumCard>
-          <SectionHeader title="Alertas críticos" description="Itens que exigem ação antes de escalar anúncios." />
-          <div className="stack-vertical">
-            <AlertCard
-              title="Produtos sem SKU"
-              description={`${criticalAlerts.noSku.length} itens sem código no recorte atual.`}
-              tone="danger"
-              badge="Revisar cadastro"
-            />
-            <AlertCard
-              title="Estoque parado"
-              description={`${criticalAlerts.stalled.length} itens com estoque e sem vendas 60d.`}
-              tone="warning"
-              badge="Giro baixo"
-            />
-            <AlertCard
-              title="Estoque negativo"
-              description={`${criticalAlerts.negative.length} itens com divergência de estoque.`}
-              tone="danger"
-              badge="Ajustar inventário"
-            />
-          </div>
-        </PremiumCard>
+        </div>
       </div>
 
-      <PremiumCard className="intro-animate">
-        <SectionHeader title="Fila de ação" description="Direcionamentos táticos para os itens mais sensíveis." />
-        <div className="action-grid">
-          {topOpportunities.slice(0, 4).map((product) => (
-            <div key={product.id} className="action-item">
-              <h4>{product.name || "Produto sem nome"}</h4>
-              <p>{formatMoneyBRL(product.price)} • estoque {product.stock}</p>
-              <Badge tone={scoreTone(product.status)}>{recommendAction(product)}</Badge>
-            </div>
-          ))}
+      <div className="ms-card ms-card--flush ms-mt">
+        <div style={{ padding: "18px 24px", borderBottom: "1px solid var(--ms-line)" }}>
+          <div className="ms-caps">Distribuição da base</div>
+          <div className="ms-h3" style={{ marginTop: 4 }}>Produtos por status operacional</div>
         </div>
-      </PremiumCard>
-    </div>
+        <div className="ms-table-wrap">
+          <table className="ms-table">
+            <thead>
+              <tr>
+                <th style={{ paddingLeft: 24 }}>Status</th>
+                <th>Produtos</th>
+                <th style={{ width: "38%" }}>Share</th>
+                <th className="ms-right" style={{ paddingRight: 24 }}>Participação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {statusDistribution.map((row) => (
+                <tr key={row.key}>
+                  <td style={{ paddingLeft: 24, fontWeight: 600, color: "var(--ms-ink)" }}>{row.name}</td>
+                  <td className="ms-num">{row.value.toLocaleString("pt-BR")}</td>
+                  <td>
+                    <div className="ms-progress"><div className="ms-progress-fill" style={{ width: `${pct(row.value)}%` }} /></div>
+                  </td>
+                  <td className="ms-right ms-num" style={{ paddingRight: 24 }}>{pct(row.value)}%</td>
+                </tr>
+              ))}
+              {statusDistribution.length === 0 ? (
+                <tr><td colSpan={4} style={{ padding: 32, textAlign: "center", color: "var(--ms-text-2)" }}>Sem dados ainda.</td></tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
   );
 }

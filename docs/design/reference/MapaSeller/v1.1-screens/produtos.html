@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>MapaSeller · Produtos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../mapaseller-tokens.css">
+<style>
+  .toolbar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ms-line);
+    flex-wrap: wrap;
+  }
+  .toolbar .ms-search { flex: 1; min-width: 260px; max-width: 380px; }
+  .toolbar .group { display: flex; gap: 8px; align-items: center; }
+  .meta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--ms-line);
+    background: var(--ms-surface-2);
+    font-size: var(--ms-fs-13);
+    color: var(--ms-text-2);
+  }
+  .meta-row strong { color: var(--ms-ink); font-weight: 600; }
+  .score-bar { width: 80px; height: 6px; background: var(--ms-surface-2); border-radius: var(--ms-radius-pill); overflow: hidden; }
+  .score-bar > div { height: 100%; border-radius: var(--ms-radius-pill); }
+  .prod-thumb {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--ms-surface-2);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ms-text-3); font-size: 10px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .prod-cell { display: flex; align-items: center; gap: 12px; }
+  .prod-name { font-weight: 600; color: var(--ms-ink); font-size: var(--ms-fs-14); }
+  .prod-cat  { font-size: var(--ms-fs-12); color: var(--ms-text-2); margin-top: 2px; }
+  .pagination {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; border-top: 1px solid var(--ms-line);
+    font-size: var(--ms-fs-13); color: var(--ms-text-2);
+  }
+  .page-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid var(--ms-line-2); background: var(--ms-surface);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ms-text); cursor: pointer;
+  }
+  .page-btn.is-active { background: var(--ms-ink); color: #fff; border-color: var(--ms-ink); }
+  .state-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ms-grid-gap); margin-top: 56px; }
+  .state-card {
+    background: var(--ms-surface); border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg); overflow: hidden;
+  }
+  .state-head {
+    padding: 14px 18px; border-bottom: 1px dashed var(--ms-line);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .state-head .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .state-head .label { font-family: var(--ms-font-mono); font-size: var(--ms-fs-11); color: var(--ms-text-2); }
+  .state-body { padding: 24px; }
+</style>
+</head>
+<body>
+
+<div class="ms-shell">
+  <aside class="ms-sidebar">
+    <div class="ms-sidebar-brand">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#5B5BF0" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span class="name">MapaSeller</span>
+      <span class="ver">v1.1</span>
+    </div>
+    <nav class="ms-sidebar-nav">
+      <div class="ms-sidebar-section">Operação</div>
+      <a class="ms-nav-item" href="./dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>Dashboard</a>
+      <a class="ms-nav-item" href="./importar.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2Z"></path><path d="M12 18V9M8 13l4-4 4 4"></path></svg>Importar XLSX</a>
+      <a class="ms-nav-item is-active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>Produtos</a>
+      <a class="ms-nav-item" href="./oportunidades.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>Oportunidades<span class="count">12</span></a>
+      <div class="ms-sidebar-section">Inteligência</div>
+      <a class="ms-nav-item" href="./mercadolivre.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21V3l-6 3v18l6-3 6 3 6-3V3l-6 3"></path><path d="M9 3l6 3"></path></svg>Marketplaces</a>
+      <a class="ms-nav-item" href="./mercadolivre.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path><circle cx="20" cy="4" r="1.5" fill="currentColor"></circle></svg>Inteligência ML</a>
+      <a class="ms-nav-item" href="./anuncios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3l11 5V6L3 11ZM14 9v7M18 12h2M18 8l2-1M18 16l2 1"></path></svg>Anúncios</a>
+      <div class="ms-sidebar-section">Sistema</div>
+      <a class="ms-nav-item" href="./configuracoes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1A2 2 0 1 1 4.4 17l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 4.4l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5h.1a1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 19.6 7l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"></path></svg>Configurações</a>
+    </nav>
+    <div class="ms-sidebar-foot">
+      <div class="ms-sidebar-workspace">
+        <div class="ms-avatar ms-avatar--sq ms-avatar--teal">CL</div>
+        <div class="info"><div class="label">Workspace</div><div class="name">Casa &amp; Lar Brasil</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"></path></svg>
+      </div>
+    </div>
+  </aside>
+
+  <div>
+    <header class="ms-topbar">
+      <div class="ms-topbar-crumbs">
+        <span>Operação</span><span class="sep">/</span><span class="current">Produtos</span>
+      </div>
+      <div class="ms-topbar-actions">
+        <div class="ms-search ms-topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input placeholder="Buscar SKU, pedido, anúncio…" />
+          <span class="ms-kbd">⌘ K</span>
+        </div>
+        <button class="ms-topbar-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg></button>
+        <div class="ms-avatar ms-avatar--sm">RM</div>
+      </div>
+    </header>
+
+    <main class="ms-content">
+      <div class="ms-page-head">
+        <div>
+          <h1 class="ms-page-title">Produtos</h1>
+          <p class="ms-page-desc">3.842 SKUs ativos consolidados das últimas importações. Filtre, ordene e abra qualquer produto para ver inteligência de mercado e histórico.</p>
+        </div>
+        <div class="ms-page-actions">
+          <button class="ms-btn ms-btn--secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path><path d="M5 21h14"></path></svg>
+            Exportar
+          </button>
+          <button class="ms-btn ms-btn--primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+            Novo produto
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick KPIs -->
+      <div class="ms-grid ms-grid-4" style="margin-bottom: var(--ms-grid-gap);">
+        <div class="ms-kpi-card">
+          <div class="ms-kpi-head"><div class="left">Total</div></div>
+          <div class="ms-kpi-body"><span class="ms-kpi-val">3.842</span></div>
+          <span class="ms-kpi-sub">SKUs cadastrados</span>
+        </div>
+        <div class="ms-kpi-card">
+          <div class="ms-kpi-head"><div class="left">Com estoque</div></div>
+          <div class="ms-kpi-body"><span class="ms-kpi-val">2.391</span><span class="ms-badge ms-badge--pos">62%</span></div>
+          <span class="ms-kpi-sub">Disponíveis para anunciar</span>
+        </div>
+        <div class="ms-kpi-card">
+          <div class="ms-kpi-head"><div class="left">Score ≥ 80</div></div>
+          <div class="ms-kpi-body"><span class="ms-kpi-val">218</span><span class="ms-badge ms-badge--brand">Alto</span></div>
+          <span class="ms-kpi-sub">Produtos prioritários</span>
+        </div>
+        <div class="ms-kpi-card">
+          <div class="ms-kpi-head"><div class="left">A revisar</div></div>
+          <div class="ms-kpi-body"><span class="ms-kpi-val">71</span><span class="ms-badge ms-badge--warn">Atenção</span></div>
+          <span class="ms-kpi-sub">Sem SKU ou estoque negativo</span>
+        </div>
+      </div>
+
+      <!-- Main table card -->
+      <div class="ms-card" style="padding: 0;">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="ms-search" style="flex:1; max-width: 380px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input placeholder="Buscar por nome, SKU ou categoria…" />
+          </div>
+          <div class="group">
+            <button class="ms-chip ms-chip--active">Todos</button>
+            <button class="ms-chip">Com estoque</button>
+            <button class="ms-chip">Sem estoque</button>
+            <button class="ms-chip">Score alto</button>
+            <button class="ms-chip">A revisar</button>
+          </div>
+          <div class="group" style="margin-left: auto;">
+            <button class="ms-btn ms-btn--secondary ms-btn--sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 9v6l-4-2v-4L3 5Z"></path></svg>
+              Filtros avançados
+              <span class="ms-badge ms-badge--brand" style="font-size:10px; padding: 2px 6px;">2</span>
+            </button>
+            <button class="ms-btn ms-btn--icon" aria-label="Colunas">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16M15 4v16"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Meta row -->
+        <div class="meta-row">
+          <div><strong>3 selecionados</strong> de 3.842 produtos · ordenado por Score · 60d</div>
+          <div style="display:flex; gap: 12px; align-items: center;">
+            <button class="ms-btn ms-btn--ghost ms-btn--sm">Sincronizar com ML</button>
+            <button class="ms-btn ms-btn--ghost ms-btn--sm">Editar em lote</button>
+            <button class="ms-btn ms-btn--ghost ms-btn--sm" style="color: var(--ms-negative-fg);">Arquivar</button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <table class="ms-table">
+          <thead>
+            <tr>
+              <th style="width:32px; padding-left: 20px;"><span class="ms-check ms-check--on"></span></th>
+              <th>Produto</th>
+              <th>SKU</th>
+              <th class="ms-right">Estoque</th>
+              <th class="ms-right">Vendas 60d</th>
+              <th class="ms-right">Preço médio</th>
+              <th class="ms-right">Custo</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th style="padding-right: 20px;">Origem</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="is-selected">
+              <td style="padding-left: 20px;"><span class="ms-check ms-check--on"></span></td>
+              <td><div class="prod-cell"><div class="prod-thumb">IMG</div><div><div class="prod-name">Jogo Panelas Antiaderente 5 pç</div><div class="prod-cat">Cozinha · Panelas</div></div></div></td>
+              <td class="ms-num">CAS-218</td>
+              <td class="ms-right ms-num">142</td>
+              <td class="ms-right ms-num">684</td>
+              <td class="ms-right ms-num">R$ 289,90</td>
+              <td class="ms-right ms-num">R$ 178,30</td>
+              <td><div style="display:flex; gap:8px; align-items:center;"><div class="score-bar"><div style="width:94%; background:var(--ms-positive-fg);"></div></div><span class="ms-num">94</span></div></td>
+              <td><span class="ms-badge ms-badge--pos">Em alta</span></td>
+              <td style="padding-right: 20px;"><span class="ms-app-ico ms-app-ico--ml" style="width:24px;height:24px;font-size:9px;">ML</span></td>
+            </tr>
+            <tr class="is-selected">
+              <td style="padding-left: 20px;"><span class="ms-check ms-check--on"></span></td>
+              <td><div class="prod-cell"><div class="prod-thumb">IMG</div><div><div class="prod-name">Conjunto Taças Cristal 6 un</div><div class="prod-cat">Mesa · Cristais</div></div></div></td>
+              <td class="ms-num">TAC-088</td>
+              <td class="ms-right ms-num">87</td>
+              <td class="ms-right ms-num">412</td>
+              <td class="ms-right ms-num">R$ 138,00</td>
+              <td class="ms-right ms-num">R$ 81,20</td>
+              <td><div style="display:flex; gap:8px; align-items:center;"><div class="score-bar"><div style="width:91%; background:var(--ms-positive-fg);"></div></div><span class="ms-num">91</span></div></td>
+              <td><span class="ms-badge ms-badge--pos">Em alta</span></td>
+              <td style="padding-right: 20px;"><span class="ms-app-ico ms-app-ico--ml" style="width:24px;height:24px;font-size:9px;">ML</span></td>
+            </tr>
+            <tr class="is-selected">
+              <td style="padding-left: 20px;"><span class="ms-check ms-check--on"></span></td>
+              <td><div class="prod-cell"><div class="prod-thumb">IMG</div><div><div class="prod-name">Faqueiro Inox 24 peças</div><div class="prod-cat">Mesa · Talheres</div></div></div></td>
+              <td class="ms-num">FAQ-141</td>
+              <td class="ms-right ms-num">64</td>
+              <td class="ms-right ms-num">298</td>
+              <td class="ms-right ms-num">R$ 184,50</td>
+              <td class="ms-right ms-num">R$ 112,00</td>
+              <td><div style="display:flex; gap:8px; align-items:center;"><div class="score-bar"><div style="width:88%; background:var(--ms-positive-fg);"></div></div><span class="ms-num">88</span></div></td>
+              <td><span class="ms-badge ms-badge--pos">Em alta</span></td>
+              <td style="padding-right: 20px;"><span class="ms-app-ico ms-app-ico--shopee" style="width:24px;height:24px;font-size:9px;">SP</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left: 20px;"><span class="ms-check"></span></td>
+              <td><div class="prod-cell"><div class="prod-thumb">IMG</div><div><div class="prod-name">Organizador Modular Cozinha</div><div class="prod-cat">Cozinha · Organização</div></div></div></td>
+              <td class="ms-num">ORG-066</td>
+              <td class="ms-right ms-num">58</td>
+              <td class="ms-right ms-num">241</td>
+              <td class="ms-right ms-num">R$ 79,90</td>
+              <td class="ms-right ms-num">R$ 41,80</td>
+              <td><div style="display:flex; gap:8px; align-items:center;"><div class="score-bar"><div style="width:86%; background:var(--ms-positive-fg);"></div></div><span class="ms-num">86</span></div></td>
+              <td><span class="ms-badge ms-badge--pos">Em alta</span></td>
+              <td style="padding-right: 20px;"><span class="ms-app-ico ms-app-ico--ml" style="width:24px;height:24px;font-size:9px;">ML</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left: 20px;"><span class="ms-check"></span></td>
+              <td><div class="prod-cell"><div class="prod-thumb">IMG</div><div><div class="prod-name">Travessa Refratária 2,5L</div><div class="prod-cat">Cozinha · Refratários</div></div></div></td>
+              <td class="ms-num">REF-302</td>
+              <td class="ms-right ms-num">12</td>
+              <td class="ms-right ms-num">188</td>
+              <td class="ms-right ms-num">R$ 64,90</td>
+              <td class="ms-right ms-num">R$ 32,10</td>
+              <td><div style="display:flex; gap:8px; align-items:center;"><div class="score-bar"><div style="width:74%; background:var(--ms-brand-600);"></div></div><span class="ms-num">74</span></div></td>
+              <td><span class="ms-badge ms-badge--warn">Repor</span></td>
+              <td style="padding-right: 20px;"><span class="ms-app-ico ms-app-ico--ml" style="width:24px;height:24px;font-size:9px;">ML</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left: 20px;"><span class="ms-check"></span></td>
+              <td><div class="prod-cell"><div class="prod-thumb">IMG</div><div><div class="prod-name">Liquidificador 1200W Inox</div><div class="prod-cat">Eletro · Cozinha</div></div></div></td>
+              <td class="ms-num">ELE-077</td>
+              <td class="ms-right ms-num">31</td>
+              <td class="ms-right ms-num">154</td>
+              <td class="ms-right ms-num">R$ 248,00</td>
+              <td class="ms-right ms-num">R$ 161,50</td>
+              <td><div style="display:flex; gap:8px; align-items:center;"><div class="score-bar"><div style="width:68%; background:var(--ms-brand-600);"></div></div><span class="ms-num">68</span></div></td>
+              <td><span class="ms-badge ms-badge--info">Estável</span></td>
+              <td style="padding-right: 20px;"><span class="ms-app-ico ms-app-ico--magalu" style="width:24px;height:24px;font-size:9px;">MG</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left: 20px;"><span class="ms-check"></span></td>
+              <td><div class="prod-cell"><div class="prod-thumb">IMG</div><div><div class="prod-name">Tábua Bambu Premium 45cm</div><div class="prod-cat">Cozinha · Tábuas</div></div></div></td>
+              <td class="ms-num">TBU-044</td>
+              <td class="ms-right ms-num">0</td>
+              <td class="ms-right ms-num">88</td>
+              <td class="ms-right ms-num">R$ 54,90</td>
+              <td class="ms-right ms-num">R$ 24,40</td>
+              <td><div style="display:flex; gap:8px; align-items:center;"><div class="score-bar"><div style="width:54%; background:var(--ms-warning-fg);"></div></div><span class="ms-num">54</span></div></td>
+              <td><span class="ms-badge ms-badge--neg">Esgotado</span></td>
+              <td style="padding-right: 20px;"><span class="ms-app-ico ms-app-ico--shopee" style="width:24px;height:24px;font-size:9px;">SP</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left: 20px;"><span class="ms-check"></span></td>
+              <td><div class="prod-cell"><div class="prod-thumb">IMG</div><div><div class="prod-name">Toalha mesa 8 lugares</div><div class="prod-cat">Mesa · Têxtil</div></div></div></td>
+              <td class="ms-num" style="color: var(--ms-warning-fg);">—</td>
+              <td class="ms-right ms-num">22</td>
+              <td class="ms-right ms-num">42</td>
+              <td class="ms-right ms-num">R$ 64,00</td>
+              <td class="ms-right ms-num">R$ 28,00</td>
+              <td><div style="display:flex; gap:8px; align-items:center;"><div class="score-bar"><div style="width:38%; background:var(--ms-warning-fg);"></div></div><span class="ms-num">38</span></div></td>
+              <td><span class="ms-badge ms-badge--warn">Sem SKU</span></td>
+              <td style="padding-right: 20px;"><span class="ms-app-ico ms-app-ico--ml" style="width:24px;height:24px;font-size:9px;">ML</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <span>Mostrando <strong style="color:var(--ms-ink);">1–25</strong> de <strong style="color:var(--ms-ink);">3.842</strong></span>
+          <div style="display:flex; gap: 6px; align-items: center;">
+            <button class="page-btn" aria-label="Anterior"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"></path></svg></button>
+            <button class="page-btn is-active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">…</button>
+            <button class="page-btn">154</button>
+            <button class="page-btn" aria-label="Próximo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- State variations -->
+      <div class="state-grid">
+        <div class="state-card">
+          <div class="state-head">
+            <span class="dot" style="background: var(--ms-text-3);"></span>
+            <span class="label">01 · loading / skeleton</span>
+          </div>
+          <div class="state-body">
+            <div style="display: grid; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="ms-skeleton" style="height: 36px; width: 36px; border-radius: 8px;"></div>
+                <div style="flex:1; display: grid; gap: 6px;">
+                  <div class="ms-skeleton" style="height: 14px; width: 60%;"></div>
+                  <div class="ms-skeleton" style="height: 12px; width: 40%;"></div>
+                </div>
+                <div class="ms-skeleton" style="height: 12px; width: 60px;"></div>
+                <div class="ms-skeleton" style="height: 24px; width: 70px; border-radius: 6px;"></div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="ms-skeleton" style="height: 36px; width: 36px; border-radius: 8px;"></div>
+                <div style="flex:1; display: grid; gap: 6px;">
+                  <div class="ms-skeleton" style="height: 14px; width: 70%;"></div>
+                  <div class="ms-skeleton" style="height: 12px; width: 35%;"></div>
+                </div>
+                <div class="ms-skeleton" style="height: 12px; width: 60px;"></div>
+                <div class="ms-skeleton" style="height: 24px; width: 70px; border-radius: 6px;"></div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="ms-skeleton" style="height: 36px; width: 36px; border-radius: 8px;"></div>
+                <div style="flex:1; display: grid; gap: 6px;">
+                  <div class="ms-skeleton" style="height: 14px; width: 55%;"></div>
+                  <div class="ms-skeleton" style="height: 12px; width: 42%;"></div>
+                </div>
+                <div class="ms-skeleton" style="height: 12px; width: 60px;"></div>
+                <div class="ms-skeleton" style="height: 24px; width: 70px; border-radius: 6px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-card">
+          <div class="state-head">
+            <span class="dot" style="background: var(--ms-warning-fg);"></span>
+            <span class="label">02 · empty / nenhum produto</span>
+          </div>
+          <div class="state-body">
+            <div class="ms-empty" style="padding: 24px 0;">
+              <div class="ms-empty-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>
+              </div>
+              <h3 class="ms-empty-title">Nenhum produto importado ainda</h3>
+              <p class="ms-empty-desc">Comece pelo upload do seu XLSX de vendidos e estoque. Em menos de 1 minuto seus produtos estarão aqui.</p>
+              <button class="ms-btn ms-btn--primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18V9M8 13l4-4 4 4"></path></svg>
+                Importar planilha
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

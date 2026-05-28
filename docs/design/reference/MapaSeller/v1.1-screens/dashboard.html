@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>MapaSeller · Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../mapaseller-tokens.css">
+<style>
+  /* Screen-specific helpers */
+  .insight-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--ms-grid-gap); }
+  .secondary-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--ms-grid-gap); margin-top: var(--ms-grid-gap); }
+  .alert-list { display: grid; gap: 12px; }
+  .alert-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    border-radius: var(--ms-radius-md);
+    background: var(--ms-surface-2);
+  }
+  .alert-item .ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .alert-item .ico svg { width: 18px; height: 18px; }
+  .alert-item.danger .ico { background: var(--ms-negative-bg); color: var(--ms-negative-fg); }
+  .alert-item.warn .ico { background: var(--ms-warning-bg); color: var(--ms-warning-fg); }
+  .alert-item.info .ico { background: var(--ms-info-bg); color: var(--ms-info-fg); }
+  .alert-item .body { flex: 1; min-width: 0; }
+  .alert-item .title { font-size: var(--ms-fs-14); font-weight: 600; color: var(--ms-ink); }
+  .alert-item .desc { font-size: var(--ms-fs-13); color: var(--ms-text-2); margin-top: 2px; }
+  .alert-item .count { font-family: var(--ms-font-mono); font-size: var(--ms-fs-14); color: var(--ms-ink); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="ms-shell">
+
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="ms-sidebar">
+    <div class="ms-sidebar-brand">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#5B5BF0" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span class="name">MapaSeller</span>
+      <span class="ver">v1.1</span>
+    </div>
+    <nav class="ms-sidebar-nav">
+      <div class="ms-sidebar-section">Operação</div>
+      <a class="ms-nav-item is-active" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+        Dashboard
+      </a>
+      <a class="ms-nav-item" href="../v1.1-screens/importar.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2Z"></path><path d="M12 18V9M8 13l4-4 4 4"></path></svg>
+        Importar XLSX
+      </a>
+      <a class="ms-nav-item" href="../v1.1-screens/produtos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>
+        Produtos
+      </a>
+      <a class="ms-nav-item" href="../v1.1-screens/oportunidades.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>
+        Oportunidades
+        <span class="count">12</span>
+      </a>
+
+      <div class="ms-sidebar-section">Inteligência</div>
+      <a class="ms-nav-item" href="../v1.1-screens/mercadolivre.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21V3l-6 3v18l6-3 6 3 6-3V3l-6 3"></path><path d="M9 3l6 3"></path></svg>
+        Marketplaces
+      </a>
+      <a class="ms-nav-item" href="../v1.1-screens/mercadolivre.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path><circle cx="20" cy="4" r="1.5" fill="currentColor"></circle></svg>
+        Inteligência ML
+      </a>
+      <a class="ms-nav-item" href="../v1.1-screens/anuncios.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3l11 5V6L3 11ZM14 9v7M18 12h2M18 8l2-1M18 16l2 1"></path></svg>
+        Anúncios
+      </a>
+
+      <div class="ms-sidebar-section">Sistema</div>
+      <a class="ms-nav-item" href="../v1.1-screens/configuracoes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1A2 2 0 1 1 4.4 17l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 4.4l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5h.1a1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 19.6 7l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"></path></svg>
+        Configurações
+      </a>
+    </nav>
+    <div class="ms-sidebar-foot">
+      <div class="ms-sidebar-workspace">
+        <div class="ms-avatar ms-avatar--sq ms-avatar--teal">CL</div>
+        <div class="info">
+          <div class="label">Workspace</div>
+          <div class="name">Casa &amp; Lar Brasil</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"></path></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============== MAIN ============== -->
+  <div>
+    <header class="ms-topbar">
+      <div class="ms-topbar-crumbs">
+        <span>Operação</span>
+        <span class="sep">/</span>
+        <span class="current">Dashboard</span>
+      </div>
+      <div class="ms-topbar-actions">
+        <div class="ms-search ms-topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input placeholder="Buscar SKU, pedido, anúncio…" />
+          <span class="ms-kbd">⌘ K</span>
+        </div>
+        <button class="ms-topbar-icon-btn" aria-label="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+          <span class="dot"></span>
+        </button>
+        <div class="ms-avatar ms-avatar--sm">RM</div>
+      </div>
+    </header>
+
+    <main class="ms-content">
+
+      <!-- Page head -->
+      <div class="ms-page-head">
+        <div>
+          <h1 class="ms-page-title">Visão geral</h1>
+          <p class="ms-page-desc">Sua operação consolidada de marketplaces — estoque, vendas, oportunidades e alertas em um único painel.</p>
+        </div>
+        <div class="ms-page-actions">
+          <button class="ms-btn ms-btn--secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+            Últimos 30 dias
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <button class="ms-btn ms-btn--secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path><path d="M5 21h14"></path></svg>
+            Exportar
+          </button>
+          <button class="ms-btn ms-btn--primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+            Importar planilha
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI row -->
+      <div class="ms-grid ms-grid-4">
+        <div class="ms-kpi-card">
+          <div class="ms-kpi-head">
+            <div class="left">
+              <span class="ms-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg></span>
+              Total de produtos
+            </div>
+          </div>
+          <div class="ms-kpi-body">
+            <span class="ms-kpi-val">3.842</span>
+            <span class="ms-badge ms-badge--pos">+128</span>
+          </div>
+          <span class="ms-kpi-sub">2.391 com estoque · 1.451 sem</span>
+        </div>
+
+        <div class="ms-kpi-card">
+          <div class="ms-kpi-head">
+            <div class="left">
+              <span class="ms-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path></svg></span>
+              Vendidos 60d
+            </div>
+          </div>
+          <div class="ms-kpi-body">
+            <span class="ms-kpi-val">9.471</span>
+            <span class="ms-badge ms-badge--pos">15,8% ↗</span>
+          </div>
+          <span class="ms-kpi-sub">Pedidos consolidados nos marketplaces</span>
+        </div>
+
+        <div class="ms-kpi-card">
+          <div class="ms-kpi-head">
+            <div class="left">
+              <span class="ms-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg></span>
+              Score alto
+            </div>
+          </div>
+          <div class="ms-kpi-body">
+            <span class="ms-kpi-val">218</span>
+            <span class="ms-badge ms-badge--brand">≥ 80</span>
+          </div>
+          <span class="ms-kpi-sub">Produtos com forte potencial de venda</span>
+        </div>
+
+        <div class="ms-kpi-card">
+          <div class="ms-kpi-head">
+            <div class="left">
+              <span class="ms-kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg></span>
+              Reposição urgente
+            </div>
+          </div>
+          <div class="ms-kpi-body">
+            <span class="ms-kpi-val">37</span>
+            <span class="ms-badge ms-badge--neg">−12</span>
+          </div>
+          <span class="ms-kpi-sub">SKUs com estoque ≤ 5 dias</span>
+        </div>
+      </div>
+
+      <!-- Insight row: chart + side -->
+      <div class="insight-row" style="margin-top: var(--ms-grid-gap);">
+        <div class="ms-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+            <div>
+              <div class="ms-caps">GMV consolidado · últimos 90 dias</div>
+              <div class="ms-h2" style="margin-top:6px;">R$ 1,24M</div>
+              <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+                <span class="ms-badge ms-badge--pos">18,4% ↗</span>
+                <span class="ms-small">+ R$ 192k vs. trimestre anterior</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="ms-chip ms-chip--active">90d</button>
+              <button class="ms-chip">60d</button>
+              <button class="ms-chip">30d</button>
+              <button class="ms-chip">7d</button>
+            </div>
+          </div>
+          <div class="ms-chart-bars" style="margin-top: 24px;">
+            <!-- 12 weeks -->
+            <div class="col"><div class="ms-bar" style="height:36px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:16px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:10px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:42px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:18px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:12px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:48px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:14px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:14px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:54px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:22px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:16px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:60px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:20px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:18px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:72px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:24px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:20px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:80px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:28px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:22px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:88px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:34px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:24px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:92px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:30px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:26px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:110px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:38px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:24px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:96px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:32px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:28px; background:var(--ms-chart-blue-500);"></div></div>
+            <div class="col"><div class="ms-bar" style="height:120px; background:var(--ms-chart-indigo-900);"></div><div class="ms-bar" style="height:40px; background:var(--ms-chart-violet-500);"></div><div class="ms-bar" style="height:30px; background:var(--ms-chart-blue-500);"></div></div>
+          </div>
+          <div class="ms-legend">
+            <span><span class="key" style="background:var(--ms-chart-indigo-900);"></span>Mercado Livre · 68%</span>
+            <span><span class="key" style="background:var(--ms-chart-violet-500);"></span>Shopee · 21%</span>
+            <span><span class="key" style="background:var(--ms-chart-blue-500);"></span>Outros · 11%</span>
+          </div>
+        </div>
+
+        <div class="ms-card">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div class="ms-caps">Match por SKU</div>
+            <span class="ms-badge ms-badge--brand">68,2%</span>
+          </div>
+          <div style="font-size: var(--ms-fs-28); font-weight:500; letter-spacing:-0.02em; margin-top: 8px;">2.623 / 3.842</div>
+          <p class="ms-small" style="margin: 8px 0 0;">SKUs reconhecidos com origem confiável entre as bases Vendidos e Estoque.</p>
+
+          <div style="margin-top:20px; display:grid; gap:12px;">
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:var(--ms-fs-13); margin-bottom:6px;">
+                <span style="color:var(--ms-text);">Match exato (SKU)</span>
+                <span class="ms-mono" style="font-size:12px;">2.623</span>
+              </div>
+              <div class="ms-progress"><div class="ms-progress-fill" style="width:68%;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:var(--ms-fs-13); margin-bottom:6px;">
+                <span style="color:var(--ms-text);">Match fuzzy (título)</span>
+                <span class="ms-mono" style="font-size:12px;">718</span>
+              </div>
+              <div class="ms-progress"><div class="ms-progress-fill" style="width:19%; background:var(--ms-chart-violet-500);"></div></div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:var(--ms-fs-13); margin-bottom:6px;">
+                <span style="color:var(--ms-text);">Sem SKU confiável</span>
+                <span class="ms-mono" style="font-size:12px;">501</span>
+              </div>
+              <div class="ms-progress"><div class="ms-progress-fill" style="width:13%; background:var(--ms-warning-fg);"></div></div>
+            </div>
+          </div>
+
+          <button class="ms-btn ms-btn--ghost ms-btn--sm" style="margin-top: 16px; padding-left: 0;">
+            Ver detalhamento
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Secondary row: alerts + opportunities -->
+      <div class="secondary-row">
+        <div class="ms-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px;">
+            <div>
+              <div class="ms-caps">Alertas operacionais</div>
+              <div class="ms-h3" style="margin-top:4px;">Ação recomendada</div>
+            </div>
+            <button class="ms-btn ms-btn--ghost ms-btn--sm">Ver todos</button>
+          </div>
+
+          <div class="alert-list">
+            <div class="alert-item danger">
+              <div class="ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+              </div>
+              <div class="body">
+                <div class="title">Estoque negativo em 9 SKUs</div>
+                <div class="desc">Inconsistência entre vendido e disponível — risco de overselling no Mercado Livre.</div>
+              </div>
+              <div class="count">9</div>
+            </div>
+            <div class="alert-item warn">
+              <div class="ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"></path><path d="M21 3v5h-5"></path></svg>
+              </div>
+              <div class="body">
+                <div class="title">Reposição urgente</div>
+                <div class="desc">37 SKUs com cobertura de estoque abaixo de 5 dias com base na média de venda.</div>
+              </div>
+              <div class="count">37</div>
+            </div>
+            <div class="alert-item info">
+              <div class="ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+              </div>
+              <div class="body">
+                <div class="title">Sem SKU confiável</div>
+                <div class="desc">501 itens não conseguiram match exato — revise códigos antes da próxima importação.</div>
+              </div>
+              <div class="count">501</div>
+            </div>
+            <div class="alert-item warn">
+              <div class="ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M5 9l7-7 7 7"></path></svg>
+              </div>
+              <div class="body">
+                <div class="title">Reprecificação sugerida</div>
+                <div class="desc">42 anúncios fora da faixa de Buy Box — sugestões prontas em Inteligência ML.</div>
+              </div>
+              <div class="count">42</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ms-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px;">
+            <div>
+              <div class="ms-caps">Top oportunidades</div>
+              <div class="ms-h3" style="margin-top:4px;">Produtos com maior upside</div>
+            </div>
+            <button class="ms-btn ms-btn--ghost ms-btn--sm">Abrir</button>
+          </div>
+
+          <div style="display:grid; gap: 10px;">
+            <div style="display:flex; gap:12px; align-items:center; padding: 12px; border: 1px solid var(--ms-line); border-radius: var(--ms-radius-md);">
+              <div style="width:40px; height:40px; border-radius:8px; background:var(--ms-surface-2); display:flex; align-items:center; justify-content:center; color:var(--ms-text-3); font-size:11px; font-weight:600;">IMG</div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:var(--ms-fs-13); font-weight:600; color:var(--ms-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Jogo Panelas Antiaderente 5 pç</div>
+                <div class="ms-meta">SKU CAS-218 · margem 38%</div>
+              </div>
+              <span class="ms-badge ms-badge--pos">Score 94</span>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center; padding: 12px; border: 1px solid var(--ms-line); border-radius: var(--ms-radius-md);">
+              <div style="width:40px; height:40px; border-radius:8px; background:var(--ms-surface-2); display:flex; align-items:center; justify-content:center; color:var(--ms-text-3); font-size:11px; font-weight:600;">IMG</div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:var(--ms-fs-13); font-weight:600; color:var(--ms-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Conjunto Taças Cristal 6 un</div>
+                <div class="ms-meta">SKU TAC-088 · margem 41%</div>
+              </div>
+              <span class="ms-badge ms-badge--pos">Score 91</span>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center; padding: 12px; border: 1px solid var(--ms-line); border-radius: var(--ms-radius-md);">
+              <div style="width:40px; height:40px; border-radius:8px; background:var(--ms-surface-2); display:flex; align-items:center; justify-content:center; color:var(--ms-text-3); font-size:11px; font-weight:600;">IMG</div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:var(--ms-fs-13); font-weight:600; color:var(--ms-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Faqueiro Inox 24 peças</div>
+                <div class="ms-meta">SKU FAQ-141 · margem 33%</div>
+              </div>
+              <span class="ms-badge ms-badge--pos">Score 88</span>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center; padding: 12px; border: 1px solid var(--ms-line); border-radius: var(--ms-radius-md);">
+              <div style="width:40px; height:40px; border-radius:8px; background:var(--ms-surface-2); display:flex; align-items:center; justify-content:center; color:var(--ms-text-3); font-size:11px; font-weight:600;">IMG</div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:var(--ms-fs-13); font-weight:600; color:var(--ms-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Organizador Modular Cozinha</div>
+                <div class="ms-meta">SKU ORG-066 · margem 36%</div>
+              </div>
+              <span class="ms-badge ms-badge--pos">Score 86</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom: marketplace performance table -->
+      <div class="ms-card" style="margin-top: var(--ms-grid-gap); padding: 0;">
+        <div style="padding: 18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom: 1px solid var(--ms-line);">
+          <div>
+            <div class="ms-caps">Desempenho por marketplace</div>
+            <div class="ms-h3" style="margin-top:4px;">Origem: vendidos + estoque (60d)</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="ms-chip ms-chip--active">Todos</button>
+            <button class="ms-chip">Casa &amp; Lar</button>
+            <button class="ms-chip">Utilidades</button>
+            <button class="ms-chip">Cozinha</button>
+          </div>
+        </div>
+        <table class="ms-table">
+          <thead>
+            <tr>
+              <th style="width:32px; padding-left: 24px;"><span class="ms-check"></span></th>
+              <th>Marketplace</th>
+              <th>Produtos ativos</th>
+              <th>Vendidos 60d</th>
+              <th>GMV</th>
+              <th style="width: 22%;">Share</th>
+              <th class="ms-right" style="padding-right: 24px;">Margem média</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left: 24px;"><span class="ms-check ms-check--on"></span></td>
+              <td><div class="ms-app-cell"><span class="ms-app-ico ms-app-ico--ml">ML</span>Mercado Livre</div></td>
+              <td class="ms-num">2.184</td>
+              <td class="ms-num">6.412</td>
+              <td class="ms-num">R$ 842,1k</td>
+              <td>
+                <div style="display:flex; gap:12px; align-items:center;">
+                  <div class="ms-progress" style="flex:1;"><div class="ms-progress-fill" style="width:68%;"></div></div>
+                  <span class="ms-num">68%</span>
+                </div>
+              </td>
+              <td class="ms-right ms-num" style="padding-right: 24px;">34,2%</td>
+            </tr>
+            <tr>
+              <td style="padding-left: 24px;"><span class="ms-check"></span></td>
+              <td><div class="ms-app-cell"><span class="ms-app-ico ms-app-ico--shopee">SP</span>Shopee</div></td>
+              <td class="ms-num">1.218</td>
+              <td class="ms-num">1.987</td>
+              <td class="ms-num">R$ 261,3k</td>
+              <td>
+                <div style="display:flex; gap:12px; align-items:center;">
+                  <div class="ms-progress" style="flex:1;"><div class="ms-progress-fill" style="width:21%; background:var(--ms-brand-700);"></div></div>
+                  <span class="ms-num">21%</span>
+                </div>
+              </td>
+              <td class="ms-right ms-num" style="padding-right: 24px;">27,8%</td>
+            </tr>
+            <tr>
+              <td style="padding-left: 24px;"><span class="ms-check"></span></td>
+              <td><div class="ms-app-cell"><span class="ms-app-ico ms-app-ico--amazon">AZ</span>Amazon</div></td>
+              <td class="ms-num">312</td>
+              <td class="ms-num">684</td>
+              <td class="ms-num">R$ 91,8k</td>
+              <td>
+                <div style="display:flex; gap:12px; align-items:center;">
+                  <div class="ms-progress" style="flex:1;"><div class="ms-progress-fill" style="width:7%; background:var(--ms-chart-violet-500);"></div></div>
+                  <span class="ms-num">7%</span>
+                </div>
+              </td>
+              <td class="ms-right ms-num" style="padding-right: 24px;">29,1%</td>
+            </tr>
+            <tr>
+              <td style="padding-left: 24px;"><span class="ms-check"></span></td>
+              <td><div class="ms-app-cell"><span class="ms-app-ico ms-app-ico--magalu">MG</span>Magalu</div></td>
+              <td class="ms-num">128</td>
+              <td class="ms-num">388</td>
+              <td class="ms-num">R$ 51,2k</td>
+              <td>
+                <div style="display:flex; gap:12px; align-items:center;">
+                  <div class="ms-progress" style="flex:1;"><div class="ms-progress-fill" style="width:4%; background:var(--ms-chart-teal-500);"></div></div>
+                  <span class="ms-num">4%</span>
+                </div>
+              </td>
+              <td class="ms-right ms-num" style="padding-right: 24px;">31,4%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

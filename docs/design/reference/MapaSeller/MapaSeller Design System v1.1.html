@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1320" />
+<title>MapaSeller — Design System v1.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mapaseller-tokens.css">
+<style>
+  body { background: var(--ms-bg); }
+
+  /* — Doc layout — */
+  .doc {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1480px;
+    margin: 0 auto;
+    gap: 64px;
+    padding: 0 56px 120px;
+  }
+
+  /* — Sticky TOC — */
+  .toc {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    padding: 32px 0;
+  }
+  .toc-brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--ms-line);
+  }
+  .toc-brand svg { width: 28px; height: 28px; }
+  .toc-brand .name { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+  .toc-brand .ver {
+    margin-left: auto;
+    font-family: var(--ms-font-mono); font-size: 11px;
+    padding: 3px 8px; background: var(--ms-surface); border: 1px solid var(--ms-line);
+    border-radius: 6px; color: var(--ms-text-2);
+  }
+  .toc-group { margin-bottom: 24px; }
+  .toc-group-title {
+    font-family: var(--ms-font-mono);
+    font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ms-text-3); font-weight: 600;
+    margin-bottom: 8px; padding: 0 8px;
+  }
+  .toc-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 8px; border-radius: 6px;
+    font-size: var(--ms-fs-13); color: var(--ms-text-2);
+    text-decoration: none;
+    transition: background var(--ms-dur-fast) var(--ms-ease);
+  }
+  .toc-link .n {
+    font-family: var(--ms-font-mono); font-size: 11px;
+    color: var(--ms-text-3); font-weight: 600;
+    width: 22px;
+  }
+  .toc-link:hover { background: var(--ms-surface); color: var(--ms-ink); }
+  .toc-link.is-active { background: var(--ms-ink); color: #fff; }
+  .toc-link.is-active .n { color: rgba(255,255,255,.6); }
+
+  /* — Main content — */
+  .content {
+    padding: 32px 0;
+    min-width: 0;
+  }
+
+  /* — Header — */
+  .doc-header {
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--ms-line);
+    margin-bottom: 64px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    flex-wrap: wrap; gap: 24px;
+  }
+  .doc-eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .14em;
+    color: var(--ms-text-2); text-transform: uppercase; margin: 0 0 14px;
+  }
+  .doc-title {
+    font-size: 56px; line-height: 1;
+    letter-spacing: -0.03em; font-weight: 700; margin: 0;
+  }
+  .doc-title em { font-style: normal; color: var(--ms-brand-600); }
+  .doc-sub {
+    font-size: 16px; color: var(--ms-text-2);
+    margin: 18px 0 0; max-width: 640px; line-height: 1.55;
+  }
+  .doc-stamp {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 16px; background: var(--ms-surface);
+    border: 1px solid var(--ms-line); border-radius: var(--ms-radius-pill);
+    font-size: 12px; color: var(--ms-text-2); font-weight: 500;
+  }
+  .doc-stamp .dot { width: 8px; height: 8px; background: var(--ms-chart-teal-500); border-radius: 50%; }
+
+  /* — Section — */
+  .section { margin-bottom: 88px; scroll-margin-top: 24px; }
+  .section-head {
+    display: flex; align-items: baseline; gap: 16px;
+    padding-bottom: 16px; margin-bottom: 28px;
+    border-bottom: 1px solid var(--ms-line);
+  }
+  .section-num {
+    font-family: var(--ms-font-mono); font-size: 13px;
+    color: var(--ms-brand-600); letter-spacing: .05em;
+  }
+  .section-title { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+  .section-desc {
+    font-size: 15px; color: var(--ms-text-2);
+    margin: 8px 0 28px; max-width: 760px; line-height: 1.6;
+  }
+
+  /* — Screen embed — */
+  .screen-frame {
+    background: var(--ms-surface);
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--ms-shadow-card);
+  }
+  .screen-frame-head {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--ms-line);
+    background: var(--ms-surface-2);
+  }
+  .screen-frame-head .lights {
+    display: flex; gap: 6px;
+  }
+  .screen-frame-head .lights span {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--ms-line-2);
+  }
+  .screen-frame-head .url {
+    flex: 1;
+    background: var(--ms-surface);
+    border: 1px solid var(--ms-line);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: var(--ms-font-mono); font-size: 11px;
+    color: var(--ms-text-2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .screen-frame-head .url svg { width: 12px; height: 12px; }
+  .screen-frame-head .url strong { color: var(--ms-ink); font-weight: 600; }
+  .screen-frame-head a {
+    font-size: var(--ms-fs-12); color: var(--ms-brand-600);
+    text-decoration: none; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .screen-frame-head a svg { width: 12px; height: 12px; }
+  .screen-stage {
+    position: relative;
+    width: 100%;
+    height: 780px;
+    overflow: hidden;
+    background: var(--ms-bg);
+  }
+  .screen-stage iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1440px; height: 1300px;
+    border: 0;
+    transform-origin: top left;
+    /* JS will set scale on resize; default ~0.7 for 1000px container */
+    transform: scale(0.69);
+  }
+
+  /* — Spec callouts — */
+  .spec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+  .spec-card {
+    background: var(--ms-surface);
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-md);
+    padding: 16px;
+  }
+  .spec-card .key {
+    font-family: var(--ms-font-mono); font-size: 11px;
+    color: var(--ms-text-2); margin-bottom: 4px;
+  }
+  .spec-card .val {
+    font-family: var(--ms-font-mono); font-size: var(--ms-fs-15);
+    color: var(--ms-ink); font-weight: 600;
+  }
+  .spec-card .desc {
+    font-size: var(--ms-fs-12); color: var(--ms-text-2);
+    margin-top: 4px; line-height: 1.45;
+  }
+
+  /* — Shell illustration — */
+  .shell-illu {
+    background: var(--ms-bg);
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg);
+    padding: 32px;
+    overflow: hidden;
+    position: relative;
+  }
+  .shell-diagram {
+    background: var(--ms-surface);
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-md);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    height: 360px;
+    box-shadow: var(--ms-shadow-card);
+  }
+  .shell-side {
+    background: var(--ms-surface);
+    border-right: 1px solid var(--ms-line);
+    padding: 14px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .shell-top {
+    height: 56px;
+    border-bottom: 1px solid var(--ms-line);
+    background: var(--ms-surface);
+    display: flex; align-items: center; padding: 0 20px; gap: 12px;
+  }
+  .shell-body { background: var(--ms-bg); padding: 24px; }
+  .shell-row { display: flex; align-items: center; gap: 8px; }
+  .shell-bar {
+    height: 8px; border-radius: 4px;
+    background: var(--ms-line);
+  }
+  .label-pin {
+    position: absolute;
+    background: var(--ms-ink); color: #fff;
+    font-family: var(--ms-font-mono); font-size: 10px;
+    padding: 4px 8px; border-radius: 6px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .label-pin::before {
+    content: '';
+    position: absolute;
+    width: 1px;
+    background: var(--ms-ink);
+  }
+
+  /* — Anatomy — */
+  .anatomy-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--ms-fs-13);
+  }
+  .anatomy-table thead th {
+    text-align: left;
+    padding: 12px 14px;
+    background: var(--ms-surface-2);
+    color: var(--ms-text-2);
+    font-weight: 600;
+    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    border-bottom: 1px solid var(--ms-line);
+  }
+  .anatomy-table thead th:first-child { border-radius: var(--ms-radius-md) 0 0 0; }
+  .anatomy-table thead th:last-child { border-radius: 0 var(--ms-radius-md) 0 0; }
+  .anatomy-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--ms-line);
+    vertical-align: top;
+  }
+  .anatomy-table tr:last-child td { border-bottom: 0; }
+  .anatomy-table .comp { font-weight: 600; color: var(--ms-ink); }
+  .anatomy-table .mono { font-family: var(--ms-font-mono); font-size: 12px; color: var(--ms-text); }
+
+  /* — Token blocks — */
+  .token-block {
+    background: var(--ms-ink); color: #E6E8EE;
+    border-radius: var(--ms-radius-md);
+    padding: 24px 28px;
+    font-family: var(--ms-font-mono);
+    font-size: 13px;
+    line-height: 1.65;
+    overflow-x: auto;
+  }
+  .token-block .com { color: #7A7C84; }
+  .token-block .key { color: #A5C6FF; }
+  .token-block .val { color: #FFD680; }
+  .token-block .str { color: #C7F4E7; }
+  .token-block .sel { color: #FFB3A9; }
+
+  /* — Responsive layout viz — */
+  .device-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .device-card {
+    background: var(--ms-surface); border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-md); overflow: hidden;
+  }
+  .device-card .preview {
+    background: var(--ms-bg);
+    aspect-ratio: 4 / 3;
+    padding: 12px;
+    display: flex; gap: 6px;
+  }
+  .device-card .preview .side {
+    background: var(--ms-surface); border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .device-card .preview .main {
+    background: var(--ms-surface); border-radius: 4px;
+    flex: 1;
+    display: flex; flex-direction: column; gap: 4px; padding: 6px;
+  }
+  .device-card .preview .main > div { background: var(--ms-line); border-radius: 2px; height: 12px; }
+  .device-card .preview .main > div:first-child { width: 50%; height: 8px; }
+  .device-card .meta {
+    padding: 12px 14px;
+    border-top: 1px solid var(--ms-line);
+  }
+  .device-card .meta .name { font-size: var(--ms-fs-13); font-weight: 600; color: var(--ms-ink); }
+  .device-card .meta .size { font-family: var(--ms-font-mono); font-size: 11px; color: var(--ms-text-2); margin-top: 2px; }
+  .device-card.lg-1440 .preview .side { width: 30%; }
+  .device-card.lg-1280 .preview .side { width: 25%; }
+  .device-card.md-1024 .preview .side { width: 12%; }
+  .device-card.sm-mobile .preview { flex-direction: column; }
+  .device-card.sm-mobile .preview .side { width: 100%; height: 14%; }
+  .device-card.sm-mobile .preview .main { flex: 1; }
+
+  /* — Phase plan — */
+  .phase-list { display: grid; gap: 16px; }
+  .phase {
+    background: var(--ms-surface); border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg); padding: 22px 24px;
+    display: grid; grid-template-columns: 48px 1fr; gap: 18px;
+    align-items: flex-start;
+  }
+  .phase-num {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--ms-brand-50); color: var(--ms-brand-700);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: var(--ms-fs-15);
+    font-family: var(--ms-font-mono);
+  }
+  .phase-title { font-size: var(--ms-fs-18); font-weight: 600; margin: 0 0 4px; }
+  .phase-desc { font-size: var(--ms-fs-13); color: var(--ms-text-2); margin: 0 0 12px; }
+  .phase-tasks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .phase-tasks li {
+    font-size: var(--ms-fs-13); color: var(--ms-text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .phase-tasks li::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ms-brand-600);
+    flex-shrink: 0;
+  }
+
+  /* — Design contract — */
+  .contract-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .contract-item {
+    background: var(--ms-surface);
+    border: 1px solid var(--ms-line);
+    border-left: 3px solid var(--ms-negative-fg);
+    border-radius: var(--ms-radius-md);
+    padding: 16px 18px;
+  }
+  .contract-item .head {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; color: var(--ms-ink);
+    font-size: var(--ms-fs-14);
+  }
+  .contract-item .head svg {
+    width: 16px; height: 16px; color: var(--ms-negative-fg);
+  }
+  .contract-item .why {
+    font-size: var(--ms-fs-12); color: var(--ms-text-2);
+    margin-top: 6px; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+  <!-- ========================== TOC ========================== -->
+  <aside class="toc">
+    <div class="toc-brand">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#5B5BF0" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span class="name">MapaSeller</span>
+      <span class="ver">v1.1</span>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-group-title">Foundations</div>
+      <a class="toc-link is-active" href="#shell"><span class="n">01</span>App Shell</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-group-title">Telas completas</div>
+      <a class="toc-link" href="#dashboard"><span class="n">02</span>Dashboard</a>
+      <a class="toc-link" href="#importar"><span class="n">03</span>Importar XLSX</a>
+      <a class="toc-link" href="#produtos"><span class="n">04</span>Produtos</a>
+      <a class="toc-link" href="#oportunidades"><span class="n">05</span>Oportunidades</a>
+      <a class="toc-link" href="#ml"><span class="n">06</span>Inteligência ML</a>
+      <a class="toc-link" href="#anuncios"><span class="n">07</span>Anúncios</a>
+      <a class="toc-link" href="#config"><span class="n">08</span>Configurações</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-group-title">Specs &amp; handoff</div>
+      <a class="toc-link" href="#anatomy"><span class="n">09</span>Component Anatomy</a>
+      <a class="toc-link" href="#tokens"><span class="n">10</span>CSS Tokens</a>
+      <a class="toc-link" href="#responsive"><span class="n">11</span>Responsive</a>
+      <a class="toc-link" href="#plan"><span class="n">12</span>Migration Plan</a>
+      <a class="toc-link" href="#contract"><span class="n">13</span>Design Contract</a>
+    </div>
+  </aside>
+
+  <!-- ========================== CONTENT ========================== -->
+  <main class="content">
+
+    <header class="doc-header">
+      <div>
+        <p class="doc-eyebrow">Design System · v1.1 · Implementation Spec</p>
+        <h1 class="doc-title">MapaSeller <em>UI Kit</em></h1>
+        <p class="doc-sub">Especificação visual pronta para implementação em React/Vite. Telas completas, anatomia de componentes, tokens prontos para colar e plano de migração em fases. Light-first, SaaS premium, ERP moderno, marketplace neutro.</p>
+      </div>
+      <div class="doc-stamp"><span class="dot"></span> Pronto para handoff</div>
+    </header>
+
+    <!-- ========================== 01 APP SHELL ========================== -->
+    <section class="section" id="shell">
+      <div class="section-head">
+        <span class="section-num">01 /</span>
+        <h2 class="section-title">App Shell</h2>
+      </div>
+      <p class="section-desc">Estrutura base de qualquer tela do MapaSeller: sidebar fixa à esquerda, topbar sticky no topo, conteúdo em coluna única com largura máxima. A sidebar usa três grupos rígidos — Operação, Inteligência, Sistema — refletindo a hierarquia mental do produto.</p>
+
+      <!-- Spec table -->
+      <div class="spec-grid">
+        <div class="spec-card"><div class="key">--ms-sidebar-w</div><div class="val">248px</div><div class="desc">Largura padrão desktop, com ícone + label + contador.</div></div>
+        <div class="spec-card"><div class="key">--ms-sidebar-collapsed-w</div><div class="val">64px</div><div class="desc">Só ícones, ativado abaixo de 1024px ou via toggle.</div></div>
+        <div class="spec-card"><div class="key">--ms-topbar-h</div><div class="val">64px</div><div class="desc">Sticky, sempre acima da sidebar em z-index.</div></div>
+        <div class="spec-card"><div class="key">--ms-content-pad-x</div><div class="val">32px</div><div class="desc">Padding lateral do conteúdo principal.</div></div>
+        <div class="spec-card"><div class="key">--ms-content-pad-y</div><div class="val">28px</div><div class="desc">Padding vertical inicial; cresce com seções.</div></div>
+        <div class="spec-card"><div class="key">--ms-content-max</div><div class="val">1320px</div><div class="desc">Largura máxima do conteúdo; centralizada acima.</div></div>
+        <div class="spec-card"><div class="key">--ms-grid-gap</div><div class="val">20px</div><div class="desc">Gap padrão entre cards do grid principal.</div></div>
+        <div class="spec-card"><div class="key">Nav item · padding</div><div class="val">10px 12px</div><div class="desc">Hit target 36px de altura. Radius 10.</div></div>
+        <div class="spec-card"><div class="key">Sidebar · groups</div><div class="val">3 grupos</div><div class="desc">Operação / Inteligência / Sistema — ordem fixa.</div></div>
+      </div>
+
+      <!-- Live shell -->
+      <h3 class="ms-h3" style="margin-top: 36px;">Shell ao vivo · Dashboard como referência</h3>
+      <p class="ms-small" style="margin: 6px 0 16px;">A topbar, sidebar e estrutura de página são idênticos em todas as 7 rotas.</p>
+      <div class="screen-frame">
+        <div class="screen-frame-head">
+          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="url">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            mapaseller.app/<strong>dashboard</strong>
+          </div>
+          <a href="v1.1-screens/dashboard.html" target="_blank">Abrir tela
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"></path></svg>
+          </a>
+        </div>
+        <div class="screen-stage">
+          <iframe src="v1.1-screens/dashboard.html" loading="lazy" data-screen></iframe>
+        </div>
+      </div>
+
+      <!-- States -->
+      <h3 class="ms-h3" style="margin-top: 36px;">Estados do nav-item</h3>
+      <p class="ms-small" style="margin: 6px 0 16px;">Quatro estados rígidos. Hover é o único usando <code>--ms-surface-2</code>; active é o único usando <code>--ms-ink</code>.</p>
+      <div class="ms-grid ms-grid-4" style="background: var(--ms-bg); border: 1px solid var(--ms-line); border-radius: var(--ms-radius-lg); padding: 24px;">
+        <div>
+          <div class="ms-meta" style="margin-bottom: 8px;">Default</div>
+          <div class="ms-nav-item" style="background: var(--ms-surface);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>
+            Produtos
+          </div>
+        </div>
+        <div>
+          <div class="ms-meta" style="margin-bottom: 8px;">Hover</div>
+          <div class="ms-nav-item" style="background: var(--ms-surface-2);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>
+            Produtos
+          </div>
+        </div>
+        <div>
+          <div class="ms-meta" style="margin-bottom: 8px;">Active</div>
+          <div class="ms-nav-item is-active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>
+            Produtos
+          </div>
+        </div>
+        <div>
+          <div class="ms-meta" style="margin-bottom: 8px;">With count</div>
+          <div class="ms-nav-item" style="background: var(--ms-surface);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>
+            Oportunidades
+            <span class="count">12</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================== 02 DASHBOARD ========================== -->
+    <section class="section" id="dashboard">
+      <div class="section-head">
+        <span class="section-num">02 /</span>
+        <h2 class="section-title">Dashboard</h2>
+      </div>
+      <p class="section-desc">Tela inicial do produto. KPI row no topo (4 métricas operacionais), gráfico principal de GMV + breakdown de match por SKU, lista de alertas + top oportunidades, e tabela de desempenho por marketplace. Toda a inteligência sintetizada em uma rolagem.</p>
+      <div class="screen-frame">
+        <div class="screen-frame-head">
+          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>mapaseller.app/<strong>dashboard</strong></div>
+          <a href="v1.1-screens/dashboard.html" target="_blank">Abrir tela <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>
+        </div>
+        <div class="screen-stage"><iframe src="v1.1-screens/dashboard.html" loading="lazy" data-screen></iframe></div>
+      </div>
+    </section>
+
+    <!-- ========================== 03 IMPORTAR ========================== -->
+    <section class="section" id="importar">
+      <div class="section-head">
+        <span class="section-num">03 /</span>
+        <h2 class="section-title">Importar XLSX</h2>
+      </div>
+      <p class="section-desc">Fluxo guiado de importação. Dropzone, análise de abas, summary com match-rate, preview tabular antes do commit, e alerta de segurança obrigatório antes de gravar. Os 4 estados (idle, analisando, sucesso, erro) estão documentados na parte inferior da tela.</p>
+      <div class="screen-frame">
+        <div class="screen-frame-head">
+          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>mapaseller.app/<strong>importar</strong></div>
+          <a href="v1.1-screens/importar.html" target="_blank">Abrir tela <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>
+        </div>
+        <div class="screen-stage" style="height: 1100px;"><iframe src="v1.1-screens/importar.html" loading="lazy" data-screen></iframe></div>
+      </div>
+    </section>
+
+    <!-- ========================== 04 PRODUTOS ========================== -->
+    <section class="section" id="produtos">
+      <div class="section-head">
+        <span class="section-num">04 /</span>
+        <h2 class="section-title">Produtos</h2>
+      </div>
+      <p class="section-desc">Tabela premium de catálogo. 10 colunas (incluindo Score visual e Status), busca, chips de filtro rápido, filtros avançados com badge de contagem, seleção em lote, ações no rodapé, paginação. Estados loading-skeleton e empty também documentados.</p>
+      <div class="screen-frame">
+        <div class="screen-frame-head">
+          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>mapaseller.app/<strong>produtos</strong></div>
+          <a href="v1.1-screens/produtos.html" target="_blank">Abrir tela <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>
+        </div>
+        <div class="screen-stage" style="height: 1100px;"><iframe src="v1.1-screens/produtos.html" loading="lazy" data-screen></iframe></div>
+      </div>
+    </section>
+
+    <!-- ========================== 05 OPORTUNIDADES ========================== -->
+    <section class="section" id="oportunidades">
+      <div class="section-head">
+        <span class="section-num">05 /</span>
+        <h2 class="section-title">Oportunidades</h2>
+      </div>
+      <p class="section-desc">Ranking inteligente. Hero da oportunidade #1 (única cor sólida da tela), filtros por tipo + marketplace, grid de 6 cards de prioridade com score, motivo, métricas e CTA específico por tipo (Reprecificar, Criar anúncio, Gerar título, Solicitar reposição).</p>
+      <div class="screen-frame">
+        <div class="screen-frame-head">
+          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>mapaseller.app/<strong>oportunidades</strong></div>
+          <a href="v1.1-screens/oportunidades.html" target="_blank">Abrir tela <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>
+        </div>
+        <div class="screen-stage" style="height: 1100px;"><iframe src="v1.1-screens/oportunidades.html" loading="lazy" data-screen></iframe></div>
+      </div>
+    </section>
+
+    <!-- ========================== 06 INTELIGÊNCIA ML ========================== -->
+    <section class="section" id="ml">
+      <div class="section-head">
+        <span class="section-num">06 /</span>
+        <h2 class="section-title">Inteligência Mercado Livre</h2>
+      </div>
+      <p class="section-desc">Tela de comando da inteligência. URL do ML como input principal, inputs manuais como fallback, resultado em coluna larga (card do produto + recomendação destacada + tabela de competidores + similares) e coluna lateral com visão de mercado e calculadora de margem detalhada.</p>
+      <div class="screen-frame">
+        <div class="screen-frame-head">
+          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>mapaseller.app/<strong>marketplaces/mercadolivre</strong></div>
+          <a href="v1.1-screens/mercadolivre.html" target="_blank">Abrir tela <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>
+        </div>
+        <div class="screen-stage" style="height: 1200px;"><iframe src="v1.1-screens/mercadolivre.html" loading="lazy" data-screen></iframe></div>
+      </div>
+    </section>
+
+    <!-- ========================== 07 ANÚNCIOS ========================== -->
+    <section class="section" id="anuncios">
+      <div class="section-head">
+        <span class="section-num">07 /</span>
+        <h2 class="section-title">Central de Anúncios</h2>
+      </div>
+      <p class="section-desc">Central operacional do ML. Connection bar no topo (status + sync), 6 ações rápidas em grid, editor de anúncio com strip de sugestões IA, preview ao vivo no formato visual do ML, checklist de publicação, lista de prioridades operacionais e auditoria de eventos recentes.</p>
+      <div class="screen-frame">
+        <div class="screen-frame-head">
+          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>mapaseller.app/<strong>anuncios</strong></div>
+          <a href="v1.1-screens/anuncios.html" target="_blank">Abrir tela <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>
+        </div>
+        <div class="screen-stage" style="height: 1300px;"><iframe src="v1.1-screens/anuncios.html" loading="lazy" data-screen></iframe></div>
+      </div>
+    </section>
+
+    <!-- ========================== 08 CONFIGURAÇÕES ========================== -->
+    <section class="section" id="config">
+      <div class="section-head">
+        <span class="section-num">08 /</span>
+        <h2 class="section-title">Configurações</h2>
+      </div>
+      <p class="section-desc">Tela de configurações com sub-nav vertical sticky. Sete blocos: Conexão ML (OAuth status), API/backend (health check), preferências de importação (estratégia de match + threshold), tema, workspace, segurança (2FA + sessões + LGPD), logs (24h).</p>
+      <div class="screen-frame">
+        <div class="screen-frame-head">
+          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>mapaseller.app/<strong>configuracoes</strong></div>
+          <a href="v1.1-screens/configuracoes.html" target="_blank">Abrir tela <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>
+        </div>
+        <div class="screen-stage" style="height: 1300px;"><iframe src="v1.1-screens/configuracoes.html" loading="lazy" data-screen></iframe></div>
+      </div>
+    </section>
+
+    <!-- ========================== 09 ANATOMY ========================== -->
+    <section class="section" id="anatomy">
+      <div class="section-head">
+        <span class="section-num">09 /</span>
+        <h2 class="section-title">Component Anatomy</h2>
+      </div>
+      <p class="section-desc">Especificação numérica de cada componente principal — padding, radius, border, shadow, tipografia, estados. Use como referência para o dev replicar pixel-a-pixel em React/Tailwind/Styled.</p>
+
+      <table class="anatomy-table" style="background: var(--ms-surface); border: 1px solid var(--ms-line); border-radius: var(--ms-radius-md); overflow: hidden;">
+        <thead>
+          <tr>
+            <th style="width: 14%;">Componente</th>
+            <th>Anatomia</th>
+            <th>Estados</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="comp">AppShell</td>
+            <td><span class="mono">grid 248px / 1fr · min-h 100vh · bg --ms-bg</span><br><span class="ms-small">Sidebar sticky + Topbar sticky + Content centralizado max 1320px.</span></td>
+            <td><span class="mono">expanded · collapsed (≤1024)</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Sidebar</td>
+            <td><span class="mono">w 248 · pad 12 · gap 4 · bg --ms-surface · border-right 1px --ms-line</span><br><span class="ms-small">Brand (h64) + Nav (flex 1 · scroll) + Foot (workspace card).</span></td>
+            <td><span class="mono">expanded · collapsed · scrolling</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Topbar</td>
+            <td><span class="mono">h 64 · pad-x 32 · bg --ms-surface · border-bottom 1 --ms-line · z 200</span><br><span class="ms-small">Crumbs (esq) + Search (320) + Icon btns + Avatar.</span></td>
+            <td><span class="mono">default · search-focused · with-badge</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Search</td>
+            <td><span class="mono">pad 10/14 · radius 12 · border 1 --ms-line · gap 10</span><br><span class="ms-small">Ícone + input + ⌘K kbd. Focus: border --ms-brand-600 + ring 3px.</span></td>
+            <td><span class="mono">idle · hover · focus · with-value</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Button</td>
+            <td><span class="mono">pad 10/16 · radius 10 · font 14/500 · gap 8 · h 36</span><br><span class="ms-small">Variants: primary, secondary, ghost, danger, success, icon. Sm: pad 8/12. Lg: pad 12/20/15.</span></td>
+            <td><span class="mono">default · hover · focus-visible · disabled · loading</span></td>
+          </tr>
+          <tr>
+            <td class="comp">KPI Card</td>
+            <td><span class="mono">pad 20/22 · radius 16 · gap-y 14 · min-h 124</span><br><span class="ms-small">Head (label + ícone) + Value (34/500) + Sub (13/text-2).</span></td>
+            <td><span class="mono">default · loading-skeleton</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Chart Card</td>
+            <td><span class="mono">pad 24 · radius 16 · gap 24</span><br><span class="ms-small">Header (caps + h2 + delta) + Chart area + Legend (gap 18, key 10×10).</span></td>
+            <td><span class="mono">default · empty · loading · zoom</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Data Table</td>
+            <td><span class="mono">th: pad 12/14 · 11/600 · upper · letter .12em · bg surface-2 · border-bottom 1</span><br><span class="ms-small">td: pad 14 · border-bottom 1. Numéricos: font-mono 13. Hover row: bg surface-2. Selected: bg brand-50.</span></td>
+            <td><span class="mono">default · hover-row · selected-row · sortable-active</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Status Badge</td>
+            <td><span class="mono">pad 4/8 · radius 6 · font 12/600 · gap 4 · line-height 1</span><br><span class="ms-small">Variants: pos · neg · warn · info · brand · neutral. Dot variant: pad-left 6, gap 6, dot 6×6.</span></td>
+            <td><span class="mono">color-coded estático</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Filter Chip</td>
+            <td><span class="mono">pad 6/12 · radius 999 · font 13/500 · border 1 --ms-line-2</span><br><span class="ms-small">Active: bg --ms-ink, color #fff. Hover: border --ms-line, color --ms-text.</span></td>
+            <td><span class="mono">default · hover · active · disabled</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Upload Dropzone</td>
+            <td><span class="mono">pad 48/32 · radius 16 · border 2px dashed --ms-line-2 · bg --ms-surface</span><br><span class="ms-small">Icon 56×56 (radius 16 bg --ms-brand-50) + title 16/600 + desc 13/text-2 + CTA.</span></td>
+            <td><span class="mono">idle · hover · drag-active · rejected · uploading</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Product Row</td>
+            <td><span class="mono">td-pad 14 · thumb 36×36 (radius 8) · gap 12</span><br><span class="ms-small">Thumb + Name (14/600 ink) + Categoria (12/text-2). Score: barra 80×6 + número mono.</span></td>
+            <td><span class="mono">default · hover · selected · disabled</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Product Card</td>
+            <td><span class="mono">pad 24 · radius 16 · grid 120px / 1fr · gap 20</span><br><span class="ms-small">Thumb 120×120 (radius 12) + meta + título 18/600 + price-grid (3 colunas).</span></td>
+            <td><span class="mono">default · in-buy-box · out-of-stock</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Empty State</td>
+            <td><span class="mono">center · gap 16 · pad 64/24</span><br><span class="ms-small">Icon 56×56 (radius 16 bg brand-50) + title 18/600 + desc 14/text-2 max-w 380 + CTA.</span></td>
+            <td><span class="mono">first-time · filtered · error-fallback</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Error State</td>
+            <td><span class="mono">pad 14/16 · radius 12 · bg --ms-negative-bg · border 1 #F5C6C6 · gap 12</span><br><span class="ms-small">Icon 18 (color --ms-negative-fg) + title 14/600 + msg 13/text.</span></td>
+            <td><span class="mono">inline · banner · destructive</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Loading Skeleton</td>
+            <td><span class="mono">bg shimmer (surface-2 → #EDEEF1) · radius 6 · animation 1.4s linear</span><br><span class="ms-small">Mantém as mesmas alturas/larguras do conteúdo real para evitar layout shift.</span></td>
+            <td><span class="mono">animado contínuo</span></td>
+          </tr>
+          <tr>
+            <td class="comp">Modal/Confirmation</td>
+            <td><span class="mono">w 440 · radius 16 · shadow-overlay · backdrop rgba(15,17,21,.4) · z 500</span><br><span class="ms-small">Head pad 20/24 + Body pad 12/24 + Foot pad 14/20 bg surface-2 (botões à direita).</span></td>
+            <td><span class="mono">default · destructive · loading-action</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ========================== 10 TOKENS ========================== -->
+    <section class="section" id="tokens">
+      <div class="section-head">
+        <span class="section-num">10 /</span>
+        <h2 class="section-title">CSS Tokens · Developer Handoff</h2>
+      </div>
+      <p class="section-desc">Cole o bloco abaixo no <code>:root</code> do projeto React/Vite. Todos os componentes do MapaSeller dependem desses tokens. Está disponível também como arquivo <code>mapaseller-tokens.css</code> no projeto.</p>
+
+      <div class="token-block">
+<span class="com">/* MapaSeller — Design Tokens v1.1 */</span>
+<span class="sel">:root</span> {
+  <span class="com">/* Brand */</span>
+  <span class="key">--ms-brand-50</span>:  <span class="val">#EEEEFE</span>;
+  <span class="key">--ms-brand-200</span>: <span class="val">#C7BAFD</span>;
+  <span class="key">--ms-brand-400</span>: <span class="val">#A78BFA</span>;
+  <span class="key">--ms-brand-600</span>: <span class="val">#5B5BF0</span>; <span class="com">/* primary */</span>
+  <span class="key">--ms-brand-700</span>: <span class="val">#4747D9</span>;
+  <span class="key">--ms-brand-900</span>: <span class="val">#2E2D8F</span>;
+
+  <span class="com">/* Surfaces &amp; neutrals */</span>
+  <span class="key">--ms-bg</span>:        <span class="val">#F2F3F5</span>;
+  <span class="key">--ms-surface</span>:   <span class="val">#FFFFFF</span>;
+  <span class="key">--ms-surface-2</span>: <span class="val">#F7F8FA</span>;
+  <span class="key">--ms-line</span>:      <span class="val">#ECEEF2</span>;
+  <span class="key">--ms-line-2</span>:    <span class="val">#E4E7EC</span>;
+  <span class="key">--ms-ink</span>:       <span class="val">#0F1115</span>;
+  <span class="key">--ms-text</span>:      <span class="val">#2C3243</span>;
+  <span class="key">--ms-text-2</span>:    <span class="val">#6B7280</span>;
+  <span class="key">--ms-text-3</span>:    <span class="val">#9CA3AF</span>;
+
+  <span class="com">/* Semantic */</span>
+  <span class="key">--ms-positive-bg</span>: <span class="val">#D5F8E9</span>;
+  <span class="key">--ms-positive-fg</span>: <span class="val">#0F8A5C</span>;
+  <span class="key">--ms-negative-bg</span>: <span class="val">#FEE0E0</span>;
+  <span class="key">--ms-negative-fg</span>: <span class="val">#D33F3F</span>;
+  <span class="key">--ms-warning-bg</span>:  <span class="val">#FFF3D6</span>;
+  <span class="key">--ms-warning-fg</span>:  <span class="val">#B6791C</span>;
+  <span class="key">--ms-info-bg</span>:     <span class="val">#DCEBFE</span>;
+  <span class="key">--ms-info-fg</span>:     <span class="val">#1E5BD3</span>;
+
+  <span class="com">/* Radius */</span>
+  <span class="key">--ms-radius-sm</span>:   <span class="val">8px</span>;
+  <span class="key">--ms-radius-md</span>:   <span class="val">12px</span>;
+  <span class="key">--ms-radius-lg</span>:   <span class="val">16px</span>;
+  <span class="key">--ms-radius-xl</span>:   <span class="val">20px</span>;
+  <span class="key">--ms-radius-pill</span>: <span class="val">999px</span>;
+
+  <span class="com">/* Shadow */</span>
+  <span class="key">--ms-shadow-card</span>:    <span class="str">0 1px 0 rgba(15,17,21,.02), 0 1px 2px rgba(15,17,21,.04)</span>;
+  <span class="key">--ms-shadow-pop</span>:     <span class="str">0 12px 32px -8px rgba(46,45,143,.18)</span>;
+  <span class="key">--ms-shadow-overlay</span>: <span class="str">0 24px 48px -12px rgba(46,45,143,.28)</span>;
+  <span class="key">--ms-focus-ring</span>:     <span class="str">0 0 0 3px rgba(91,91,240,.22)</span>;
+
+  <span class="com">/* Layout */</span>
+  <span class="key">--ms-sidebar-w</span>:           <span class="val">248px</span>;
+  <span class="key">--ms-sidebar-collapsed-w</span>: <span class="val">64px</span>;
+  <span class="key">--ms-topbar-h</span>:            <span class="val">64px</span>;
+  <span class="key">--ms-content-max</span>:         <span class="val">1320px</span>;
+  <span class="key">--ms-grid-gap</span>:            <span class="val">20px</span>;
+}
+      </div>
+
+      <h3 class="ms-h3" style="margin-top: 36px;">Escala de spacing · 4pt</h3>
+      <div class="ms-grid ms-grid-6" style="margin-top: 16px;">
+        <div class="spec-card"><div class="key">--ms-space-1</div><div class="val">4px</div></div>
+        <div class="spec-card"><div class="key">--ms-space-2</div><div class="val">8px</div></div>
+        <div class="spec-card"><div class="key">--ms-space-3</div><div class="val">12px</div></div>
+        <div class="spec-card"><div class="key">--ms-space-4</div><div class="val">16px</div></div>
+        <div class="spec-card"><div class="key">--ms-space-6</div><div class="val">24px</div></div>
+        <div class="spec-card"><div class="key">--ms-space-8</div><div class="val">32px</div></div>
+      </div>
+
+      <h3 class="ms-h3" style="margin-top: 36px;">Escala tipográfica</h3>
+      <table class="anatomy-table" style="margin-top: 14px; background: var(--ms-surface); border: 1px solid var(--ms-line); border-radius: var(--ms-radius-md); overflow: hidden;">
+        <thead>
+          <tr><th>Token</th><th>Tamanho</th><th>Peso</th><th>Letter-spacing</th><th>Uso</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="comp">.ms-display</td><td class="mono">56px / 1.0</td><td class="mono">700</td><td class="mono">-0.03em</td><td>Hero, marketing.</td></tr>
+          <tr><td class="comp">.ms-h1</td><td class="mono">44px / 1.05</td><td class="mono">600</td><td class="mono">-0.02em</td><td>Página de marketing.</td></tr>
+          <tr><td class="comp">.ms-page-title</td><td class="mono">28px / 1.2</td><td class="mono">600</td><td class="mono">-0.02em</td><td>Título da rota.</td></tr>
+          <tr><td class="comp">.ms-h3</td><td class="mono">20px / 1.3</td><td class="mono">600</td><td class="mono">-0.01em</td><td>Título de card.</td></tr>
+          <tr><td class="comp">.ms-kpi</td><td class="mono">34px / 1.0</td><td class="mono">500</td><td class="mono">-0.02em</td><td>Valor de KPI.</td></tr>
+          <tr><td class="comp">.ms-body</td><td class="mono">15px / 1.55</td><td class="mono">400</td><td class="mono">0</td><td>Parágrafos.</td></tr>
+          <tr><td class="comp">.ms-small</td><td class="mono">13px / 1.4</td><td class="mono">400</td><td class="mono">0</td><td>Metadados.</td></tr>
+          <tr><td class="comp">.ms-caps</td><td class="mono">11px</td><td class="mono">600</td><td class="mono">.14em</td><td>Labels de seção.</td></tr>
+          <tr><td class="comp">.ms-mono</td><td class="mono">13px</td><td class="mono">400</td><td class="mono">0</td><td>SKU, código, ratio.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="ms-h3" style="margin-top: 36px;">Z-index</h3>
+      <div class="ms-grid ms-grid-6" style="margin-top: 14px;">
+        <div class="spec-card"><div class="key">base</div><div class="val">1</div></div>
+        <div class="spec-card"><div class="key">sticky</div><div class="val">100</div></div>
+        <div class="spec-card"><div class="key">topbar</div><div class="val">200</div></div>
+        <div class="spec-card"><div class="key">sidebar</div><div class="val">300</div></div>
+        <div class="spec-card"><div class="key">popover</div><div class="val">400</div></div>
+        <div class="spec-card"><div class="key">modal</div><div class="val">500</div></div>
+      </div>
+
+      <h3 class="ms-h3" style="margin-top: 36px;">Equivalência Tailwind (recomendado)</h3>
+      <p class="ms-small" style="margin-top: 4px;">Se for usar Tailwind, extenda o config com nossos tokens — não invente paletas paralelas.</p>
+      <div class="token-block" style="margin-top: 14px;">
+<span class="com">// tailwind.config.js</span>
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        brand: { 50: <span class="str">'#EEEEFE'</span>, 200: <span class="str">'#C7BAFD'</span>, 400: <span class="str">'#A78BFA'</span>,
+                 600: <span class="str">'#5B5BF0'</span>, 700: <span class="str">'#4747D9'</span>, 900: <span class="str">'#2E2D8F'</span> },
+        ink: <span class="str">'#0F1115'</span>, surface: <span class="str">'#FFFFFF'</span>, line: <span class="str">'#ECEEF2'</span>,
+      },
+      borderRadius: { sm: <span class="str">'8px'</span>, md: <span class="str">'12px'</span>, lg: <span class="str">'16px'</span>, xl: <span class="str">'20px'</span> },
+      fontFamily: { sans: [<span class="str">'Inter'</span>, <span class="str">'system-ui'</span>], mono: [<span class="str">'JetBrains Mono'</span>] }
+    }
+  }
+}
+      </div>
+    </section>
+
+    <!-- ========================== 11 RESPONSIVE ========================== -->
+    <section class="section" id="responsive">
+      <div class="section-head">
+        <span class="section-num">11 /</span>
+        <h2 class="section-title">Responsive Behavior</h2>
+      </div>
+      <p class="section-desc">O MapaSeller é desktop-first — operação real acontece em telas grandes. Notebooks e tablets recebem layouts otimizados; mobile é uma versão de consulta (não de edição em lote).</p>
+
+      <div class="device-row">
+        <div class="device-card lg-1440">
+          <div class="preview"><div class="side"></div><div class="main"><div></div><div></div><div></div><div></div></div></div>
+          <div class="meta">
+            <div class="name">Desktop</div>
+            <div class="size">≥ 1440 px · Sidebar 248 · Grid 4 colunas</div>
+          </div>
+        </div>
+        <div class="device-card lg-1280">
+          <div class="preview"><div class="side"></div><div class="main"><div></div><div></div><div></div></div></div>
+          <div class="meta">
+            <div class="name">Notebook</div>
+            <div class="size">1280 – 1439 px · Sidebar 248 · Grid 3 colunas</div>
+          </div>
+        </div>
+        <div class="device-card md-1024">
+          <div class="preview"><div class="side"></div><div class="main"><div></div><div></div></div></div>
+          <div class="meta">
+            <div class="name">Tablet</div>
+            <div class="size">768 – 1279 px · Sidebar colapsa 64 · Grid 2 colunas</div>
+          </div>
+        </div>
+        <div class="device-card sm-mobile">
+          <div class="preview"><div class="side"></div><div class="main"><div></div><div></div></div></div>
+          <div class="meta">
+            <div class="name">Mobile</div>
+            <div class="size">≤ 767 px · Sidebar drawer · Grid 1 coluna</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="ms-h3" style="margin-top: 36px;">Regras de breakpoint</h3>
+      <table class="anatomy-table" style="margin-top: 14px; background: var(--ms-surface); border: 1px solid var(--ms-line); border-radius: var(--ms-radius-md); overflow: hidden;">
+        <thead>
+          <tr><th>Breakpoint</th><th>Sidebar</th><th>Cards/KPIs</th><th>Tabela</th><th>Topbar</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="comp">≥ 1440</td><td>Aberta (248)</td><td>4 colunas</td><td>Todas as colunas visíveis</td><td>Search 320 + ações completas</td></tr>
+          <tr><td class="comp">1280–1439</td><td>Aberta (248)</td><td>3 colunas</td><td>Esconde colunas terciárias</td><td>Search 280 + ações completas</td></tr>
+          <tr><td class="comp">1024–1279</td><td>Colapsada (64)</td><td>2 colunas</td><td>Scroll horizontal protegido</td><td>Search 240, sem crumbs</td></tr>
+          <tr><td class="comp">768–1023</td><td>Colapsada/drawer</td><td>2 colunas</td><td>Vira lista de cards</td><td>Search vira ícone</td></tr>
+          <tr><td class="comp">≤ 767</td><td>Drawer (hamburger)</td><td>1 coluna</td><td>Lista de cards · sem multi-select</td><td>Brand + ícones essenciais</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ========================== 12 PLAN ========================== -->
+    <section class="section" id="plan">
+      <div class="section-head">
+        <span class="section-num">12 /</span>
+        <h2 class="section-title">Developer Migration Plan</h2>
+      </div>
+      <p class="section-desc">Ordem rígida de implementação. Cada fase só começa quando a anterior estiver mergeada e testada. Não pule fases — fundação primeiro, depois telas.</p>
+
+      <div class="phase-list">
+        <div class="phase">
+          <div class="phase-num">1</div>
+          <div>
+            <h3 class="phase-title">Fundação</h3>
+            <p class="phase-desc">Tokens globais e shell. Sem isso, qualquer tela vai derivar.</p>
+            <ul class="phase-tasks">
+              <li>Tokens globais em <code>:root</code></li>
+              <li>AppShell (grid sidebar + topbar)</li>
+              <li>Sidebar com 3 grupos</li>
+              <li>Topbar sticky com search</li>
+              <li>Roteamento React Router</li>
+              <li>Layout responsivo base</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase">
+          <div class="phase-num">2</div>
+          <div>
+            <h3 class="phase-title">Componentes base</h3>
+            <p class="phase-desc">Biblioteca atômica. Tudo daqui em diante reusa.</p>
+            <ul class="phase-tasks">
+              <li>Button (5 variants + icon)</li>
+              <li>Input, Search, Toggle, Checkbox</li>
+              <li>Badge (6 variants + dot)</li>
+              <li>Chip (filter)</li>
+              <li>KPI Card</li>
+              <li>Data Table (head + row + cell)</li>
+              <li>Modal/Confirmation</li>
+              <li>Upload Dropzone</li>
+              <li>Empty / Loading / Error states</li>
+              <li>Skeleton</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase">
+          <div class="phase-num">3</div>
+          <div>
+            <h3 class="phase-title">Telas de operação</h3>
+            <p class="phase-desc">As 3 telas que o seller usa todo dia.</p>
+            <ul class="phase-tasks">
+              <li>Dashboard (KPIs + chart + alerts + table)</li>
+              <li>Importar XLSX (4 estados)</li>
+              <li>Produtos (table + filtros + bulk)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase">
+          <div class="phase-num">4</div>
+          <div>
+            <h3 class="phase-title">Telas de inteligência &amp; sistema</h3>
+            <p class="phase-desc">Diferencial competitivo do produto.</p>
+            <ul class="phase-tasks">
+              <li>Inteligência ML (URL analyzer + result)</li>
+              <li>Central de Anúncios (editor + preview)</li>
+              <li>Oportunidades (ranking + cards)</li>
+              <li>Configurações (7 seções)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase">
+          <div class="phase-num">5</div>
+          <div>
+            <h3 class="phase-title">Refinamento &amp; QA</h3>
+            <p class="phase-desc">Estado final antes do release.</p>
+            <ul class="phase-tasks">
+              <li>Responsividade nos 5 breakpoints</li>
+              <li>Estados de loading em todas as rotas</li>
+              <li>Estados de erro tratados</li>
+              <li>Acessibilidade (focus ring, ARIA)</li>
+              <li>Testes visuais (Storybook)</li>
+              <li>Auditoria final contra esta spec</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================== 13 CONTRACT ========================== -->
+    <section class="section" id="contract" style="margin-bottom: 0;">
+      <div class="section-head">
+        <span class="section-num">13 /</span>
+        <h2 class="section-title">Design Contract</h2>
+      </div>
+      <p class="section-desc">Regras inegociáveis. Qualquer PR que viole uma delas deve ser revisado antes do merge. Não são preferências — são limites do produto.</p>
+
+      <div class="contract-list">
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não usar visual dark/cyber como base
+          </div>
+          <p class="why">MapaSeller é light-first. Dark mode é opcional (em beta) — nunca o padrão. Layouts não devem ser projetados pensando em fundo escuro.</p>
+        </div>
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não usar brilho excessivo
+          </div>
+          <p class="why">Gradiente é reservado para um único elemento por tela (hero de oportunidade, leader card). Glow, neon e fundos vibrantes são proibidos.</p>
+        </div>
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não apertar textos
+          </div>
+          <p class="why">Padding mínimo em cards é 20×22. Botões 36px de altura. Hit target mínimo 44px no mobile. Tabelas com 14px vertical.</p>
+        </div>
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não criar cards sem respiro
+          </div>
+          <p class="why">Gap mínimo entre cards é 20px (–ms-grid-gap). Cards colados (gap 0 ou border-shared) só em casos justificados pela hierarquia.</p>
+        </div>
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não usar cores de marketplace dominando
+          </div>
+          <p class="why">Amarelo ML, vermelho Shopee, preto Amazon: apenas em ícone 24–32px ou logo. Nunca como bg de seção ou cor de CTA.</p>
+        </div>
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não usar emoji como ícone
+          </div>
+          <p class="why">Iconografia é Lucide outline 1.75px. Emoji não é icon system — quebra acessibilidade, inconsistente entre OS e desalinha visualmente.</p>
+        </div>
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não misturar estilos
+          </div>
+          <p class="why">Inter + JetBrains Mono. Cantos sempre arredondados (radius da escala). Ícones outline. Não introduzir font, radius ou estilo de ícone novos.</p>
+        </div>
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não quebrar hierarquia numérica
+          </div>
+          <p class="why">KPI 34/500. Valor de tabela 14 (numérico em mono 13). O número deve ser maior que seu rótulo — sempre.</p>
+        </div>
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não usar animação como decoração
+          </div>
+          <p class="why">Transition apenas em hover/focus/state changes (120–200ms ease-out). Loading e shimmer são funcionais. Nada de parallax, particles ou efeitos de "vida".</p>
+        </div>
+        <div class="contract-item">
+          <div class="head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg>
+            Não alterar funcional sem necessidade
+          </div>
+          <p class="why">Esta spec dita aparência e estados. Não mude o comportamento de uma rota durante a implementação visual — escolha um e abra ticket separado.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  /* Rescale iframes to fit container width while keeping 1440px native */
+  function rescaleScreens() {
+    const screens = document.querySelectorAll('iframe[data-screen]');
+    screens.forEach(iframe => {
+      const container = iframe.parentElement;
+      const containerWidth = container.clientWidth;
+      const scale = containerWidth / 1440;
+      iframe.style.transform = `scale(${scale})`;
+      iframe.style.width = '1440px';
+    });
+  }
+  window.addEventListener('load', rescaleScreens);
+  window.addEventListener('resize', rescaleScreens);
+
+  /* Active TOC link on scroll */
+  const sections = document.querySelectorAll('.section[id]');
+  const links = document.querySelectorAll('.toc-link');
+  function syncToc() {
+    let active = sections[0].id;
+    const y = window.scrollY + 120;
+    sections.forEach(s => { if (s.offsetTop <= y) active = s.id; });
+    links.forEach(a => a.classList.toggle('is-active', a.getAttribute('href') === '#' + active));
+  }
+  window.addEventListener('scroll', syncToc, { passive: true });
+  syncToc();
+</script>
+
+</body>
+</html>

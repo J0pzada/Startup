@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>MapaSeller · Inteligência Mercado Livre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../mapaseller-tokens.css">
+<style>
+  .ml-commander {
+    background: var(--ms-surface);
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg);
+    padding: 24px;
+    display: grid; gap: 20px;
+  }
+  .ml-url-row { display: flex; gap: 10px; }
+  .ml-url-row .ms-input { flex: 1; }
+  .ml-input-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+
+  .analysis-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--ms-grid-gap); margin-top: var(--ms-grid-gap); }
+  .product-card {
+    background: var(--ms-surface); border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg); padding: 24px;
+    display: grid; grid-template-columns: 120px 1fr; gap: 20px;
+  }
+  .product-card .img {
+    width: 120px; height: 120px;
+    border-radius: var(--ms-radius-md);
+    background: var(--ms-surface-2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ms-text-3); font-size: 12px; font-weight: 600;
+  }
+  .product-title { font-size: var(--ms-fs-18); font-weight: 600; color: var(--ms-ink); line-height: 1.3; letter-spacing: -0.01em; margin: 0; }
+  .price-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-top: 18px;
+  }
+  .price-cell {
+    background: var(--ms-surface-2);
+    border-radius: var(--ms-radius-md);
+    padding: 14px;
+    text-align: left;
+  }
+  .price-cell .lab { font-size: var(--ms-fs-11); color: var(--ms-text-2); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .price-cell .val { font-size: var(--ms-fs-20); font-weight: 600; color: var(--ms-ink); margin-top: 4px; letter-spacing: -0.01em; }
+  .price-cell .sub { font-size: var(--ms-fs-12); color: var(--ms-text-2); margin-top: 2px; }
+  .price-cell.is-you  { background: var(--ms-brand-50); }
+  .price-cell.is-you .val { color: var(--ms-brand-700); }
+
+  .similar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .similar-card {
+    background: var(--ms-surface);
+    border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-md);
+    padding: 12px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .similar-card .img {
+    width: 100%; aspect-ratio: 1; border-radius: 8px;
+    background: var(--ms-surface-2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ms-text-3); font-size: 11px; font-weight: 600;
+  }
+  .similar-card .name {
+    font-size: var(--ms-fs-12); color: var(--ms-text);
+    line-height: 1.35; font-weight: 500;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .similar-card .price { font-size: var(--ms-fs-13); font-weight: 700; color: var(--ms-ink); }
+  .similar-card .seller { font-size: var(--ms-fs-11); color: var(--ms-text-2); }
+  .calc {
+    background: var(--ms-surface); border: 1px solid var(--ms-line);
+    border-radius: var(--ms-radius-lg); padding: 24px;
+  }
+  .calc-row {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: center; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--ms-line);
+  }
+  .calc-row:last-of-type { border-bottom: 0; }
+  .calc-row .lab { font-size: var(--ms-fs-14); color: var(--ms-text); }
+  .calc-row .val { font-family: var(--ms-font-mono); font-size: var(--ms-fs-14); color: var(--ms-ink); font-weight: 600; }
+  .calc-row.is-neg .val { color: var(--ms-negative-fg); }
+  .calc-row.is-total {
+    padding-top: 16px; margin-top: 6px;
+    border-top: 1px solid var(--ms-line); border-bottom: 0;
+  }
+  .calc-row.is-total .lab { font-weight: 600; font-size: var(--ms-fs-15); }
+  .calc-row.is-total .val { font-size: var(--ms-fs-20); color: var(--ms-positive-fg); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="ms-shell">
+  <aside class="ms-sidebar">
+    <div class="ms-sidebar-brand">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 3c-5 0-9 3.8-9 8.6 0 5.8 6.4 11.7 8.4 13.4.4.3.9.3 1.3 0 2-1.7 8.3-7.6 8.3-13.4C25 6.8 21 3 16 3Z" stroke="#5B5BF0" stroke-width="2.5" stroke-linejoin="round"></path><path d="M12 13l3-3 2.5 2.5L21 9M18 9h3v3" stroke="#5B5BF0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span class="name">MapaSeller</span><span class="ver">v1.1</span>
+    </div>
+    <nav class="ms-sidebar-nav">
+      <div class="ms-sidebar-section">Operação</div>
+      <a class="ms-nav-item" href="./dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>Dashboard</a>
+      <a class="ms-nav-item" href="./importar.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l3 3v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2Z"></path><path d="M12 18V9M8 13l4-4 4 4"></path></svg>Importar XLSX</a>
+      <a class="ms-nav-item" href="./produtos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4Z"></path><path d="M3 12l9 4 9-4M3 17l9 4 9-4"></path></svg>Produtos</a>
+      <a class="ms-nav-item" href="./oportunidades.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>Oportunidades<span class="count">12</span></a>
+      <div class="ms-sidebar-section">Inteligência</div>
+      <a class="ms-nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21V3l-6 3v18l6-3 6 3 6-3V3l-6 3"></path><path d="M9 3l6 3"></path></svg>Marketplaces</a>
+      <a class="ms-nav-item is-active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path><circle cx="20" cy="4" r="1.5" fill="currentColor"></circle></svg>Inteligência ML</a>
+      <a class="ms-nav-item" href="./anuncios.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3l11 5V6L3 11ZM14 9v7M18 12h2M18 8l2-1M18 16l2 1"></path></svg>Anúncios</a>
+      <div class="ms-sidebar-section">Sistema</div>
+      <a class="ms-nav-item" href="./configuracoes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1A2 2 0 1 1 4.4 17l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 4.4l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5h.1a1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 19.6 7l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"></path></svg>Configurações</a>
+    </nav>
+    <div class="ms-sidebar-foot">
+      <div class="ms-sidebar-workspace"><div class="ms-avatar ms-avatar--sq ms-avatar--teal">CL</div><div class="info"><div class="label">Workspace</div><div class="name">Casa &amp; Lar Brasil</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"></path></svg></div>
+    </div>
+  </aside>
+
+  <div>
+    <header class="ms-topbar">
+      <div class="ms-topbar-crumbs"><span>Inteligência</span><span class="sep">/</span><span class="current">Mercado Livre</span></div>
+      <div class="ms-topbar-actions">
+        <div class="ms-search ms-topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input placeholder="Buscar SKU, pedido, anúncio…" /><span class="ms-kbd">⌘ K</span>
+        </div>
+        <button class="ms-topbar-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg></button>
+        <div class="ms-avatar ms-avatar--sm">RM</div>
+      </div>
+    </header>
+
+    <main class="ms-content">
+      <div class="ms-page-head">
+        <div>
+          <h1 class="ms-page-title">Inteligência Mercado Livre</h1>
+          <p class="ms-page-desc">Cole a URL de qualquer anúncio do ML — ou preencha manualmente — para receber análise completa de mercado, concorrência, margem e recomendações.</p>
+        </div>
+        <div class="ms-page-actions">
+          <button class="ms-btn ms-btn--secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h12"></path></svg>
+            Histórico de análises
+          </button>
+        </div>
+      </div>
+
+      <!-- Commander -->
+      <div class="ml-commander">
+        <div>
+          <label class="ms-label">URL do anúncio Mercado Livre</label>
+          <div class="ml-url-row">
+            <div class="ms-search" style="flex:1;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a3.5 3.5 0 0 0 5 0l3-3a3.5 3.5 0 1 0-5-5l-1 1"></path><path d="M14 10a3.5 3.5 0 0 0-5 0l-3 3a3.5 3.5 0 1 0 5 5l1-1"></path></svg>
+              <input value="https://produto.mercadolivre.com.br/MLB-2847391-jogo-de-panelas-antiaderente-5-pecas" />
+            </div>
+            <button class="ms-btn ms-btn--primary ms-btn--lg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-6 4 4 8-10"></path><path d="M14 7h6v6"></path></svg>
+              Analisar
+            </button>
+          </div>
+          <p class="ms-hint">Cole o link completo — funciona com produtos novos, usados e anúncios de catálogo.</p>
+        </div>
+
+        <div style="display:flex; align-items:center; gap: 12px;">
+          <div style="height: 1px; flex: 1; background: var(--ms-line);"></div>
+          <span class="ms-caps" style="font-size: 10px;">ou preencha manualmente</span>
+          <div style="height: 1px; flex: 1; background: var(--ms-line);"></div>
+        </div>
+
+        <div class="ml-input-grid">
+          <div class="ms-field">
+            <label class="ms-label">Preço de venda</label>
+            <input class="ms-input" value="R$ 289,90" />
+          </div>
+          <div class="ms-field">
+            <label class="ms-label">Custo do produto</label>
+            <input class="ms-input" value="R$ 178,30" />
+          </div>
+          <div class="ms-field">
+            <label class="ms-label">Estoque</label>
+            <input class="ms-input" value="142" />
+          </div>
+          <div class="ms-field">
+            <label class="ms-label">Vendas 60d</label>
+            <input class="ms-input" value="684" />
+          </div>
+          <div class="ms-field">
+            <label class="ms-label">Lead time (dias)</label>
+            <input class="ms-input" value="14" />
+          </div>
+          <div class="ms-field">
+            <label class="ms-label">Investimento em Ads</label>
+            <input class="ms-input" value="R$ 480/mês" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis -->
+      <div class="analysis-grid">
+
+        <div style="display: grid; gap: var(--ms-grid-gap); align-content: start;">
+          <!-- Product card -->
+          <div class="product-card">
+            <div class="img">IMG</div>
+            <div>
+              <div style="display:flex; gap:8px; margin-bottom: 10px; align-items:center;">
+                <span class="ms-app-ico ms-app-ico--ml" style="width:22px;height:22px;font-size:9px;">ML</span>
+                <span class="ms-caps">MLB-2847391 · Catálogo</span>
+                <span class="ms-badge ms-badge--pos" style="margin-left:auto;">Buy Box</span>
+              </div>
+              <h2 class="product-title">Jogo Panelas Antiaderente 5 peças Indução Casa &amp; Lar</h2>
+              <div style="display:flex; gap:14px; margin-top: 12px; align-items: center;">
+                <span class="ms-mono">SKU CAS-218</span>
+                <span style="color: var(--ms-text-3);">•</span>
+                <span class="ms-small">Categoria: Cozinha › Panelas</span>
+                <span style="color: var(--ms-text-3);">•</span>
+                <span class="ms-small">684 vendas em 60d</span>
+              </div>
+              <div class="price-grid">
+                <div class="price-cell">
+                  <div class="lab">Preço mínimo</div>
+                  <div class="val">R$ 248,00</div>
+                  <div class="sub">vendedor "PanelaPro"</div>
+                </div>
+                <div class="price-cell">
+                  <div class="lab">Preço médio</div>
+                  <div class="val">R$ 274,90</div>
+                  <div class="sub">23 anúncios ativos</div>
+                </div>
+                <div class="price-cell is-you">
+                  <div class="lab">Seu preço</div>
+                  <div class="val">R$ 289,90</div>
+                  <div class="sub">+R$ 15 acima da média</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommendation -->
+          <div class="ms-alert ms-alert--info" style="padding: 18px 20px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.6 1 1.3 1 2.1V18h6v-1.2c0-.8.4-1.5 1-2.1A7 7 0 0 0 12 2Z"></path></svg>
+            <div>
+              <div style="font-weight: 600; color: var(--ms-info-fg); font-size: var(--ms-fs-15);">Recomendação de mercado</div>
+              <p style="margin: 6px 0 0; color: var(--ms-text); font-size: var(--ms-fs-13); line-height: 1.55;">Reduza o preço para <strong>R$ 274,90</strong> (igualar a média). Sua margem cai de 38% para 35%, mas o motor projeta <strong>2,1× mais vendas</strong> e recuperação do Buy Box em ~3 dias.</p>
+              <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <button class="ms-btn ms-btn--primary ms-btn--sm">Aplicar sugestão</button>
+                <button class="ms-btn ms-btn--ghost ms-btn--sm">Simular outro preço</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top anúncios table -->
+          <div class="ms-card" style="padding: 0;">
+            <div style="padding: 18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom: 1px solid var(--ms-line);">
+              <div>
+                <div class="ms-caps">Top anúncios</div>
+                <div class="ms-h3" style="margin-top:4px;">Quem está vendendo o mesmo produto</div>
+              </div>
+              <button class="ms-btn ms-btn--ghost ms-btn--sm">Ver todos · 23</button>
+            </div>
+            <table class="ms-table">
+              <thead>
+                <tr>
+                  <th style="padding-left: 24px;">Vendedor</th>
+                  <th>Reputação</th>
+                  <th class="ms-right">Preço</th>
+                  <th class="ms-right">Vendas</th>
+                  <th class="ms-right" style="padding-right: 24px;">Posição</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding-left: 24px;"><div class="ms-app-cell"><div class="ms-avatar ms-avatar--sm">PP</div>PanelaPro</div></td>
+                  <td><span class="ms-badge ms-badge--pos">Platinum</span></td>
+                  <td class="ms-right ms-num">R$ 248,00</td>
+                  <td class="ms-right ms-num">1.247</td>
+                  <td class="ms-right" style="padding-right: 24px;"><span class="ms-badge ms-badge--pos">Buy Box</span></td>
+                </tr>
+                <tr>
+                  <td style="padding-left: 24px;"><div class="ms-app-cell"><div class="ms-avatar ms-avatar--sm" style="background:linear-gradient(135deg, #B8D4F0, #5B8FD9);">CC</div>CozinhaCenter</div></td>
+                  <td><span class="ms-badge ms-badge--pos">Platinum</span></td>
+                  <td class="ms-right ms-num">R$ 262,50</td>
+                  <td class="ms-right ms-num">891</td>
+                  <td class="ms-right" style="padding-right: 24px;">#2</td>
+                </tr>
+                <tr style="background: var(--ms-brand-50);">
+                  <td style="padding-left: 24px;"><div class="ms-app-cell"><div class="ms-avatar ms-avatar--sm">CL</div><strong>Casa &amp; Lar Brasil</strong></div></td>
+                  <td><span class="ms-badge ms-badge--brand">Você</span></td>
+                  <td class="ms-right ms-num"><strong>R$ 289,90</strong></td>
+                  <td class="ms-right ms-num">684</td>
+                  <td class="ms-right" style="padding-right: 24px;">#5</td>
+                </tr>
+                <tr>
+                  <td style="padding-left: 24px;"><div class="ms-app-cell"><div class="ms-avatar ms-avatar--sm" style="background:linear-gradient(135deg, #C8E6C9, #66BB6A);">CL</div>CasaLinda</div></td>
+                  <td><span class="ms-badge ms-badge--info">Gold</span></td>
+                  <td class="ms-right ms-num">R$ 295,00</td>
+                  <td class="ms-right ms-num">512</td>
+                  <td class="ms-right" style="padding-right: 24px;">#6</td>
+                </tr>
+                <tr>
+                  <td style="padding-left: 24px;"><div class="ms-app-cell"><div class="ms-avatar ms-avatar--sm" style="background:linear-gradient(135deg, #FFE0B2, #FB8C00);">PA</div>PanelasArte</div></td>
+                  <td><span class="ms-badge ms-badge--info">Gold</span></td>
+                  <td class="ms-right ms-num">R$ 309,90</td>
+                  <td class="ms-right ms-num">388</td>
+                  <td class="ms-right" style="padding-right: 24px;">#7</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Similar products -->
+          <div class="ms-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 16px;">
+              <div>
+                <div class="ms-caps">Produtos similares</div>
+                <div class="ms-h3" style="margin-top:4px;">Mesma categoria, alternativas relevantes</div>
+              </div>
+              <button class="ms-btn ms-btn--ghost ms-btn--sm">Ver mais</button>
+            </div>
+            <div class="similar-grid">
+              <div class="similar-card">
+                <div class="img">IMG</div>
+                <div class="name">Jogo Panelas Cerâmica 7 peças Antiaderente</div>
+                <div class="price">R$ 349,90</div>
+                <div class="seller">CozinhaCenter · 412 vendas</div>
+              </div>
+              <div class="similar-card">
+                <div class="img">IMG</div>
+                <div class="name">Conjunto Panelas Tramontina 5 pç Allegra</div>
+                <div class="price">R$ 419,00</div>
+                <div class="seller">Tramontina Oficial · 1.2k</div>
+              </div>
+              <div class="similar-card">
+                <div class="img">IMG</div>
+                <div class="name">Panelas Indução 4 pç com Tampa Vidro</div>
+                <div class="price">R$ 218,90</div>
+                <div class="seller">PanelasArte · 287 vendas</div>
+              </div>
+              <div class="similar-card">
+                <div class="img">IMG</div>
+                <div class="name">Jogo Frigideiras Granito 3 peças Premium</div>
+                <div class="price">R$ 184,00</div>
+                <div class="seller">CasaLinda · 564 vendas</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side: market KPIs + calculator -->
+        <div style="display: grid; gap: var(--ms-grid-gap); align-content: start;">
+          <div class="ms-card">
+            <div class="ms-caps">Visão de mercado</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
+              <div class="price-cell">
+                <div class="lab">Vendedores ativos</div>
+                <div class="val">23</div>
+                <div class="sub">9 com Buy Box rotativo</div>
+              </div>
+              <div class="price-cell">
+                <div class="lab">Volume / mês</div>
+                <div class="val">4.812</div>
+                <div class="sub">vendas estimadas</div>
+              </div>
+              <div class="price-cell">
+                <div class="lab">Margem média</div>
+                <div class="val">31%</div>
+                <div class="sub">no Buy Box</div>
+              </div>
+              <div class="price-cell">
+                <div class="lab">Sua margem</div>
+                <div class="val" style="color: var(--ms-positive-fg);">38%</div>
+                <div class="sub">acima da média</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="calc">
+            <div class="ms-caps">Calculadora de margem</div>
+            <p class="ms-small" style="margin: 6px 0 18px;">Simulação com o preço sugerido pelo motor.</p>
+            <div class="calc-row">
+              <span class="lab">Preço de venda</span>
+              <span class="val">R$ 274,90</span>
+            </div>
+            <div class="calc-row is-neg">
+              <span class="lab">Custo do produto</span>
+              <span class="val">− R$ 178,30</span>
+            </div>
+            <div class="calc-row is-neg">
+              <span class="lab">Comissão ML (12%)</span>
+              <span class="val">− R$ 32,99</span>
+            </div>
+            <div class="calc-row is-neg">
+              <span class="lab">Frete grátis (estimado)</span>
+              <span class="val">− R$ 18,40</span>
+            </div>
+            <div class="calc-row is-neg">
+              <span class="lab">Ads (rateio)</span>
+              <span class="val">− R$ 4,80</span>
+            </div>
+            <div class="calc-row is-total">
+              <span class="lab">Lucro líquido</span>
+              <span class="val">R$ 40,41</span>
+            </div>
+            <div style="margin-top: 8px; display:flex; justify-content:space-between; align-items:center;">
+              <span class="ms-meta">Margem líquida</span>
+              <span class="ms-badge ms-badge--pos">14,7%</span>
+            </div>
+          </div>
+
+          <div class="ms-card" style="background: var(--ms-surface-2); border-style: dashed;">
+            <div class="ms-caps">Última análise</div>
+            <p style="margin: 6px 0 0; font-size: var(--ms-fs-13); color: var(--ms-text);">Atualizado há <strong>2 minutos</strong>. Dados de mercado refrescam automaticamente a cada hora.</p>
+            <button class="ms-btn ms-btn--ghost ms-btn--sm" style="padding-left: 0; margin-top: 8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"></path><path d="M21 3v5h-5"></path></svg>
+              Re-analisar agora
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

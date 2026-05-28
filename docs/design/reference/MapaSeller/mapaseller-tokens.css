@@ -1,0 +1,663 @@
+/* ===============================================================
+   MapaSeller — Design Tokens v1.1
+   Single source of truth for the entire product.
+   Light-first. SaaS premium. ERP moderno. Marketplace neutro.
+   =============================================================== */
+
+:root {
+  /* — Brand — */
+  --ms-brand-50:  #EEEEFE;
+  --ms-brand-100: #DCDDFC;
+  --ms-brand-200: #C7BAFD;
+  --ms-brand-400: #A78BFA;
+  --ms-brand-500: #6E6EF5;
+  --ms-brand-600: #5B5BF0;
+  --ms-brand-700: #4747D9;
+  --ms-brand-900: #2E2D8F;
+
+  /* — Chart palette — */
+  --ms-chart-indigo-900: #2E2D8F;
+  --ms-chart-indigo-700: #4747D9;
+  --ms-chart-violet-500: #A78BFA;
+  --ms-chart-violet-300: #C7BAFD;
+  --ms-chart-blue-500:   #3B82F6;
+  --ms-chart-teal-500:   #14B8A6;
+  --ms-chart-mint-300:   #6EE7CF;
+  --ms-chart-mint-100:   #C7F4E7;
+  --ms-chart-track:      #ECECFB;
+
+  /* — Neutrals — */
+  --ms-ink:        #0F1115;
+  --ms-text:       #2C3243;
+  --ms-text-2:     #6B7280;
+  --ms-text-3:     #9CA3AF;
+  --ms-line:       #ECEEF2;
+  --ms-line-2:     #E4E7EC;
+  --ms-surface:    #FFFFFF;
+  --ms-surface-2:  #F7F8FA;
+  --ms-bg:         #F2F3F5;
+
+  /* — Semantic — */
+  --ms-positive-bg: #D5F8E9;
+  --ms-positive-fg: #0F8A5C;
+  --ms-negative-bg: #FEE0E0;
+  --ms-negative-fg: #D33F3F;
+  --ms-warning-bg:  #FFF3D6;
+  --ms-warning-fg:  #B6791C;
+  --ms-info-bg:     #DCEBFE;
+  --ms-info-fg:     #1E5BD3;
+
+  /* — Marketplace brand chips (only used in app-ico) — */
+  --ms-ml:     #FFE600;
+  --ms-ml-fg:  #2D3277;
+  --ms-shopee: #EE4D2D;
+  --ms-amazon: #232F3E;
+  --ms-magalu: #0086FF;
+
+  /* — Radius — */
+  --ms-radius-xs:  4px;
+  --ms-radius-sm:  8px;
+  --ms-radius-md:  12px;
+  --ms-radius-lg:  16px;
+  --ms-radius-xl:  20px;
+  --ms-radius-pill: 999px;
+
+  /* — Spacing scale (4pt) — */
+  --ms-space-0:  0;
+  --ms-space-1:  4px;
+  --ms-space-2:  8px;
+  --ms-space-3:  12px;
+  --ms-space-4:  16px;
+  --ms-space-5:  20px;
+  --ms-space-6:  24px;
+  --ms-space-8:  32px;
+  --ms-space-10: 40px;
+  --ms-space-12: 48px;
+  --ms-space-16: 64px;
+  --ms-space-20: 80px;
+
+  /* — Type scale (px) — */
+  --ms-font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ms-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ms-fs-11: 11px;
+  --ms-fs-12: 12px;
+  --ms-fs-13: 13px;
+  --ms-fs-14: 14px;
+  --ms-fs-15: 15px;
+  --ms-fs-16: 16px;
+  --ms-fs-18: 18px;
+  --ms-fs-20: 20px;
+  --ms-fs-24: 24px;
+  --ms-fs-28: 28px;
+  --ms-fs-34: 34px;
+  --ms-fs-44: 44px;
+  --ms-fs-56: 56px;
+
+  /* — Shadows — */
+  --ms-shadow-card:    0 1px 0 rgba(15,17,21,.02), 0 1px 2px rgba(15,17,21,.04);
+  --ms-shadow-card-hi: 0 2px 0 rgba(15,17,21,.02), 0 6px 16px -4px rgba(15,17,21,.07);
+  --ms-shadow-pop:     0 12px 32px -8px rgba(46,45,143,.18), 0 2px 8px rgba(15,17,21,.05);
+  --ms-shadow-overlay: 0 24px 48px -12px rgba(46,45,143,.28);
+  --ms-focus-ring:     0 0 0 3px rgba(91,91,240,.22);
+
+  /* — Layout — */
+  --ms-sidebar-w:           248px;
+  --ms-sidebar-collapsed-w: 64px;
+  --ms-topbar-h:            64px;
+  --ms-content-max:         1320px;
+  --ms-content-pad-x:       32px;
+  --ms-content-pad-y:       28px;
+  --ms-grid-gap:            20px;
+
+  /* — Z-index scale — */
+  --ms-z-base:    1;
+  --ms-z-sticky:  100;
+  --ms-z-topbar:  200;
+  --ms-z-sidebar: 300;
+  --ms-z-popover: 400;
+  --ms-z-modal:   500;
+  --ms-z-toast:   600;
+
+  /* — Motion (use sparingly) — */
+  --ms-dur-fast: 120ms;
+  --ms-dur-med:  200ms;
+  --ms-dur-slow: 320ms;
+  --ms-ease:     cubic-bezier(.2,.7,.3,1);
+}
+
+/* ===============================================================
+   Base
+   =============================================================== */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--ms-font-sans);
+  background: var(--ms-bg);
+  color: var(--ms-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11","ss01";
+  font-size: var(--ms-fs-14);
+  line-height: 1.5;
+}
+
+/* ===============================================================
+   Type utilities
+   =============================================================== */
+.ms-display { font-size: var(--ms-fs-56); font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+.ms-h1      { font-size: var(--ms-fs-44); font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; }
+.ms-h2      { font-size: var(--ms-fs-28); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.ms-h3      { font-size: var(--ms-fs-20); font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; }
+.ms-kpi     { font-size: var(--ms-fs-34); font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+.ms-body    { font-size: var(--ms-fs-15); line-height: 1.55; color: var(--ms-text); }
+.ms-small   { font-size: var(--ms-fs-13); color: var(--ms-text-2); }
+.ms-meta    { font-size: var(--ms-fs-12); color: var(--ms-text-2); }
+.ms-caps    {
+  font-size: var(--ms-fs-11); font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ms-text-2);
+}
+.ms-mono    { font-family: var(--ms-font-mono); font-size: var(--ms-fs-13); color: var(--ms-text); }
+
+/* ===============================================================
+   Card
+   =============================================================== */
+.ms-card {
+  background: var(--ms-surface);
+  border: 1px solid var(--ms-line);
+  border-radius: var(--ms-radius-lg);
+  padding: var(--ms-space-6);
+  box-shadow: var(--ms-shadow-card);
+}
+.ms-card--flush { padding: 0; }
+.ms-card--tight { padding: var(--ms-space-4); }
+
+/* ===============================================================
+   Buttons
+   =============================================================== */
+.ms-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: inherit; font-size: var(--ms-fs-14); font-weight: 500;
+  padding: 10px 16px; border-radius: 10px; border: 1px solid transparent;
+  cursor: pointer; line-height: 1; white-space: nowrap;
+  transition: background var(--ms-dur-fast) var(--ms-ease),
+              box-shadow var(--ms-dur-fast) var(--ms-ease),
+              border-color var(--ms-dur-fast) var(--ms-ease);
+}
+.ms-btn svg { width: 16px; height: 16px; }
+.ms-btn:focus-visible { outline: none; box-shadow: var(--ms-focus-ring); }
+.ms-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.ms-btn--primary {
+  background: var(--ms-brand-600); color: #fff;
+  box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 1px 2px rgba(46,45,143,.4);
+}
+.ms-btn--primary:hover { background: var(--ms-brand-700); }
+
+.ms-btn--secondary {
+  background: var(--ms-surface); border-color: var(--ms-line-2); color: var(--ms-text);
+}
+.ms-btn--secondary:hover { background: var(--ms-surface-2); border-color: var(--ms-line); }
+
+.ms-btn--ghost { background: transparent; color: var(--ms-text); }
+.ms-btn--ghost:hover { background: var(--ms-surface-2); }
+
+.ms-btn--danger { background: var(--ms-negative-bg); color: var(--ms-negative-fg); }
+.ms-btn--danger:hover { background: #FBC9C9; }
+
+.ms-btn--success { background: var(--ms-positive-bg); color: var(--ms-positive-fg); }
+
+.ms-btn--icon {
+  width: 36px; height: 36px; padding: 0; justify-content: center;
+  background: var(--ms-surface); border-color: var(--ms-line-2); color: var(--ms-text);
+}
+.ms-btn--icon:hover { background: var(--ms-surface-2); }
+
+.ms-btn--sm { padding: 8px 12px; font-size: var(--ms-fs-13); }
+.ms-btn--lg { padding: 12px 20px; font-size: var(--ms-fs-15); }
+
+/* ===============================================================
+   Inputs / form
+   =============================================================== */
+.ms-input {
+  display: block; width: 100%;
+  font-family: inherit; font-size: var(--ms-fs-14);
+  padding: 10px 14px;
+  background: var(--ms-surface);
+  border: 1px solid var(--ms-line-2);
+  border-radius: 10px;
+  color: var(--ms-ink);
+  transition: border-color var(--ms-dur-fast) var(--ms-ease), box-shadow var(--ms-dur-fast) var(--ms-ease);
+}
+.ms-input::placeholder { color: var(--ms-text-3); }
+.ms-input:focus { outline: none; border-color: var(--ms-brand-600); box-shadow: var(--ms-focus-ring); }
+
+.ms-label {
+  display: block; font-size: var(--ms-fs-12); font-weight: 600;
+  color: var(--ms-text-2); margin-bottom: 6px;
+  letter-spacing: .02em;
+}
+.ms-hint { font-size: var(--ms-fs-12); color: var(--ms-text-3); margin-top: 6px; }
+
+.ms-field { display: block; }
+.ms-field--inline { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.ms-search {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--ms-surface); border: 1px solid var(--ms-line);
+  border-radius: 12px; padding: 10px 14px; color: var(--ms-text-3);
+  font-size: var(--ms-fs-14);
+}
+.ms-search svg { width: 16px; height: 16px; flex-shrink: 0; }
+.ms-search input {
+  flex: 1; border: 0; outline: 0; background: transparent;
+  font: inherit; color: var(--ms-ink);
+}
+.ms-search input::placeholder { color: var(--ms-text-3); }
+.ms-search .ms-kbd {
+  margin-left: auto;
+  font-family: var(--ms-font-mono); font-size: 11px;
+  background: var(--ms-surface-2); border: 1px solid var(--ms-line);
+  border-radius: 6px; padding: 2px 6px; color: var(--ms-text-2);
+}
+
+.ms-check {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--ms-line-2); border-radius: 5px;
+  display: inline-block; background: var(--ms-surface);
+  cursor: pointer;
+}
+.ms-check--on {
+  background: var(--ms-brand-600); border-color: var(--ms-brand-600);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='5 12 10 17 19 7'/></svg>");
+  background-size: 14px 14px; background-position: center; background-repeat: no-repeat;
+}
+
+.ms-toggle {
+  width: 36px; height: 20px; background: var(--ms-line-2);
+  border-radius: var(--ms-radius-pill); position: relative; cursor: pointer;
+  transition: background var(--ms-dur-fast) var(--ms-ease);
+}
+.ms-toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; background: #fff; border-radius: 50%;
+  transition: transform var(--ms-dur-fast) var(--ms-ease);
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+.ms-toggle--on { background: var(--ms-brand-600); }
+.ms-toggle--on::after { transform: translateX(16px); }
+
+/* ===============================================================
+   Badges
+   =============================================================== */
+.ms-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 8px; font-size: var(--ms-fs-12); font-weight: 600;
+  border-radius: 6px; line-height: 1;
+}
+.ms-badge svg { width: 12px; height: 12px; }
+.ms-badge--pos { background: var(--ms-positive-bg); color: var(--ms-positive-fg); }
+.ms-badge--neg { background: var(--ms-negative-bg); color: var(--ms-negative-fg); }
+.ms-badge--warn { background: var(--ms-warning-bg); color: var(--ms-warning-fg); }
+.ms-badge--info { background: var(--ms-info-bg); color: var(--ms-info-fg); }
+.ms-badge--brand { background: var(--ms-brand-50); color: var(--ms-brand-700); }
+.ms-badge--neutral { background: var(--ms-surface-2); color: var(--ms-text-2); border: 1px solid var(--ms-line); }
+.ms-badge--dot {
+  padding-left: 6px; gap: 6px;
+}
+.ms-badge--dot::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+}
+.ms-badge-beta {
+  background: #EEF0F4; color: var(--ms-text-2);
+  padding: 3px 7px; font-size: 10px; letter-spacing: .04em;
+  border-radius: 6px; text-transform: uppercase; font-weight: 600;
+}
+
+/* Filter chip */
+.ms-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: var(--ms-radius-pill);
+  background: var(--ms-surface); border: 1px solid var(--ms-line-2);
+  color: var(--ms-text-2); font-size: var(--ms-fs-13); font-weight: 500;
+  cursor: pointer; transition: all var(--ms-dur-fast) var(--ms-ease);
+}
+.ms-chip:hover { border-color: var(--ms-line); color: var(--ms-text); }
+.ms-chip--active { background: var(--ms-ink); color: #fff; border-color: var(--ms-ink); }
+.ms-chip--brand  { background: var(--ms-brand-50); color: var(--ms-brand-700); border-color: var(--ms-brand-50); }
+
+/* ===============================================================
+   KPI Card
+   =============================================================== */
+.ms-kpi-card {
+  background: var(--ms-surface);
+  border: 1px solid var(--ms-line);
+  border-radius: var(--ms-radius-lg);
+  padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 14px;
+  min-height: 124px;
+}
+.ms-kpi-head {
+  display: flex; align-items: center; justify-content: space-between;
+  color: var(--ms-text-2); font-size: var(--ms-fs-14); font-weight: 500;
+}
+.ms-kpi-head .left { display: flex; align-items: center; gap: 10px; }
+.ms-kpi-ico {
+  width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center;
+  color: var(--ms-text-2);
+}
+.ms-kpi-body { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.ms-kpi-val { font-size: var(--ms-fs-34); font-weight: 500; letter-spacing: -0.02em; color: var(--ms-ink); }
+.ms-kpi-sub { font-size: var(--ms-fs-13); color: var(--ms-text-2); }
+
+/* ===============================================================
+   Avatar
+   =============================================================== */
+.ms-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #F4C6A5, #E89870);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 600; font-size: 14px; flex-shrink: 0;
+}
+.ms-avatar--sm { width: 28px; height: 28px; font-size: 11px; }
+.ms-avatar--lg { width: 48px; height: 48px; font-size: 16px; }
+.ms-avatar--sq { border-radius: 10px; }
+.ms-avatar--brand { background: linear-gradient(135deg, var(--ms-brand-500), var(--ms-brand-900)); }
+.ms-avatar--teal { background: var(--ms-chart-teal-500); }
+
+/* ===============================================================
+   Progress
+   =============================================================== */
+.ms-progress {
+  height: 6px; width: 100%; background: var(--ms-surface-2);
+  border-radius: var(--ms-radius-pill); overflow: hidden;
+}
+.ms-progress .ms-progress-fill {
+  height: 100%; background: var(--ms-brand-600); border-radius: var(--ms-radius-pill);
+}
+
+/* ===============================================================
+   Table
+   =============================================================== */
+.ms-table { width: 100%; border-collapse: collapse; font-size: var(--ms-fs-14); }
+.ms-table thead th {
+  text-align: left;
+  font-size: var(--ms-fs-11); font-weight: 600; letter-spacing: .12em;
+  color: var(--ms-text-3); text-transform: uppercase;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--ms-line);
+  background: var(--ms-surface);
+}
+.ms-table tbody td {
+  padding: 14px; border-bottom: 1px solid var(--ms-line); color: var(--ms-text);
+  vertical-align: middle;
+}
+.ms-table tbody tr:last-child td { border-bottom: 0; }
+.ms-table tbody tr:hover td { background: var(--ms-surface-2); }
+.ms-table tbody tr.is-selected td { background: var(--ms-brand-50); }
+.ms-table .ms-num { font-family: var(--ms-font-mono); font-size: var(--ms-fs-13); }
+.ms-table .ms-right { text-align: right; }
+
+.ms-app-cell { display: flex; align-items: center; gap: 12px; font-weight: 500; color: var(--ms-ink); }
+.ms-app-ico {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; color: #fff; font-size: 11px; flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+.ms-app-ico--ml { background: var(--ms-ml); color: var(--ms-ml-fg); }
+.ms-app-ico--shopee { background: var(--ms-shopee); }
+.ms-app-ico--amazon { background: var(--ms-amazon); }
+.ms-app-ico--magalu { background: var(--ms-magalu); }
+
+/* ===============================================================
+   App Shell — Sidebar + Topbar
+   =============================================================== */
+.ms-shell {
+  display: grid;
+  grid-template-columns: var(--ms-sidebar-w) 1fr;
+  min-height: 100vh;
+  background: var(--ms-bg);
+}
+.ms-shell--collapsed { grid-template-columns: var(--ms-sidebar-collapsed-w) 1fr; }
+
+.ms-sidebar {
+  background: var(--ms-surface);
+  border-right: 1px solid var(--ms-line);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+  z-index: var(--ms-z-sidebar);
+}
+.ms-sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 20px;
+  height: var(--ms-topbar-h);
+  border-bottom: 1px solid var(--ms-line);
+}
+.ms-sidebar-brand svg { width: 26px; height: 26px; flex-shrink: 0; }
+.ms-sidebar-brand .name {
+  font-size: var(--ms-fs-16); font-weight: 700; letter-spacing: -0.01em;
+  color: var(--ms-ink);
+}
+.ms-sidebar-brand .ver {
+  font-family: var(--ms-font-mono); font-size: 10px; color: var(--ms-text-3);
+  margin-left: auto; padding: 2px 6px; background: var(--ms-surface-2);
+  border-radius: 4px;
+}
+.ms-sidebar-nav {
+  flex: 1; padding: 12px 12px 16px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.ms-sidebar-section {
+  font-size: var(--ms-fs-11); font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ms-text-3);
+  padding: 16px 12px 6px;
+}
+.ms-sidebar-section:first-child { padding-top: 8px; }
+.ms-nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  color: var(--ms-text); font-size: var(--ms-fs-14); font-weight: 500;
+  cursor: pointer; text-decoration: none;
+  transition: background var(--ms-dur-fast) var(--ms-ease);
+}
+.ms-nav-item svg { width: 18px; height: 18px; color: var(--ms-text-2); flex-shrink: 0; }
+.ms-nav-item:hover { background: var(--ms-surface-2); }
+.ms-nav-item.is-active { background: var(--ms-ink); color: #fff; }
+.ms-nav-item.is-active svg { color: #fff; }
+.ms-nav-item .count {
+  margin-left: auto;
+  background: var(--ms-surface-2); color: var(--ms-text-2);
+  border-radius: 6px; font-size: 11px; font-weight: 600; padding: 2px 7px;
+}
+.ms-nav-item.is-active .count { background: rgba(255,255,255,.15); color: #fff; }
+.ms-nav-item .tag {
+  margin-left: auto;
+  background: var(--ms-brand-50); color: var(--ms-brand-700);
+  border-radius: 6px; font-size: 10px; font-weight: 600;
+  padding: 2px 6px; letter-spacing: .04em; text-transform: uppercase;
+}
+.ms-sidebar-foot {
+  padding: 12px;
+  border-top: 1px solid var(--ms-line);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ms-sidebar-workspace {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--ms-surface-2);
+}
+.ms-sidebar-workspace .info { flex: 1; min-width: 0; }
+.ms-sidebar-workspace .label { font-size: 11px; color: var(--ms-text-2); font-weight: 600; }
+.ms-sidebar-workspace .name { font-size: var(--ms-fs-13); font-weight: 600; color: var(--ms-ink); }
+
+/* Topbar */
+.ms-topbar {
+  background: var(--ms-surface);
+  border-bottom: 1px solid var(--ms-line);
+  height: var(--ms-topbar-h);
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 var(--ms-content-pad-x);
+  position: sticky; top: 0; z-index: var(--ms-z-topbar);
+}
+.ms-topbar-title {
+  font-size: var(--ms-fs-16); font-weight: 600; color: var(--ms-ink);
+  letter-spacing: -0.01em;
+}
+.ms-topbar-crumbs {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--ms-text-3); font-size: var(--ms-fs-13);
+}
+.ms-topbar-crumbs .sep { color: var(--ms-line-2); }
+.ms-topbar-crumbs .current { color: var(--ms-text); font-weight: 500; }
+.ms-topbar-actions {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px;
+}
+.ms-topbar-search {
+  width: 320px;
+}
+.ms-topbar-icon-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: 0; color: var(--ms-text-2);
+  cursor: pointer; position: relative;
+}
+.ms-topbar-icon-btn:hover { background: var(--ms-surface-2); color: var(--ms-text); }
+.ms-topbar-icon-btn svg { width: 18px; height: 18px; }
+.ms-topbar-icon-btn .dot {
+  position: absolute; top: 8px; right: 8px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ms-brand-600); border: 2px solid var(--ms-surface);
+}
+
+/* Content */
+.ms-content {
+  padding: var(--ms-content-pad-y) var(--ms-content-pad-x) 80px;
+  max-width: var(--ms-content-max);
+  margin: 0 auto;
+  width: 100%;
+}
+.ms-page-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; margin-bottom: var(--ms-space-8);
+  flex-wrap: wrap;
+}
+.ms-page-title { font-size: var(--ms-fs-28); font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+.ms-page-desc { font-size: var(--ms-fs-14); color: var(--ms-text-2); margin: 6px 0 0; max-width: 680px; line-height: 1.5; }
+.ms-page-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* Grid */
+.ms-grid { display: grid; gap: var(--ms-grid-gap); }
+.ms-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.ms-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.ms-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.ms-grid-5 { grid-template-columns: repeat(5, 1fr); }
+.ms-grid-6 { grid-template-columns: repeat(6, 1fr); }
+
+/* ===============================================================
+   Empty / Loading / Error states
+   =============================================================== */
+.ms-empty {
+  text-align: center; padding: 64px 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.ms-empty-ico {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: var(--ms-brand-50);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--ms-brand-700);
+}
+.ms-empty-ico svg { width: 26px; height: 26px; }
+.ms-empty-title { font-size: var(--ms-fs-18); font-weight: 600; color: var(--ms-ink); margin: 0; }
+.ms-empty-desc { font-size: var(--ms-fs-14); color: var(--ms-text-2); margin: 0; max-width: 380px; line-height: 1.5; }
+
+.ms-skeleton {
+  background: linear-gradient(90deg, var(--ms-surface-2) 0%, #EDEEF1 50%, var(--ms-surface-2) 100%);
+  background-size: 200% 100%;
+  animation: ms-shimmer 1.4s linear infinite;
+  border-radius: 6px;
+}
+@keyframes ms-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.ms-error {
+  background: var(--ms-negative-bg);
+  border: 1px solid #F5C6C6;
+  border-radius: var(--ms-radius-md);
+  padding: 14px 16px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.ms-error svg { width: 18px; height: 18px; color: var(--ms-negative-fg); flex-shrink: 0; margin-top: 1px; }
+.ms-error-title { font-weight: 600; color: var(--ms-negative-fg); margin: 0; font-size: var(--ms-fs-14); }
+.ms-error-msg { color: var(--ms-text); font-size: var(--ms-fs-13); margin: 4px 0 0; }
+
+.ms-alert {
+  border-radius: var(--ms-radius-md);
+  padding: 14px 16px;
+  display: flex; gap: 12px; align-items: flex-start;
+  font-size: var(--ms-fs-13); line-height: 1.5;
+}
+.ms-alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+.ms-alert--warn { background: var(--ms-warning-bg); color: var(--ms-warning-fg); }
+.ms-alert--info { background: var(--ms-info-bg); color: var(--ms-info-fg); }
+.ms-alert--ok { background: var(--ms-positive-bg); color: var(--ms-positive-fg); }
+
+/* ===============================================================
+   Dropzone (upload)
+   =============================================================== */
+.ms-dropzone {
+  border: 2px dashed var(--ms-line-2);
+  background: var(--ms-surface);
+  border-radius: var(--ms-radius-lg);
+  padding: 48px 32px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  transition: border-color var(--ms-dur-fast) var(--ms-ease), background var(--ms-dur-fast) var(--ms-ease);
+  cursor: pointer;
+}
+.ms-dropzone:hover { border-color: var(--ms-brand-400); background: #FAFAFF; }
+.ms-dropzone--active { border-color: var(--ms-brand-600); background: var(--ms-brand-50); }
+.ms-dropzone-ico {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: var(--ms-brand-50);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--ms-brand-700);
+}
+.ms-dropzone-ico svg { width: 28px; height: 28px; }
+.ms-dropzone-title { font-size: var(--ms-fs-16); font-weight: 600; color: var(--ms-ink); margin: 0; }
+.ms-dropzone-desc { font-size: var(--ms-fs-13); color: var(--ms-text-2); margin: 0; }
+
+/* ===============================================================
+   Modal / Confirmation
+   =============================================================== */
+.ms-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15,17,21,.4);
+  z-index: var(--ms-z-modal);
+  display: grid; place-items: center;
+}
+.ms-modal {
+  background: var(--ms-surface); border-radius: var(--ms-radius-lg);
+  width: 440px; max-width: calc(100vw - 32px);
+  box-shadow: var(--ms-shadow-overlay);
+  overflow: hidden;
+}
+.ms-modal-head { padding: 20px 24px 8px; }
+.ms-modal-title { font-size: var(--ms-fs-18); font-weight: 600; margin: 0; color: var(--ms-ink); }
+.ms-modal-body { padding: 12px 24px 20px; font-size: var(--ms-fs-14); color: var(--ms-text); line-height: 1.55; }
+.ms-modal-foot {
+  padding: 14px 20px; background: var(--ms-surface-2);
+  display: flex; gap: 10px; justify-content: flex-end;
+  border-top: 1px solid var(--ms-line);
+}
+
+/* ===============================================================
+   Chart pieces (decorative for mockups)
+   =============================================================== */
+.ms-chart-bars { display: flex; align-items: flex-end; gap: 14px; height: 200px; }
+.ms-chart-bars .col { flex: 1; display: flex; flex-direction: column; gap: 3px; justify-content: flex-end; }
+.ms-bar { border-radius: 5px; }
+.ms-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: var(--ms-fs-12); color: var(--ms-text-2); margin-top: 14px; }
+.ms-legend .key { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 6px; }
